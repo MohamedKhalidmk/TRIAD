@@ -26,26 +26,28 @@
 
 \renewcommand{\bibfont}{\scriptsize\raggedright}
 \setlength{\bibsep}{0pt}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\emergencystretch=3em
 \begin{document}
 \title{TRIAD: Trusted RDF Interoperable Agent Data}
 
 \author{Asish A. George}
 \affiliation{
-  \institution{University of Victoria}
-  \country{Canada}
+  \institution{University of Victoria, Canada}
 }
 \email{asishgeorge@uvic.ca}
 
-\author{Mohamed Khaled Abuela}
+\author{Mohamed Khaled}
 \affiliation{
-  \institution{University of Victoria}
-  \country{Canada}
+  \institution{University of Victoria, Canada}
 }
 \email{mabuela@uvic.ca}
 
 % ABSTRACT: Khaled's text, AI-edited for clarity (Level C). Original in appendix.
 \begin{abstract}
-Patients can wait and deteriorate while information about them is missed, delayed, or scattered across records, and physicians spend much of their time piecing it together. We propose TRIAD, a data model that connects the information recorded by nurses and physicians so it can be shared and updated as it changes, and that allows an agent to retrieve that information directly rather than search for it. Code: \url{github.com/MohamedKhalidmk/TRIAD} (CC BY-NC-SA 4.0).
+\raggedright
+Patients can wait and deteriorate while information about them is missed, delayed, or scattered across records, and physicians spend much of their time piecing it together. We propose TRIAD, a data model that connects the information recorded by nurses and physicians so it can be shared and updated as it changes, and an agent can retrieve it directly rather than search for it. Code: \url{github.com/MohamedKhalidmk/TRIAD} (\mbox{CC BY-NC-SA 4.0}).
 \end{abstract}
 
 \keywords{Knowledge Graph, FHIR, Agent Memory, Privacy}
@@ -55,11 +57,12 @@ Patients can wait and deteriorate while information about them is missed, delaye
 \section{Introduction}
 % Khaled's section: his own text, AI-edited for clarity only (Level C).
 % Originals in Appendix A.
-When a patient calls a clinic, the information they give may be incomplete or inaccurate, and it is then summarized by a nurse. Patients may be prioritized incorrectly, so urgent cases wait; reviews of emergency triage report nurse accuracy between 59.3\% and 82\%~\cite{triage}. Physicians also lose time on wrong or outdated information and spend 49\% of their office day on electronic records and desk work~\cite{sinsky2016}.
+When a patient calls a clinic, the information they give may be incomplete or inaccurate before a nurse summarizes it. Patients may be prioritized incorrectly, so urgent cases wait; a review of emergency triage reports nurse accuracy between 59.3\% and 82\%~\cite{triage}. Physicians also lose time to wrong or outdated information in slow systems, spending 49\% of their office day on electronic records and desk work~\cite{sinsky2016}.
 
-Information about a patient comes from several sources over time: the patient's report, the provincial pharmacy record (PharmaNet), test results, the nurse's assessment and recommendation (SBAR), and the physician's decision to accept, reject, or build on it. Because different people and organizations create this history, records can disagree. The physician then cannot easily tell whether a record reflects what the patient is actually taking, who recorded and verified it, and whether the nurse's recommendation was accepted.
+Patient information comes from the patient's report, the provincial pharmacy record (PharmaNet)~\cite{pharmanet}, the nurse's assessment and recommendation (SBAR)~\cite{sbar}, and the physician's decision to accept, reject, or build on it. Because this history is created by different people and organizations, records can disagree. The physician then cannot easily tell whether a record still reflects what the patient is actually taking~\cite{ismp}, who recorded and verified it, and whether the nurse's recommendation was accepted.
 
-Existing standards such as HL7 FHIR~\cite{fhir} can record where each piece of information came from, but they point at conflicts rather than resolve them. A patient's medication information is scattered across orders, dispenses, administrations, patient reports, and claims, and clinicians must reconcile it by hand, which takes time away from direct patient care~\cite{ismp}.
+FHIR gives systems a common structure for exchanging records, but not a shared, machine-interpretable account of how records relate; it points at conflicts rather than resolving them. Medication information is scattered across orders, dispenses, and patient reports, and clinicians reconcile it manually~\cite{fhirmeds}.
+
 
 \section{Motivation}
 Hospitals are slow to use agents in clinical work, for two reasons. First, an agent cannot keep all of this data in its conversation window. In a long context, the agent can miss that a fact changed and use the old fact.
@@ -76,7 +79,7 @@ In the evening, the patient asks the agent about the plan for their care. The co
 With TRIAD, the agent starts at the patient and finds the current assessment one or two hops away in an RDF~\cite{rdf} knowledge graph. It sees that the physician replaced the assessment of the nurse, and it finds the family history. If its answer is wrong, we can trace the error to a specific relationship. The agent shows the patient only approved data, and staff who do not care for this patient get no access to their PHI.
 
 \section{Team Justification}
-The project combines Mohamed Khaled Abuela's M.Sc. thesis research on memory for language model agents, under Professor Shengyao Lu, with Asish George's four years of experience developing healthcare systems, so the problem comes from real work. Abuela wrote the abstract, introduction, and references and set up the repository. George wrote the motivation and example, created the name and logo, and proposed FHIR. Both edited the proposal.
+The project combines Mohamed Khaled's M.Sc. thesis research on memory for language model agents with Asish George's four years of experience developing healthcare systems. Mohamed Khaled wrote the abstract, introduction, and references and set up the repository. Asish George wrote the motivation and example, named the project, designed its logo, and proposed FHIR. Both edited it.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography.bib}
@@ -88,10 +91,10 @@ The project combines Mohamed Khaled Abuela's M.Sc. thesis research on memory for
 \clearpage
 \appendix
 \section{Original Work Before AI-Assisted Editing}
-Per the Level C guideline, this appendix contains both authors' original text, written without AI, before AI-assisted editing (A.1: Asish A. George, a spoken transcript with speech errors removed; A.2 onward: Mohamed Khaled Abuela). AI (Claude) was also used to locate and explain sources.
+Per the Level C guideline, this appendix contains both authors' original text, written without AI, before AI-assisted editing (A.1: Asish A. George, a spoken transcript; A.2 onward: Mohamed Khaled Abuela). AI (Claude) was also used to locate and explain sources.
 
 \subsection{Motivation: Original Transcript}
-\textit{Spoken transcript by Asish A. George. Filler words, repeated words, and speech-to-text errors are removed. The wording is otherwise unchanged.}
+\textit{Spoken transcript by Asish A. George.}
 
 I want to talk about the motivation for the project. There are different levels of motivation. First, in multi-agent systems, let's say a doctor has an agent to talk about patient data, and a nurse has an agent to talk about the patient data. These two agents may have fragmented memory about the patient data itself. We don't want different people to have fragmented memory about the same element. We want to have a cohesive memory within an agentic system so that patient care happens in a much easier way.
 
@@ -105,20 +108,29 @@ The third is in terms of data privacy. Even though we are using a graph database
 
 This is the motivation behind the project and what we want to do with it.
 
+\subsection{Motivation: Who Benefits}
+everyone gains because its faster for the doctor anad the patient saving living and not wasting tiime and easily doctors lives when docoters are in most need and qutiing there jobs
+
+\subsection{Motivation: FHIR Structure vs.\ Meaning}
+yeah fhir is for common structures ours is for common matchine readable strucutres
+
 \subsection{Abstract}
 patient wait and goes critical and miss information keeps delaying while physicions is working 24/7 and we are just trying to make standards that arent helping but just pointing triad automates the entire processes from summary to giving the doctor waht he needs using a smart data model that doesnt require the agent to ask questions and fetch but just to pull without reason sharing across nurve and doctor info can be shared and exchanged and editted right awya without any problems all connected
 
 \subsection{Problem Definition Notes}
 \textit{Answers to the six problem-definition questions, as originally written:}
 
-\begin{enumerate*}
-  \item patient on phone then pharmacy then xrays then ISMP then SBAR
-  \item patient history and medications different other clinics or out of data, also name different in entities like m.khaled or mohamed khaled or different descriptions of symptoms
-  \item what patient who wrote it who verified
-  \item Next patient, conditon, how argent and what they are currently taking and nurse recommendation
-  \item same
-  \item why it was recorded who recorded it when and patient full history and condition
-\end{enumerate*}
+1. patient on phone then pharmacy then xrays then ISMP then SBAR
+
+2. patient history and medications different other clinics or out of data, also name different in entities like m.khaled or mohamed khaled or different descriptions of symptoms
+
+3. what patient who wrote it who verified
+
+4. Next patient, conditon, how argent and what they are currently taking and nurse recommendation
+
+5. same
+
+6. why it was recorded who recorded it when and patient full history and condition
 
 \textit{Follow-up answers:} medications the patient currently taking and it gives the doctor an idea and the doctor can use it or reject it or expand it; history and results; human symbols and writing and also what patient and and time and author revision verification etc.
 
