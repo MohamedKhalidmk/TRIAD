@@ -5,7 +5,7 @@
 
 **Trusted RDF Interoperable Agent Data**
 
-CSC 501; Algorithms and Data Models (Fall 2026), Dr. Hossein Fani
+CSC 501; Algorithms and Data Models (Fall 2026), Prof. Hossein Fani
 University of Victoria
 
 A data model for clinical records created and revised by multiple people over
