@@ -32,42 +32,51 @@
 \author{Asish A. George}
 \affiliation{
   \institution{University of Victoria}
+  \country{Canada}
 }
 \email{asishgeorge@uvic.ca}
 
 \author{Mohamed Khaled Abuela}
 \affiliation{
   \institution{University of Victoria}
+  \country{Canada}
 }
 \email{mabuela@uvic.ca}
 
 % ABSTRACT: Khaled's text, AI-edited for clarity (Level C). Original in appendix.
 \begin{abstract}
-Patients can wait and deteriorate while information about them is missed, delayed, or scattered across records, and physicians spend much of their time piecing it together. Existing standards identify where information came from, but they point at conflicts rather than resolve them. We propose TRIAD, a data model that connects the information recorded by nurses and physicians so it can be shared and updated as it changes, and that allows an agent to retrieve that information directly rather than search for it. Code: \url{github.com/MohamedKhalidmk/TRIAD} (CC BY-NC-SA 4.0).
+Patients can wait and deteriorate while information about them is missed, delayed, or scattered across records, and physicians spend much of their time piecing it together. We propose TRIAD, a data model that connects the information recorded by nurses and physicians so it can be shared and updated as it changes, and that allows an agent to retrieve that information directly rather than search for it. Code: \url{github.com/MohamedKhalidmk/TRIAD} (CC BY-NC-SA 4.0).
 \end{abstract}
 
 \keywords{Knowledge Graph, FHIR, Agent Memory, Privacy}
 \maketitle
+\pagestyle{empty}
 
 \section{Introduction}
 % Khaled's section: his own text, AI-edited for clarity only (Level C).
 % Originals in Appendix A.
-When a patient calls a clinic, the information they give may be incomplete or inaccurate, and it is then summarized by a nurse. Patients may be prioritized incorrectly, so urgent cases wait; reviews of emergency triage report nurse accuracy between 59.3\% and 82\%~\cite{triage}. Physicians also lose time working from wrong or outdated information in systems that do not present it quickly, spending 49\% of their office day on electronic records and desk work~\cite{sinsky2016}.
+When a patient calls a clinic, the information they give may be incomplete or inaccurate, and it is then summarized by a nurse. Patients may be prioritized incorrectly, so urgent cases wait; reviews of emergency triage report nurse accuracy between 59.3\% and 82\%~\cite{triage}. Physicians also lose time on wrong or outdated information and spend 49\% of their office day on electronic records and desk work~\cite{sinsky2016}.
 
-Information about a patient comes from several people and systems over time: the patient's own report, the provincial pharmacy dispensing record (PharmaNet)~\cite{pharmanet}, imaging and test results, the nurse's assessment and recommendation (SBAR)~\cite{sbar}, and the physician's decision, which may accept, reject, or build on that recommendation. Because this history is created by different people and organizations, records can disagree. The physician then cannot easily tell whether a record still reflects what the patient is actually taking~\cite{ismp}, who recorded and verified it and when, and whether the nurse's recommendation was accepted.
+Information about a patient comes from several sources over time: the patient's report, the provincial pharmacy record (PharmaNet), test results, the nurse's assessment and recommendation (SBAR), and the physician's decision to accept, reject, or build on it. Because different people and organizations create this history, records can disagree. The physician then cannot easily tell whether a record reflects what the patient is actually taking, who recorded and verified it, and whether the nurse's recommendation was accepted.
 
-Existing standards such as HL7 FHIR can record where each piece of information came from~\cite{provenance}, but they point at conflicts rather than resolve them. A patient's medication information is scattered across orders, dispenses, administrations, patient reports, and claims, and reconciling it is left to clinicians as a manual process~\cite{fhirmeds} that is burdensome and takes time away from direct patient care~\cite{bastola2025}.
-
-Patient information is also sensitive: when information that can identify a person, such as a name or health card number, is linked to health data, it becomes Protected Health Information, and its use is governed by strict laws such as HIPAA in the United States and PIPEDA in Canada. Privacy is therefore a core requirement in this domain, and any representation must take these regulations into account.
+Existing standards such as HL7 FHIR~\cite{fhir} can record where each piece of information came from, but they point at conflicts rather than resolve them. A patient's medication information is scattered across orders, dispenses, administrations, patient reports, and claims, and clinicians must reconcile it by hand, which takes time away from direct patient care~\cite{ismp}.
 
 \section{Motivation}
-Hospitals are slow to use agents in clinical work, for two reasons. Patient data is in many separate systems, even where hospitals adopt interoperability standards such as FHIR~\cite{fhir}. In addition, an agent cannot keep all of this data in its conversation window: in long contexts, language models miss relevant facts and act on outdated ones.
+Hospitals are slow to use agents in clinical work, for two reasons. First, an agent cannot keep all of this data in its conversation window. In a long context, the agent can miss that a fact changed and use the old fact.
+
+Second, patient data is sensitive. Personally Identifiable Information (PII), such as a name or a health card number, becomes Protected Health Information (PHI) when it is linked to health data. Laws such as HIPAA in the United States, and PIPEDA and PHIPA in Canada, control the use of PHI. A hospital cannot use an agent that shows PHI to the wrong person or does not obey these laws.
+
+An Electronic Health Record (EHR) is designed for people to read. It does not show the agent who asserted what and what replaced what, so the agent must infer this at runtime. When the inference is wrong, nobody can find the cause, staff stop trusting the agent, and hospitals do not use it.
 
 \subsection{Motivating Example}
-A patient comes to the emergency room with shortness of breath. The nurse records a possible asthma attack; one hour later, the physician revises the assessment to possible heart failure and tells the agent that the patient's father died of a heart attack, a fact not yet in the EHR. That evening, the patient asks the agent about the plan for their care. The conversation is now long: the asthma assessment appears many times and the revision once, so the agent answers from the old assessment and tells the patient that an inhaler is the plan.
+A patient comes to the emergency room with shortness of breath. The nurse assesses the patient and records a possible asthma attack. One hour later, the physician examines the patient and revises the assessment to possible heart failure. The physician also tells the agent that the father of the patient died of a heart attack. This fact is not in the EHR yet.
+
+In the evening, the patient asks the agent about the plan for their care. The conversation is now long. The asthma assessment appears many times, and the revision appears once. The agent answers from the old assessment and tells the patient that an inhaler is the plan.
+
+With TRIAD, the agent starts at the patient and finds the current assessment one or two hops away in an RDF~\cite{rdf} knowledge graph. It sees that the physician replaced the assessment of the nurse, and it finds the family history. If its answer is wrong, we can trace the error to a specific relationship. The agent shows the patient only approved data, and staff who do not care for this patient get no access to their PHI.
 
 \section{Team Justification}
-The project combines Mohamed Khaled Abuela's M.Sc. thesis research on memory for language model agents, under Professor Shengyao Lu, with Asish George's four years of experience developing healthcare systems, so the problem comes from real work. Mohamed Khaled Abuela wrote the abstract, introduction, and references and set up the repository; Asish George wrote the motivation and example, created the project name and logo, and proposed FHIR; both edited the proposal.
+The project combines Mohamed Khaled Abuela's M.Sc. thesis research on memory for language model agents, under Professor Shengyao Lu, with Asish George's four years of experience developing healthcare systems, so the problem comes from real work. Abuela wrote the abstract, introduction, and references and set up the repository. George wrote the motivation and example, created the name and logo, and proposed FHIR. Both edited the proposal.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography.bib}
@@ -79,32 +88,22 @@ The project combines Mohamed Khaled Abuela's M.Sc. thesis research on memory for
 \clearpage
 \appendix
 \section{Original Work Before AI-Assisted Editing}
-Per the Level C guideline, this appendix contains both authors' original text, written without AI, before AI-assisted editing (A.1: Asish A. George; A.2 onward: Mohamed Khaled Abuela). AI (Claude) was also used to locate and explain sources.
+Per the Level C guideline, this appendix contains both authors' original text, written without AI, before AI-assisted editing (A.1: Asish A. George, a spoken transcript with speech errors removed; A.2 onward: Mohamed Khaled Abuela). AI (Claude) was also used to locate and explain sources.
 
-\subsection{Asish A. George: Motivation, Example, and Team Justification}
-As originally written, before AI-assisted editing for length.
+\subsection{Motivation: Original Transcript}
+\textit{Spoken transcript by Asish A. George. Filler words, repeated words, and speech-to-text errors are removed. The wording is otherwise unchanged.}
 
-\subsubsection*{Motivation}
-Hospitals are slow to use agents in clinical work, for four reasons. First, patient data is in many separate systems. Even where hospitals adopt interoperability standards such as FHIR [FHIR], some data is on paper, and other data is behind an interface that nobody outside the building can reach.
+I want to talk about the motivation for the project. There are different levels of motivation. First, in multi-agent systems, let's say a doctor has an agent to talk about patient data, and a nurse has an agent to talk about the patient data. These two agents may have fragmented memory about the patient data itself. We don't want different people to have fragmented memory about the same element. We want to have a cohesive memory within an agentic system so that patient care happens in a much easier way.
 
-Second, an agent cannot keep all of this data in its conversation window. When the context is long, language models miss relevant facts. The agent does not see that a fact changed, and it uses an old fact.
+That aside, agentic systems are not being accepted or adopted into real healthcare systems as much, for different reasons. One is that the data is fragmented across different systems. The second is the concern of privacy, whether a data leak will happen. And third, there are strict regulations like HIPAA, and PHIPA in Canada, where we have to adhere to certain laws to support the healthcare environment.
 
-Third, patient data is sensitive. Personally Identifiable Information (PII) is information that can identify a person, such as a name or a health card number. When PII is linked to health data, it becomes Protected Health Information (PHI). An agent must not show PHI to the wrong person.
+We want to create a system or a data model that solves most of these problems. In an agentic system, we want a really fast lookup. So having a triple store, or RDF-based store, where we can query a patient's data would be beneficial for us.
 
-Fourth, the use of PHI and PII is subject to strict laws, such as HIPAA in the United States, and PIPEDA and PHIPA in Canada. A hospital cannot use a system that does not obey these laws.
+The second is in terms of the data store. Like I said, there are multiple fragmented data stores, but the most common is FHIR data. It might not be widely adopted, but it is the global standard for interoperability for healthcare data. So we could model the agent in such a way that any FHIR data source can be attached to the agent, so that we can load FHIR data into the RDF store at any time, and the agent can operate within that data store.
 
-An Electronic Health Record (EHR) is designed for people to read. It does not give the agent a small and explicit view of who asserted what and what replaced what. The agent must infer this at runtime. When the inference is wrong, nobody can find the cause. Wrong answers decrease the trust of staff, and hospitals then do not use agents.
+The third is in terms of data privacy. Even though we are using a graph database to hold the relations, we also try to ensure that no data leaks, that one patient's data is not shown to another patient, and that only the practitioners who are responsible for the patient can see the patient.
 
-\subsubsection*{Motivating Example}
-A patient comes to the emergency room with shortness of breath. At triage, the patient tells the agent that the problem started two days ago. The nurse assesses the patient and records a possible asthma attack. One hour later, the physician examines the patient and revises the assessment to possible heart failure. The physician also tells the agent that the father of the patient died of a heart attack. This fact is not in the EHR yet.
-
-In the evening, the patient asks the agent about the plan for their care. The conversation is now long. The asthma assessment appears many times, and the revision appears once. The agent answers from the old assessment and tells the patient that an inhaler is the plan.
-
-With TRIAD, the agent starts at the patient and finds the current assessment one or two hops away in an RDF [RDF] knowledge graph. It sees that the physician replaced the assessment of the nurse, and it finds the family history. If its answer is wrong, we can trace the error to a specific relationship. In the session of the patient, the agent shows only the data that is approved for the patient. Staff who do not care for this patient get no access to their PHI.
-
-\subsubsection*{Team Justification}
-This project combines the backgrounds of the two team members. Khaled Abuela does his M.Sc. thesis research on memory for language model agents under Professor Shengyao Lu. Asish George has four years of experience with the development of healthcare systems. We selected a problem that we both know from real work, not an artificial one.
-
+This is the motivation behind the project and what we want to do with it.
 
 \subsection{Abstract}
 patient wait and goes critical and miss information keeps delaying while physicions is working 24/7 and we are just trying to make standards that arent helping but just pointing triad automates the entire processes from summary to giving the doctor waht he needs using a smart data model that doesnt require the agent to ask questions and fetch but just to pull without reason sharing across nurve and doctor info can be shared and exchanged and editted right awya without any problems all connected
@@ -112,17 +111,14 @@ patient wait and goes critical and miss information keeps delaying while physici
 \subsection{Problem Definition Notes}
 \textit{Answers to the six problem-definition questions, as originally written:}
 
-1. patient on phone then pharmacy then xrays then ISMP then SBAR
-
-2. patient history and medications different other clinics or out of data, also name different in entities like m.khaled or mohamed khaled or different descriptions of symptoms
-
-3. what patient who wrote it who verified
-
-4. Next patient, conditon, how argent and what they are currently taking and nurse recommendation
-
-5. same
-
-6. why it was recorded who recorded it when and patient full history and condition
+\begin{enumerate*}
+  \item patient on phone then pharmacy then xrays then ISMP then SBAR
+  \item patient history and medications different other clinics or out of data, also name different in entities like m.khaled or mohamed khaled or different descriptions of symptoms
+  \item what patient who wrote it who verified
+  \item Next patient, conditon, how argent and what they are currently taking and nurse recommendation
+  \item same
+  \item why it was recorded who recorded it when and patient full history and condition
+\end{enumerate*}
 
 \textit{Follow-up answers:} medications the patient currently taking and it gives the doctor an idea and the doctor can use it or reject it or expand it; history and results; human symbols and writing and also what patient and and time and author revision verification etc.
 
