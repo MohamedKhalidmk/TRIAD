@@ -36,14 +36,14 @@
 }
 \email{asishgeorge@uvic.ca}
 
-\author{Khaled Abuela}
+\author{Mohamed Khaled Abuela}
 \affiliation{
   \institution{University of Victoria}
   \city{Victoria}
   \state{BC}
   \country{Canada}
 }
-\email{khaled@uvic.ca} % TODO: confirm Khaled's email
+\email{mabuela@uvic.ca}
 
 \begin{abstract}
 \end{abstract}
@@ -52,6 +52,15 @@
 \maketitle
 
 \section{Introduction}
+% Khaled's section: his own text, AI-edited for clarity only (Level C).
+% Originals in Appendix A.
+When a patient calls a clinic, the information they give may be incomplete or inaccurate, and it is then summarized by a nurse. Errors at this stage have serious consequences. Patients may be prioritized incorrectly, so urgent cases wait; reviews of emergency triage report nurse accuracy between 59.3\% and 82\%~\cite{triage}. Physicians also lose time working from wrong or outdated information in systems that do not present it quickly, spending 49\% of their office day on electronic records and desk work compared with 27\% with patients~\cite{sinsky2016}.
+
+Information about a patient comes from several people and systems over time: the patient's own report of symptoms, the provincial pharmacy dispensing record (PharmaNet)~\cite{pharmanet}, existing clinical records such as imaging and test results, the nurse's structured assessment and recommendation (SBAR)~\cite{sbar}, and the physician's decision. The nurse's recommendation informs the physician's decision; the physician may accept it, reject it, or build on it.
+
+Because this history is created by different people and organizations, records can disagree, and the same patient may appear under different names. When records disagree, the physician cannot easily tell whether a record still reflects what the patient is actually taking~\cite{ismp}, who recorded it and when, who verified it, and whether the nurse's recommendation was accepted, rejected, or built on.
+
+Existing standards such as HL7 FHIR can record where each piece of information came from~\cite{provenance}, but they point at conflicts rather than resolve them. A patient's medication information is scattered across orders, dispenses, administrations, patient reports, and claims~\cite{fhirmeds}, and reconciling it is left to clinicians as a manual process~\cite{smp} that is burdensome and takes time away from direct patient care~\cite{bastola2025}.
 
 \section{Motivation}
 Hospitals are slow to use agents in clinical work, for four reasons. First, patient data is in many separate systems. Even where hospitals adopt interoperability standards such as FHIR \cite{fhir}, some data is on paper, and other data is behind an interface that nobody outside the building can reach.
@@ -76,5 +85,42 @@ This project combines the backgrounds of the two team members. Khaled Abuela doe
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography.bib}
+
+% ---------------------------------------------------------------
+% APPENDIX: original text before AI-assisted editing (Level C).
+% Does not count toward the one-page limit.
+% ---------------------------------------------------------------
+\clearpage
+\appendix
+\section{Original Work Before AI-Assisted Editing}
+Per the Level C guideline, this appendix contains Mohamed Khaled Abuela's original text for the Introduction, written without AI, before AI-assisted editing. AI (Claude) was also used to locate and explain sources.
+
+\subsection{Problem Definition Notes}
+\textit{Answers to the six problem-definition questions, as originally written:}
+
+1. patient on phone then pharmacy then xrays then ISMP then SBAR
+
+2. patient history and medications different other clinics or out of data, also name different in entities like m.khaled or mohamed khaled or different descriptions of symptoms
+
+3. what patient who wrote it who verified
+
+4. Next patient, conditon, how argent and what they are currently taking and nurse recommendation
+
+5. same
+
+6. why it was recorded who recorded it when and patient full history and condition
+
+\textit{Follow-up answers:} medications the patient currently taking and it gives the doctor an idea and the doctor can use it or reject it or expand it; history and results; human symbols and writing and also what patient and and time and author revision verification etc.
+
+\textit{Problem paragraph:} Patient history can differ as its created by different people and organisation and its not easy to know without wasting the doctors time also a nurse can miss important info over the phone and the doctor can waste sm time on something he didint need to do while also other more important patient suffer
+
+\subsection{Introduction: Opening}
+so the patient when he calls a hospital the info he give mgiht not be that accurate or summaries so the nursey summaries it [...] that has some serious problems which are first the ordering of patients are incorrect, causing important patients to wait critical time and sec that the doctor time is wasted with completely wrong info, also doctors deal with the slowest out dated systems that doesnt just give the info right awya we ened a source for that
+
+\subsection{Introduction: Disagreement Between Records}
+Because this history is created by different people and organizations, records can disagree, and the same patient may appear under different names. When records disagree, the physician cannot easily tell whether a record still reflects what the patient is actually taking, who recorded it and when, who verified it, and whether the nurse's recommendation was accepted, rejected, or built on.
+
+\subsection{Introduction: Gap}
+fhir just signaties what comes from a different source not resolve the conflict its pointing at the problem not offering solvtions and also the sattering thing i saiid and also most of clinical work is still maual and u can find many evidence
 
 \end{document}
