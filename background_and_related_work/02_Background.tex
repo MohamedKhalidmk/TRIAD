@@ -60,7 +60,7 @@
 \begin{abstract}
 \raggedright
 % Mohamed Khaled's abstract, AI-edited (Level C), drawn from his own wording in the paper.
-Clinical records pass from medical office assistant to nurse to doctor, and along the way facts are lost, overwritten, or duplicated. Existing models record authorship and revision only optionally, or per document. We propose TRIAD, a FHIR R4-aligned, RDF-compatible data model in which every fact records who asserted it and in what role, whether a clinician or an AI agent acting for one, and explicit Supersedes links record what replaced what, keeping the record traceable per fact. We review existing clinical models and present TRIAD's draft entity-relationship model.
+Clinical records pass from medical office assistant to nurse to doctor, and along the way facts are lost, overwritten, or duplicated. Existing models record authorship and revision only optionally, or per document. We propose TRIAD (Trusted RDF Interoperable Agent Data), a data model aligned with Fast Healthcare Interoperability Resources (FHIR) R4 and compatible with the Resource Description Framework (RDF), in which every fact records who asserted it and in what role, whether a clinician or an artificial intelligence (AI) agent acting for one, and explicit Supersedes links record what replaced what, keeping the record traceable per fact. We review existing clinical models and present TRIAD's draft entity-relationship model.
 Code: \url{https://github.com/MohamedKhalidmk/TRIAD}.
 \end{abstract}
 
@@ -87,15 +87,17 @@ examination, laboratory results, progress notes, and discharge diagnosis.
 Henry S.\ Plummer later introduced, at St Mary's Hospital and the Mayo Clinic,
 a clinic number assigned to each new patient~\cite{gillum2013}.
 
-Records then moved to electronic media. CDA Release~1, published in November
-2000 as an ANSI-approved HL7 standard, standardized electronic clinical
+Records then moved to electronic media. Clinical Document Architecture (CDA) Release~1, published in November
+2000 as an American National Standards Institute (ANSI)-approved Health Level
+Seven (HL7) standard, standardized electronic clinical
 documents~\cite{dolin2001}. The benefits were not guaranteed: a systematic
-review of 43 studies of physician-office EMRs found limited positive
-impact~\cite{lau2012}, and EHRs were criticized as costly and not
+review of 43 studies of physician-office electronic medical records (EMRs) found limited
+positive impact~\cite{lau2012}, and electronic health records (EHRs) were criticized as costly and not
 interoperable. FHIR was proposed in 2011 as an interoperability
 standard~\cite{ayaz2021}; its first normative release, R4, appeared in
 December 2018~\cite{hl7fhirhistory}, and in 2020 the US 21st Century Cures Act
-Final Rule required certified health IT to provide FHIR APIs~\cite{cures2020}.
+Final Rule required certified health information technology to provide FHIR application
+programming interfaces (APIs)~\cite{cures2020}.
 openEHR is another such standard, focused on storing clinical data as
 long-term records.
 
@@ -106,8 +108,7 @@ We searched global standards bodies, academic research, government programs,
 and the practices industry applications use to exchange health records. The
 models we found fall into two levels (Figure~\ref{fig:hierarchy}): by domain,
 clinical record models versus models of provenance and change; and, within
-clinical records, by purpose, operational models used day to day (FHIR,
-openEHR) versus research and analytical models (MIMIC-IV, OMOP CDM).
+clinical records, by purpose, operational models used day to day versus research and analytical models.
 Table~\ref{tab:comparison} compares the clinical models on the features most
 relevant to us: authorship (who created what, and when), revision and
 versioning, the time content was added, and enforcement of who does what.
@@ -123,15 +124,15 @@ versioning, the time content was added, and enforcement of who does what.
   arr/.style={-{Stealth[length=3pt]}, gray!70!black},
 ]
 % Level 0
-\node[box, text width=4.2cm] (root) at (4.15,3.6) {Existing representations};
+\node[box, text width=4.2cm] (root) at (4.15,3.05) {Existing representations};
 % Level 1: domain
-\node[box, text width=3.9cm, fill=gray!15] (clin) at (2.05,2.7) {Clinical record models};
-\node[box, text width=3.9cm, fill=gray!15] (prov) at (6.25,2.7) {Models of provenance and change};
+\node[box, text width=3.9cm, fill=gray!15] (clin) at (2.05,2.35) {Clinical record models};
+\node[box, text width=3.9cm, fill=gray!15] (prov) at (6.25,2.35) {Models of provenance and change};
 % Level 2: purpose
-\node[cat] (op)  at (1.00,1.75) {Operational /\\exchange};
-\node[cat] (res) at (3.10,1.75) {Research /\\analytical};
-\node[cat] (po)  at (5.20,1.75) {Provenance\\ontology};
-\node[cat] (am)  at (7.30,1.75) {Agent memory\\graph};
+\node[cat] (op)  at (1.00,1.55) {Operational /\\exchange};
+\node[cat] (res) at (3.10,1.55) {Research /\\analytical};
+\node[cat] (po)  at (5.20,1.55) {Provenance\\ontology};
+\node[cat] (am)  at (7.30,1.55) {Agent memory\\graph};
 % Existing models
 \node[leaf] (fhir)   at (1.00,0.85) {FHIR R4};
 \node[leaf] (oehr)   at (1.00,0.30) {openEHR};
@@ -141,7 +142,7 @@ versioning, the time content was added, and enforcement of who does what.
 \node[leaf] (zep)    at (7.30,0.85) {Zep (Graphiti)};
 % This work
 \node[box, text width=6.2cm, fill=orange!15, draw=orange!70!black] (triad)
-  at (4.15,-0.75) {TRIAD: authorship and supersession as first-class relations};
+  at (4.15,-0.45) {TRIAD: authorship and supersession as first-class relations};
 % Edges
 \draw[arr] (root) -- (clin); \draw[arr] (root) -- (prov);
 \draw[arr] (clin) -- (op);   \draw[arr] (clin) -- (res);
@@ -161,7 +162,7 @@ level) and by purpose (second level).}
 \end{figure}
 
 \begin{table*}[t]
-\footnotesize
+\scriptsize
 \setlength{\tabcolsep}{4pt}
 \caption{Comparison of existing clinical record models.}
 \label{tab:comparison}
@@ -177,37 +178,31 @@ Purpose &
   Long-term, patient-centric clinical record &
   Observational clinical research dataset &
   Observational research and analytics \\
-\addlinespace
 Central entity &
   Resource, linked by references (Patient as anchor) &
   EHR $\rightarrow$ versioned Composition $\rightarrow$ Entry &
   Patient $\rightarrow$ admission $\rightarrow$ ICU stay &
   \texttt{PERSON} \\
-\addlinespace
 Authorship &
   Resource-specific, mostly optional fields; \texttt{Provenance.agent} &
   \texttt{composer}; \texttt{commit\_audit.committer} (mandatory) &
   Partial; de-identified provider IDs &
   \texttt{provider\_id} where available; no formal provenance \\
-\addlinespace
 Revision / supersession &
   Version history; status codes (e.g.\ \texttt{amended}); Provenance &
   Immutable versions of whole compositions; no in-place overwrite &
   None per record; dataset-level releases only &
   None \\
-\addlinespace
 Clinical vs recorded time &
   Recorded: \texttt{meta.lastUpdated}, \texttt{Provenance.recorded}; clinical: resource fields (e.g.\ \texttt{effective[x]}) &
   Recorded: \texttt{time\_committed}; clinical: \texttt{EVENT\_CONTEXT.start\_time} &
   Clinical: \texttt{charttime}; recorded: \texttt{storetime} (some tables) &
   Clinical event dates only; no recording time \\
-\addlinespace
 Enforced by &
   Not enforced; depends on profiles and server &
   Reference-model rules + committing EHR service &
   Schema and data-generation process &
-  Schema + ETL conventions \\
-\addlinespace
+  Schema + extract-transform-load (ETL) conventions \\
 Representation &
   Typed resources; JSON, XML, RDF (Turtle) &
   Object-oriented reference model; JSON, XML &
@@ -231,21 +226,25 @@ in resource-specific, mostly optional fields and in a separate Provenance
 resource. openEHR versions are immutable and never overwritten in place, and
 audit time is kept separate from clinical time; FHIR represents time at three
 levels (\texttt{meta.lastUpdated}, \texttt{Provenance.recorded}, and clinical
-fields such as \texttt{effective[x]}). Both use JSON and XML and are typed,
+fields such as \texttt{effective[x]}). Both use JavaScript Object Notation (JSON) and Extensible Markup Language
+(XML) and are typed,
 FHIR through resources and openEHR through an object-oriented reference model.
 
 \subsection{Research and Analytical Models}
 % Asish's spoken transcript, AI-edited and condensed (Level C). Original in Appendix A.4.
-MIMIC-IV~\cite{mimic-iv} is a clinical research dataset, and
-OMOP CDM~\cite{omop-cdm} is a common data model for observational analytics.
+The Medical Information Mart for Intensive Care (MIMIC-IV)~\cite{mimic-iv} is
+a clinical research dataset, and the Observational Medical Outcomes Partnership
+Common Data Model (OMOP CDM)~\cite{omop-cdm} is a common data model for
+observational analytics.
 OMOP centres on the person, from which every record flows; MIMIC-IV centres on
-the patient, with admissions and ICU stays beneath. Neither has formal
+the patient, with admissions and intensive care unit (ICU) stays beneath. Neither has formal
 authorship: records are de-identified, so provider IDs do not establish who
 authored a record. Neither versions individual records: MIMIC-IV is versioned
 only as dataset releases, and OMOP has no revision mechanism. They differ in
 time: OMOP records only when events occurred, while some MIMIC-IV tables record
 both when an observation was charted and when it was stored. Both are
-relational: MIMIC-IV ships as CSV files, and OMOP defines SQL-compatible types.
+relational: MIMIC-IV ships as comma-separated values (CSV) files, and OMOP defines
+Structured Query Language (SQL)-compatible types.
 
 \subsection{Time, Provenance, and Change}
 % Asish's spoken transcript, AI-edited and condensed (Level C). Original in Appendix A.5-A.6.
@@ -260,22 +259,20 @@ serialization~\cite{fhir-r4}, whereas openEHR does not; RDF versions of
 openEHR data exist only as research prototypes~\cite{haarbrandt2016}.
 
 Two models outside clinical records address parts of the problem.
-PROV-O~\cite{provo2013}, a W3C standard for interchanging provenance, is built
-on Entity, Activity, and Agent and is RDF- and OWL-compatible; it is not
+The PROV Ontology (PROV-O)~\cite{provo2013}, a World Wide Web Consortium (W3C)
+standard for interchanging provenance, is built on Entity, Activity, and Agent
+and is compatible with RDF and the Web Ontology Language (OWL); it is not
 clinical, but its way of representing revisions is one we want to adopt.
 Zep~\cite{zep2025}, an agent memory layer built on Graphiti, supersedes facts
 over time by invalidating rather than deleting them, using timestamps; we aim
-to bring this mechanism into the clinical space for agents. TRIAD aims to
-combine these properties in one RDF-compatible model in which authorship and
-time of change can be determined with certainty and AI agents are supported as
-authors.
+to bring this mechanism into the clinical space for agents.
 
 % POSITIONING AND ERD DISCUSSION: Khaled's spoken draft, AI-edited (Level C). Original in Appendix A.7-A.9.
-\section{Positioning and Draft ER Diagram}
+\section{Positioning and Draft Entity-Relationship Diagram}
 % Mohamed Khaled's spoken draft, AI-edited and condensed (Level C). Originals in Appendix A.7--A.9.
 TRIAD makes two structural additions, shaded grey in Figure~\ref{fig:erd}. First, every fact records who asserted it and in what role, so a patient's account, an intake note, a nurse's recommendation, and a physician's decision stay distinct. An author may be a clinician or an AI agent acting on a person's behalf, recorded by \textit{Source}; a human remains accountable. Second, revision is explicit: when a fact changes, a \textit{Supersedes} link keeps both versions, so the current fact is the one nothing supersedes, found in one step.
 
-TRIAD lifts authorship out of each clinical fact into a central \textit{Assertion} entity, linked to its author (\textit{Asserts}), the \textit{ClinicalEntry} it concerns (\textit{About}), and its source \textit{Message} (\textit{ExtractedFrom}). One entry can thus carry several assertions over time, each with its own author, chained by the unary \textit{Supersedes} relationship; this is what makes the one-step lookup of the current fact possible. The full diagram is in our repository.
+TRIAD lifts authorship out of each clinical fact into a central \textit{Assertion} entity, linked to its author (\textit{Asserts}), the \textit{ClinicalEntry} it concerns (\textit{About}), and its source \textit{Message} (\textit{ExtractedFrom}). One entry can thus carry several assertions over time, each with its own author, chained by the unary \textit{Supersedes} relationship.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography.bib}
