@@ -275,7 +275,7 @@ authors.
 % Mohamed Khaled's spoken draft, AI-edited and condensed (Level C). Originals in Appendix A.7--A.9.
 TRIAD makes two structural additions, shaded grey in Figure~\ref{fig:erd}. First, every fact records who asserted it and in what role, so a patient's account, an intake note, a nurse's recommendation, and a physician's decision stay distinct. An author may be a clinician or an AI agent acting on a person's behalf, recorded by \textit{Source}; a human remains accountable. Second, revision is explicit: when a fact changes, a \textit{Supersedes} link keeps both versions, so the current fact is the one nothing supersedes, found in one step.
 
-Both additions are carried by a central \textit{Assertion} entity, linked to the \textit{Staff} member who made it (\textit{Asserts}), the \textit{ClinicalEntry} it concerns (\textit{About}), and the \textit{Message} it was extracted from (\textit{ExtractedFrom}). \textit{Supersedes} is a unary relationship on Assertion with the roles \textit{Replaces} and \textit{ReplacedBy}. The full diagram is in our repository.
+TRIAD lifts authorship out of each clinical fact into a central \textit{Assertion} entity, linked to its author (\textit{Asserts}), the \textit{ClinicalEntry} it concerns (\textit{About}), and its source \textit{Message} (\textit{ExtractedFrom}). One entry can thus carry several assertions over time, each with its own author, chained by the unary \textit{Supersedes} relationship; this is what makes the one-step lookup of the current fact possible. The full diagram is in our repository.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography.bib}
