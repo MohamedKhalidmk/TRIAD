@@ -275,7 +275,7 @@ authors.
 % Mohamed Khaled's spoken draft, AI-edited and condensed (Level C). Originals in Appendix A.7--A.9.
 TRIAD makes two structural additions, shaded grey in Figure~\ref{fig:erd}. First, every fact records who asserted it and in what role, so a patient's account, an intake note, a nurse's recommendation, and a physician's decision stay distinct. An author may be a clinician or an AI agent acting on a person's behalf, recorded by \textit{Source}; a human remains accountable. Second, revision is explicit: when a fact changes, a \textit{Supersedes} link keeps both versions, so the current fact is the one nothing supersedes, found in one step.
 
-TRIAD lifts authorship out of each clinical fact into a central \textit{Assertion} entity, linked to its author (\textit{Asserts}), the \textit{ClinicalEntry} it concerns (\textit{About}), and its source \textit{Message} (\textit{ExtractedFrom}). One entry can thus carry several assertions over time, each with its own author, chained by the unary \textit{Supersedes} relationship; this is what makes the one-step lookup of the current fact possible. The full diagram is in our repository.
+TRIAD lifts authorship out of each clinical fact into a central \textit{Assertion} entity, linked to its author (\textit{Asserts}), the \textit{ClinicalEntry} it concerns (\textit{About}), and its source \textit{Message} (\textit{ExtractedFrom}). One entry can thus carry several assertions over time, each with its own author, chained by the unary \textit{Supersedes} relationship, so the current version is reached in one hop rather than by scanning the fact's whole history, keeping retrieval cheap as the record grows.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bibliography.bib}
@@ -285,7 +285,7 @@ TRIAD lifts authorship out of each clinical fact into a central \textit{Assertio
 \begin{figure*}
 \centering
 \includegraphics[width=\textwidth,height=0.88\textheight,keepaspectratio]{figures/TRIAD_ERD.png}
-\caption{The draft version of our project's ER diagram. The whole model is our design; grey marks where TRIAD's novelty concentrates: who asserted each entry and in what role (Asserts), whether it came from a staff member or an agent acting for them (Source), the entry asserted (About), revision (Supersedes), and the message each assertion was extracted from (ExtractedFrom). White entities take their names from FHIR R4. Double boxes are weak entities; a solid underline marks a key and a dashed underline a partial key. Both IS-A hierarchies are disjoint. The draw.io source is in the repository.}
+\caption{The draft version of our project's ER diagram. The whole model is our design; grey marks where TRIAD's novelty concentrates, and white entities take their names from FHIR R4. Double boxes are weak entities; a solid underline marks a key and a dashed underline a partial key. Both IS-A hierarchies are disjoint.}
 \label{fig:erd}
 \end{figure*}
 
