@@ -70,7 +70,7 @@ Code: \url{https://github.com/MohamedKhalidmk/TRIAD}.
 
 %%----------Section 1------------------------------------------
 \section{Introduction}
-% INTRODUCTION: Mohamed Khaled's spoken draft, AI-edited (Level C). Original in Appendix A.10.
+% INTRODUCTION: Mohamed Khaled's draft, AI-edited (Level C). Original in Appendix A.10.
 Clinical data is mostly natural language, often originating on paper or by phone. Data models have given it structure, but not traceability or accountability. As information moves from the medical office assistant (MOA) to the nurse to the doctor and back, facts are lost, overwritten, or duplicated. When a fact changes, nothing records that the new version replaced the old one, so a correction is indistinguishable from a contradiction, and no one can tell who asserted what.
 
 We propose TRIAD, a data model in which authorship and revision are structural: every fact records who asserted it and in what role, and explicit Supersedes links make the current fact the one nothing supersedes. FHIR and openEHR support this optionally, or per document; TRIAD does it per fact.
@@ -270,10 +270,10 @@ combine these properties in one RDF-compatible model in which authorship and
 time of change can be determined with certainty and AI agents are supported as
 authors.
 
-% POSITIONING AND ERD DISCUSSION: Khaled's spoken draft, AI-edited (Level C). Original in Appendix A.7-A.9.
+% POSITIONING AND ERD DISCUSSION: Khaled's draft, AI-edited (Level C). Original in Appendix A.7-A.9.
 \section{Positioning and Draft ER Diagram}
-% Mohamed Khaled's spoken draft, AI-edited and condensed (Level C). Originals in Appendix A.7--A.9.
-TRIAD makes two structural additions, shaded grey in Figure~\ref{fig:erd}. First, every fact records who asserted it and in what role, so a patient's account, an intake note, a nurse's recommendation, and a physician's decision stay distinct. An author may be a clinician or an AI agent acting on a person's behalf, recorded by \textit{Source}; a human remains accountable. Second, revision is explicit: when a fact changes, a \textit{Supersedes} link keeps both versions, so the current fact is the one nothing supersedes, found in one step.
+% Mohamed Khaled's draft, AI-edited and condensed (Level C). Originals in Appendix A.7--A.9.
+TRIAD makes two structural additions, shaded grey in Figure~\ref{fig:erd}. First, every fact records who asserted it and in what role, so a patient's account, an intake note, a nurse's recommendation, and a physician's decision stay distinct. An author may be a clinician or an AI agent acting on a person's behalf, recorded by \textit{Source}; a human remains accountable. Second, revision is explicit: when a fact changes, a \textit{Supersedes} link keeps both versions.
 
 TRIAD lifts authorship out of each clinical fact into a central \textit{Assertion} entity, linked to its author (\textit{Asserts}), the \textit{ClinicalEntry} it concerns (\textit{About}), and its source \textit{Message} (\textit{ExtractedFrom}). One entry can thus carry several assertions over time, each with its own author, chained by the unary \textit{Supersedes} relationship, so the current version is reached in one hop rather than by scanning the fact's whole history, keeping retrieval cheap as the record grows.
 
@@ -303,12 +303,7 @@ spoken transcripts; AI (Claude) removed filler words, corrected
 mis-transcribed words, and joined fragments into complete sentences, without
 changing what was said. A.1 also includes his written clarifications. AI was
 also used to locate and explain sources and to format the LaTeX.
-Sections A.7--A.9 are by Mohamed Khaled. They are spoken transcripts; AI
-(Claude) removed filler words and repeated phrases and reordered fragments,
-without changing what was said. AI also rendered the ER diagram in draw.io from
-his design.
-Section A.10 is Mohamed Khaled's spoken draft of the introduction, prepared the same way.
-The abstract was assembled by AI from Mohamed Khaled's own wording in the introduction and Section 3, then revised at his direction to add agent authorship and accessibility; it has no separate original.
+Sections A.7--A.10 are Mohamed Khaled's drafts of Section 3 and the introduction, before AI-assisted editing and structuring; the abstract was condensed from them.
 
 \subsection{History: Transcript and Clarifications}
 This section is about the history of electronic, or medical, records in
@@ -454,16 +449,16 @@ bring it into the clinical space for a faster and more accurate agent
 approach.
 
 
-\subsection{Positioning, the Gap: Transcript}
+\subsection{Positioning, the Gap: Draft}
 The gap is that medical data moves between different people: from the patient himself, to the MOA, then to the nurse, and finally it reaches the doctor. This movement of information has two problems. First, this information is mostly natural language, and when it gets assigned to a database, more information can get lost between the transfers. Second, we have inconsistencies over time, especially knowing that the patient can come multiple times and can change his words or add things. We end up with all this information about a patient, and most of it is just updates of the old information, but we don't know that, we just add it, so we have inconsistencies over time. There is also no accountability: if the MOA missed something or the nurse added something, we don't know whether it was the nurse's addition or the MOA's omission. We have no accountability and no traceability.
 
-\subsection{Positioning, What TRIAD Adds: Transcript}
+\subsection{Positioning, What TRIAD Adds: Draft}
 It has two things. First, authorship on each and every fact: this fact was said by the patient himself, this fact was added by the MOA, this fact was added by the nurse, this fact was removed by the doctor. We have authorship on every single fact. For example, the nurse can add things, and we want to know this is the nurse's recommendation; we don't want it mixed with what the patient actually said. Hand in hand with that comes supersession: we have who changed what and who did what. We keep the old version, so when a fact changes, we have the old one and the changed fact. That gives us traceability of what could get lost, and it removes contradictions, because the current fact is a new one we can pull faster, and we still have the backup.
 
-\subsection{Positioning, the Structure: Transcript}
+\subsection{Positioning, the Structure: Draft}
 We have a main entity, the Assertion. This Assertion has three binary relationships, with the Message, the Staff, and the ClinicalFact, because we want to know who asserted it (Staff), what specific fact was asserted (ClinicalFact), and from what message. So we have full authorship and full traceability. This entity also has a unary relationship, Supersedes, which records what got replaced by what.
 
-\subsection{Introduction: Transcript}
+\subsection{Introduction: Draft}
 The problem with clinical data is that it is mostly natural language, and it can also be reported on paper. We then had a whole era of designing databases and data-structuring techniques to shape it in structured ways that make the data line up properly. But there was no intentional focus on traceability, accountability and authorization, especially when their absence can cause very big problems, like inconsistencies. A patient's diagnosis can change in a second. Medications can change, reports can change, a nurse can add recommendations. Things go around from the MOA to the nurse to the doctor, and back. Across this whole pipeline the information keeps going forward and backward, many things get lost, and many things get changed over time, so we have inconsistent or redundant data. From all these inconsistencies we have two problems. First, we can miss things: by the time the information reaches the doctor, it might be incomplete. Second, we might have inconsistencies we cannot resolve, because we do not know which is the newest version or who made an edit. The nurse can add things the MOA did not add, and the nurse might add something wrong, without accountability for who added it or who said it. We have no way of knowing whether this is the patient, an edit, a recommendation, or an actual update. So we have the information, but we do not know how to trace it to somebody, how important it is, or how accurate it is.
 
 \end{document}
