@@ -71,9 +71,14 @@ Code: \url{https://github.com/MohamedKhalidmk/TRIAD}.
 
 %%----------Section 1------------------------------------------
 \section{Introduction}
-% INTRODUCTION: to be written by Mohamed Khaled.
-% TODO (Khaled): replace placeholder with the introduction.
-Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor.
+% INTRODUCTION: Mohamed Khaled's spoken draft, AI-edited (Level C). Original in Appendix A.10.
+Clinical data is mostly natural language, and much of it still originates on paper or by phone. Over time, database and data-modeling techniques were developed to structure this information so that it lines up consistently. That effort focused on structure, not on traceability, accountability, or authorship, even though their absence can cause serious problems.
+
+A patient's diagnosis can change in a moment; medication reports change; a nurse adds a recommendation. Information moves across a pipeline, from the medical office assistant (MOA) to the nurse to the doctor and back, and as it moves, facts are lost, overwritten, or duplicated, leaving inconsistent and redundant data. Crucially, when a fact changes, nothing records that the new version replaced the old one, so a correction is indistinguishable from a contradiction.
+
+This creates two problems. First, information goes missing: by the time a nurse's note reaches the doctor, it may be incomplete. Second, when facts conflict, they cannot be resolved, because we do not know which version is newest or who made each edit. A nurse may add something the MOA did not, or even something wrong, with no record of who asserted it. We have the information, but no way to trace it to a person, judge its reliability, or tell a patient's self-report from a clinician's update.
+
+We propose TRIAD, a data model for clinical records in which authorship and revision are structural rather than optional. TRIAD makes two additions. First, every fact records who asserted it and in what role, so authorship is first-class rather than an optional field. Second, revision is captured by explicit typed links: when one fact supersedes another, a Supersedes link records it, so the current version is the one that nothing supersedes, found in a single step rather than by scanning history. FHIR and openEHR support parts of this optionally, or per document; TRIAD makes it structural, and per fact. This paper reviews how existing models represent clinical records, compares them, and presents TRIAD's draft entity-relationship model.
 
 \subsection{History}
 % Asish's spoken transcript, AI-edited and condensed (Level C). Original in Appendix A.1.
@@ -308,7 +313,8 @@ Sections A.7--A.9 are by Mohamed Khaled. They are spoken transcripts; AI
 (Claude) removed filler words and repeated phrases and reordered fragments,
 without changing what was said. AI also rendered the ER diagram in draw.io from
 his design.
-\todo{Khaled: add your original abstract and introduction after A.9.}
+Section A.10 is Mohamed Khaled's spoken draft of the introduction, prepared the same way.
+\todo{Khaled: add your original abstract after A.10.}
 
 \subsection{History: Transcript and Clarifications}
 This section is about the history of electronic, or medical, records in
@@ -462,5 +468,8 @@ It has two things. First, authorship on each and every fact: this fact was said 
 
 \subsection{Positioning, the Structure: Transcript}
 We have a main entity, the Assertion. This Assertion has three binary relationships, with the Message, the Staff, and the ClinicalFact, because we want to know who asserted it (Staff), what specific fact was asserted (ClinicalFact), and from what message. So we have full authorship and full traceability. This entity also has a unary relationship, Supersedes, which records what got replaced by what.
+
+\subsection{Introduction: Transcript}
+The problem with clinical data is that it is mostly natural language, and it can also be reported on paper. We then had a whole era of designing databases and data-structuring techniques to shape it in structured ways that make the data line up properly. But there was no intentional focus on traceability, accountability and authorization, especially when their absence can cause very big problems, like inconsistencies. A patient's diagnosis can change in a second. Medications can change, reports can change, a nurse can add recommendations. Things go around from the MOA to the nurse to the doctor, and back. Across this whole pipeline the information keeps going forward and backward, many things get lost, and many things get changed over time, so we have inconsistent or redundant data. From all these inconsistencies we have two problems. First, we can miss things: by the time the information reaches the doctor, it might be incomplete. Second, we might have inconsistencies we cannot resolve, because we do not know which is the newest version or who made an edit. The nurse can add things the MOA did not add, and the nurse might add something wrong, without accountability for who added it or who said it. We have no way of knowing whether this is the patient, an edit, a recommendation, or an actual update. So we have the information, but we do not know how to trace it to somebody, how important it is, or how accurate it is.
 
 \end{document}
