@@ -57,11 +57,10 @@
 }
 \email{mabuela@uvic.ca}
 
-% ABSTRACT: to be written by Mohamed Khaled. Keep the repository line.
 \begin{abstract}
 \raggedright
-% TODO (Khaled): replace placeholder with the abstract.
-Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut.
+% Mohamed Khaled's abstract, AI-edited (Level C), drawn from his own wording in the paper.
+Clinical records are mostly natural language, passed from medical office assistant to nurse to doctor, and along the way facts are lost, overwritten, or duplicated. Existing models record authorship and revision only optionally, or per document, so one cannot reliably tell who asserted a fact or which version superseded another. We propose TRIAD, a FHIR R4-aligned, RDF-compatible data model for clinical records in which authorship and revision are structural rather than optional. Every fact records who asserted it and in what role, whether a clinician or an AI agent acting on a person's behalf, and revision is captured by explicit typed links, so the current fact is the one nothing supersedes, retrieved in a single step rather than by scanning history. Provenance is tracked per fact, not per document, so the record stays accessible, each fact traceable to its author and its current version. This milestone reviews and compares existing clinical models, FHIR R4, openEHR, MIMIC-IV, and OMOP CDM, and presents a draft entity-relationship model positioning TRIAD against them.
 Code: \url{https://github.com/MohamedKhalidmk/TRIAD}.
 \end{abstract}
 
@@ -279,7 +278,7 @@ authors.
 \section{Positioning and Draft ER Diagram}
 In clinical settings, information moves through many hands: from the patient to the medical office assistant (MOA), then to the nurse, and finally to the physician. This movement introduces two problems. First, clinical information originates as unstructured natural language, and detail is lost each time it is transferred and recorded. Second, because a patient returns repeatedly and revises or adds to earlier accounts, records accumulate inconsistencies over time: most new facts are really updates to older ones, yet they are stored as independent entries, leaving contradictions unresolved. Underlying both is a lack of accountability and traceability. Existing models record authorship and revision only optionally, or per document rather than per fact, so a physician inheriting the record cannot reliably tell the nurse's addition from the assistant's omission, nor the current fact from a superseded one.
 
-TRIAD addresses these gaps with two structural additions. First, authorship is attached to every individual fact: each fact records who asserted it and in what role, so the patient's own account, the assistant's intake note, the nurse's recommendation, and the physician's decision remain distinct and are never conflated. Second, revision is made explicit through typed supersession links: when a fact changes, the model preserves both the earlier version and the one that replaced it, recording what superseded what. Together these restore accountability and traceability, since every fact is attributable and every change is recoverable, and they resolve inconsistency directly: the current fact is the one with nothing superseding it, retrievable in a single step rather than reconstructed by comparing dates across scattered entries.
+TRIAD addresses these gaps with two structural additions. First, authorship is attached to every individual fact: each fact records who asserted it and in what role, so the patient's own account, the assistant's intake note, the nurse's recommendation, and the physician's decision remain distinct and are never conflated. An author may be a clinician or an AI agent acting on a person's behalf; in both cases a human remains accountable for the fact. Second, revision is made explicit through typed supersession links: when a fact changes, the model preserves both the earlier version and the one that replaced it, recording what superseded what. Together these restore accountability and traceability, since every fact is attributable and every change is recoverable, and they resolve inconsistency directly: the current fact is the one with nothing superseding it, retrievable in a single step rather than reconstructed by comparing dates across scattered entries.
 
 Structurally, both additions are carried by a central \textit{Assertion} entity, shaded grey in Figure~\ref{fig:erd}. Each Assertion links through three binary relationships: to the \textit{Staff} member who made it, through \textit{Asserts}; to the \textit{ClinicalEntry} it concerns, through \textit{About}; and to the \textit{Message} it was extracted from, through \textit{ExtractedFrom}. These capture who asserted what, and from which source, giving each fact full authorship and traceability back to its origin. Revision is captured by the unary \textit{Supersedes} relationship on Assertion, with the roles \textit{Replaces} and \textit{ReplacedBy}, so the current version and its history are both preserved. The full diagram is available in our repository.
 
@@ -314,7 +313,7 @@ Sections A.7--A.9 are by Mohamed Khaled. They are spoken transcripts; AI
 without changing what was said. AI also rendered the ER diagram in draw.io from
 his design.
 Section A.10 is Mohamed Khaled's spoken draft of the introduction, prepared the same way.
-\todo{Khaled: add your original abstract after A.10.}
+The abstract was assembled by AI from Mohamed Khaled's own wording in the introduction and Section 3, then revised at his direction to add agent authorship and accessibility; it has no separate original.
 
 \subsection{History: Transcript and Clarifications}
 This section is about the history of electronic, or medical, records in
