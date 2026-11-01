@@ -1,3 +1,4 @@
+# LaTeX build files
 *.aux
 *.log
 *.out
@@ -6,4 +7,38 @@
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+
+# macOS
 .DS_Store
+
+# Course reference files (manual, sample, annotated feedback). Do not commit.
+/ref/
+4_Relational_*.zip
+
+# SQLite databases and their side files
+*.db
+*.db-*
+*.db.tmp
+*.sqlite*
+
+# Downloaded source data (the preprocessed data is committed)
+src/backend/data/raw/*.zip
+src/backend/data/raw/*.part
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Node and frontend build output
+node_modules/
+src/frontend/dist/
+
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+
+# Test output
+test-results/
+playwright-report/
