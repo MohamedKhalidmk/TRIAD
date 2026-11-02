@@ -184,7 +184,7 @@ export function CareAssistant({ patient, user }: { patient: Patient; user: UserV
             {patient.permissions.tell && (
               <p className="muted small">
                 You can also tell a fact. For example:{' '}
-                {user.role === 'Patient' ? '“I stopped taking metformin.”' : '“The patient\'s father died of a heart attack.”'} The
+                {user.role === 'Patient' ? '“My mother had diabetes.”' : '“The patient\'s father died of a heart attack.”'} The
                 assistant records it as unconfirmed.
               </p>
             )}
@@ -284,7 +284,7 @@ function TurnView({ turn }: { turn: ChatTurn }) {
       </div>
       <div className="bubble-time">
         {formatTime(turn.createdAt)}
-        {turn.kind === 'tell' && ' · Recorded from your message'}
+        {turn.kind === 'tell' && (turn.recordedIds.length > 0 ? ' · Recorded from your message' : ' · Nothing recorded')}
         {cards.length === 0 && turn.kind === 'ask' && ' · No item cited'}
       </div>
       {cards.map((card) => (
