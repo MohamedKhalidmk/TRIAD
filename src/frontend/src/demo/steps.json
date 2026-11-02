@@ -1,0 +1,285 @@
+{
+  "description": "The steps of the hospital-visit journey (USER_FLOWS.md section 3). The Demo guide panel shows them. npm run check:demo checks the user keys and the pages.",
+  "users": {
+    "Patient:MRN-000001": "Elena Marsh (Patient A)",
+    "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b": "Marlin805 Reggie481 Nienow652 (Patient B)",
+    "MOA:E1001": "Sofia Alvarez",
+    "Nurse:E1002": "Priya Nair",
+    "Nurse:E1003": "Tom Becker",
+    "Nurse:E1004": "Jun Park",
+    "Doctor:E1005": "Amara Okafor",
+    "Doctor:E1006": "Lucas Brennan"
+  },
+  "steps": [
+    {
+      "id": 0,
+      "title": "The 3MT slide (Patient A)",
+      "acts": [
+        {
+          "user": "Doctor:E1005",
+          "page": "/patients/:id",
+          "patient": "Patient:MRN-000001",
+          "tab": "chart",
+          "actions": [
+            "In the Care Assistant, ask: \"Is she allergic to penicillin?\"",
+            "You can also open the past chat of Oct 29, 2026."
+          ]
+        }
+      ],
+      "expected": [
+        "The answer is: \"No. A physician ruled it out with an allergy test on Oct 2, 2026.\"",
+        "The card shows the current assertion.",
+        "Below it, the card shows two superseded assertions with a line through them: \"Other clinic, 2024: penicillin allergy (copied)\" and \"Front desk, 2019: penicillin allergy\"."
+      ]
+    },
+    {
+      "id": 1,
+      "title": "Arrival (front desk)",
+      "acts": [
+        {
+          "user": "MOA:E1001",
+          "page": "/patients",
+          "tab": "find",
+          "search": { "q": "Nienow652", "dob": "1966-02-18" },
+          "actions": ["Find Patient B by name and date of birth. The app fills in the search. Open the patient."]
+        },
+        {
+          "user": "MOA:E1001",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "visit",
+          "actions": [
+            "Select Edit details. Change the phone number. Select Save. (UPDATE)",
+            "In \"Check in a visit\", select the class Emergency and the location \"ER Waiting\". Select Check in."
+          ]
+        },
+        {
+          "user": "MOA:E1001",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "care-team",
+          "actions": [
+            "Add Priya Nair and Dr. Amara Okafor. Select \"Save the care team\".",
+            "Add Jun Park by mistake. Select \"Save the care team\".",
+            "Remove Jun Park. Select \"Save the care team\"."
+          ]
+        },
+        {
+          "user": "MOA:E1001",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "visit",
+          "actions": [
+            "Select \"Write an intake note\". Write the statement: \"Shortness of breath since this morning.\" Select Record."
+          ]
+        }
+      ],
+      "expected": [
+        "The visit is open in \"ER Waiting\".",
+        "The care team has Priya Nair and Dr. Amara Okafor only.",
+        "The care-team chain shows three versions: {Nair, Okafor} ← {Nair, Okafor, Park} ← {Nair, Okafor}. Sofia Alvarez is the author of each version.",
+        "The intake note is an observation (chief complaint) in the open visit."
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Waiting room (Patient B)",
+      "acts": [
+        {
+          "user": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "chart",
+          "actions": [
+            "In the Care Assistant, ask: \"What medications am I taking?\"",
+            "In My record, find the metformin item. Select Report. Write: \"I stopped taking metformin.\" Select Record."
+          ]
+        }
+      ],
+      "expected": [
+        "The answer lists metformin.",
+        "The report is a new assertion about the metformin item. Its message has no staff issuer. Its origin is \"Patient\" and its channel is \"App\".",
+        "The report supersedes the metformin prescription. The chain is: prescription ← patient report."
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Triage (nurse)",
+      "acts": [
+        {
+          "user": "Nurse:E1002",
+          "page": "/patients",
+          "tab": "my-patients",
+          "actions": ["Open Patient B from My patients."]
+        },
+        {
+          "user": "Nurse:E1002",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "visit",
+          "actions": [
+            "Read the earlier visits.",
+            "Open the Chart tab. Select \"Record vital signs\". Write the heart rate, the blood pressure and the oxygen saturation. Select Record.",
+            "Select Record. Select the category Diagnosis and the preset for an asthma attack. Select the intent Recommendation and the verification Provisional. Write the statement: \"Possible asthma attack.\"",
+            "Select Record. Select the category Prescription and the preset for the salbutamol inhaler. Select the intent Recommendation.",
+            "Open the Visit tab. Move the patient to \"ER Bed 2\".",
+            "In the Care Assistant, ask: \"Any allergies?\""
+          ]
+        }
+      ],
+      "expected": [
+        "The chart shows the new items. The nurse is the author.",
+        "Patient B has no allergy on record. The answer says that no allergy is recorded, and it cites no item."
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Physician (doctor)",
+      "acts": [
+        {
+          "user": "Doctor:E1005",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "chart",
+          "actions": [
+            "In the Care Assistant, ask: \"What did the nurse recommend?\"",
+            "Select Record. Select the category Lab order and the troponin preset. Select Record.",
+            "Select Record again. Record the troponin result (category Lab result or Observation, troponin preset).",
+            "On the asthma item, select Supersede. Select the preset for heart failure. Select the intent Decision. Write: \"Possible heart failure.\"",
+            "In the Care Assistant, tell: \"The patient's father died of a heart attack.\"",
+            "On the new family-history item (Agent, Unconfirmed), select Confirm.",
+            "On the inhaler item, select Supersede. Select the furosemide preset. Select the intent Decision.",
+            "On the metformin item, select Supersede. Set the status to \"stopped\". Select the intent Decision. Write: \"Metformin is stopped.\""
+          ]
+        }
+      ],
+      "expected": [
+        "The answer cites the nurse's recommendations.",
+        "The lab order and the lab result show in the chart.",
+        "The chain shows: asthma (superseded) ← heart failure.",
+        "The agent records the family history as unconfirmed. The source is \"Agent\". The card shows \"Recorded, unconfirmed\".",
+        "The doctor's confirmation supersedes the agent's item.",
+        "The chain shows: inhaler (superseded) ← furosemide.",
+        "The metformin chain shows: prescription ← patient report ← doctor decision."
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Transfer (nurse and front desk)",
+      "acts": [
+        {
+          "user": "Nurse:E1002",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "visit",
+          "actions": ["Move the patient to \"Cardiology Room 401\"."]
+        },
+        {
+          "user": "MOA:E1001",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "care-team",
+          "actions": ["Add Tom Becker. Select \"Save the care team\". This makes a new care-team entry that supersedes the earlier one."]
+        },
+        {
+          "user": "Nurse:E1003",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "chart",
+          "actions": ["Look at the chart of Patient B as Tom Becker."]
+        }
+      ],
+      "expected": [
+        "The visit shows each location with its times.",
+        "Tom Becker can open the chart."
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Evening (Patient B)",
+      "acts": [
+        {
+          "user": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "chart",
+          "actions": ["In the Care Assistant, ask: \"What is my plan?\""]
+        }
+      ],
+      "expected": [
+        "The answer gives the heart-failure work-up and furosemide.",
+        "The answer does not give asthma or the inhaler.",
+        "The cards show the current items only. A patient sees no superseded rows."
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Privacy check (nurse not on the care team)",
+      "acts": [
+        {
+          "user": "Nurse:E1004",
+          "page": "/patients",
+          "tab": "find",
+          "search": { "q": "Nienow652", "dob": "1966-02-18" },
+          "actions": ["Find Patient B. Open the patient."]
+        },
+        {
+          "user": "Nurse:E1004",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "chart",
+          "actions": ["Look at the Chart tab."]
+        },
+        {
+          "user": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "audit",
+          "actions": ["Look at the audit log."]
+        }
+      ],
+      "expected": [
+        "A 403 panel shows: \"You are not on this patient's care team. This attempt is in the audit log.\"",
+        "Patient B sees the denied attempt (a red row) in the Audit tab."
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Directory (front desk)",
+      "acts": [
+        {
+          "user": "MOA:E1001",
+          "page": "/directory",
+          "tab": "staff",
+          "actions": [
+            "On the Staff tab, find a staff member. Select Edit. Change the phone number. Select Save. (UPDATE)",
+            "On the Departments tab, select Delete on Emergency. Select Delete in the dialog.",
+            "On the Locations tab, select Delete on \"Old Storage Room\". Select Delete in the dialog. (DELETE)"
+          ]
+        }
+      ],
+      "expected": [
+        "The new phone number shows.",
+        "A 409 message shows: the department has staff, so you cannot delete it.",
+        "The location goes away from the list."
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Discharge (doctor)",
+      "acts": [
+        {
+          "user": "Doctor:E1005",
+          "page": "/patients/:id",
+          "patient": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
+          "tab": "visit",
+          "actions": ["Select \"End the visit\". Select \"End the visit\" again in the dialog."]
+        }
+      ],
+      "expected": [
+        "The visit shows an end time.",
+        "The chart keeps the full history, with the author of each item. Select \"Show history\" on the Chart tab to see it."
+      ]
+    }
+  ]
+}
