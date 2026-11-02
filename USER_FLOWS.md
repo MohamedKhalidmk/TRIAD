@@ -54,16 +54,16 @@ The dataset must give the items in this table. Phase 2 of the plan builds them.
 | Item | Requirement |
 |---|---|
 | Departments | Emergency, Inpatient Medicine, Family Medicine, Urgent Care, Home Health, Virtual Care, Cardiology, Front Office. All are part of TRIAD General Hospital. |
-| Locations | ER Waiting; ER Bed 1 to ER Bed 4; Cardiology Ward with Cardiology Room 401 and Cardiology Room 402; Family Medicine Room 1; Urgent Care Room 1; Inpatient Ward 3; Patient Home; Virtual Visit. Each department has one default location for re-homed visits. |
+| Locations | Emergency Unit with ER Waiting, ER Bed 1 to ER Bed 4 and the Emergency Registration Desk; Cardiology Ward with Cardiology Room 401, Cardiology Room 402 and the Cardiology Desk; Family Medicine Room 1 and the Family Medicine Desk; Urgent Care Room 1; Inpatient Ward 3; Patient Home; Virtual Visit; Main Front Desk; Old Storage Room (not used, for the delete step). Each department has one default location for re-homed visits. |
 | Doctors | The 234 Synthea doctors that the visits use, plus the demo doctors in 0.4. |
 | Nurses (method A) | Emergency 4, Inpatient Medicine 3, Cardiology 3, Family Medicine 2, Urgent Care 2, Home Health 2, Virtual Care 1. |
 | MOAs (method A) | Front Office 3, Emergency 1, Family Medicine 1, Cardiology 1. |
 | Care teams | Every patient has at least one active care team. Use the Synthea care team if one exists. If not, use the doctor of the latest visit and one nurse of that department. |
 | Staff languages | Each staff member has one or more languages. |
 | Patient A | A curated patient with the penicillin history from the 3MT slide (see 0.4). |
-| Patient B | A Synthea patient. The patient is alive and is an adult on the demo date. The patient has an active metformin prescription and no penicillin allergy. The FHIR bundle is small. |
+| Patient B | A Synthea patient. The patient is alive and is an adult on the demo date. The patient has an active metformin prescription and no penicillin allergy. Of the 3 eligible patients, Patient B has the fewest resources (879). |
 | Demo activity | Patient A has one saved chat with citations. The audit log has some reads and one denied access. |
-| Demo date | `TRIAD_NOW = 2026-10-30T09:00:00-07:00`. This date is after the Synthea build date (2026-10-21). It is before the time change on 2026-11-01. |
+| Demo date | `TRIAD_NOW = 2026-10-30T09:00:00-04:00` (Eastern time, because the hospital is in Worcester, MA). This date is after the Synthea build date (2026-10-21). It is before the time change on 2026-11-01. |
 
 ### 0.4 Demo users (pinned at the top of the picker)
 
@@ -72,7 +72,7 @@ All names are fictional.
 | Role | Name | Department | Use in the journey |
 |---|---|---|---|
 | Patient | Elena Marsh (Patient A) | — | The 3MT slide patient |
-| Patient | Patient B (chosen in Phase 2) | — | Walks the hospital visit |
+| Patient | Marlin805 Reggie481 Nienow652 (Patient B), born 1966-02-18 | — | Walks the hospital visit. Synthea names keep their digits. |
 | MOA | Sofia Alvarez | Front Office | Front desk |
 | Nurse | Priya Nair | Emergency | Triage nurse, on B's care team |
 | Nurse | Tom Becker | Cardiology | Ward nurse, added at transfer |
@@ -197,7 +197,7 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
   1. Ask: "What did the nurse recommend?"
   2. Order a troponin test. Record the result.
   3. Revise the assessment to "Possible heart failure." This decision supersedes the nurse's asthma assessment.
-  4. Tell the Care Assistant: "Her father died of a heart attack."
+  4. Tell the Care Assistant: "The patient's father died of a heart attack."
   5. Confirm the new family-history item.
   6. Prescribe furosemide. This decision supersedes the inhaler recommendation.
   7. Resolve metformin. This decision supersedes the patient's report.
@@ -240,7 +240,7 @@ This step shows the main idea of TRIAD. A long record does not make the assistan
 - **Action:**
   1. Change the phone number of a staff member. (**UPDATE**)
   2. Try to delete the Emergency department. (It has staff.)
-  3. Delete an unused location. (**DELETE**)
+  3. Delete the unused location "Old Storage Room". (**DELETE**)
 - **Expected result:**
   1. The new phone number shows.
   2. A 409 message: the department has staff, so you cannot delete it.

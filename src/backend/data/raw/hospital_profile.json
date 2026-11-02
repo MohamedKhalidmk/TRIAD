@@ -1,0 +1,88 @@
+{
+  "description": "The one-hospital profile of the TRIAD prototype. USER_FLOWS.md section 0 defines it. build_scenarios.py and the onboarding loader read it.",
+  "triadNow": "2026-10-30T09:00:00-04:00",
+  "seed": 20261030,
+  "baseUrl": "https://triad.example/fhir",
+  "identifierSystems": {
+    "organization": "https://triad.example/fhir/sid/organization",
+    "location": "https://triad.example/fhir/sid/location",
+    "employee": "https://triad.example/fhir/sid/employee",
+    "mrn": "https://triad.example/fhir/sid/mrn",
+    "careTeam": "https://triad.example/fhir/sid/care-team",
+    "message": "https://triad.example/fhir/sid/message",
+    "nurseLicence": "https://triad.example/fhir/sid/nurse-licence",
+    "doctorLicence": "https://triad.example/fhir/sid/doctor-licence",
+    "moaCertificate": "https://triad.example/fhir/sid/moa-certificate",
+    "bcPhn": "https://fhir.infoway-inforoute.ca/NamingSystem/ca-bc-patient-healthcare-id",
+    "npi": "http://hl7.org/fhir/sid/us-npi"
+  },
+  "extensions": {
+    "origin": "https://triad.example/fhir/StructureDefinition/message-origin",
+    "intent": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+    "staffRole": "https://triad.example/fhir/CodeSystem/staff-role"
+  },
+  "hospital": {
+    "code": "TRIAD-GH",
+    "name": "TRIAD General Hospital",
+    "phone": "+1-508-555-0100",
+    "email": "info@triad-general.example",
+    "address": {"line": ["1 Triad Way"], "city": "Worcester", "state": "MA", "postalCode": "01608", "country": "US"}
+  },
+  "departments": [
+    {"code": "EMER", "name": "Emergency", "phone": "+1-508-555-0110", "defaultLocation": "ER-UNIT"},
+    {"code": "INPAT", "name": "Inpatient Medicine", "phone": "+1-508-555-0120", "defaultLocation": "INPAT-WARD3"},
+    {"code": "FAMMED", "name": "Family Medicine", "phone": "+1-508-555-0130", "defaultLocation": "FAMMED-ROOM1"},
+    {"code": "URGENT", "name": "Urgent Care", "phone": "+1-508-555-0140", "defaultLocation": "URGENT-ROOM1"},
+    {"code": "HOME", "name": "Home Health", "phone": "+1-508-555-0150", "defaultLocation": "PATIENT-HOME"},
+    {"code": "VIRT", "name": "Virtual Care", "phone": "+1-508-555-0160", "defaultLocation": "VIRTUAL-VISIT"},
+    {"code": "CARD", "name": "Cardiology", "phone": "+1-508-555-0170", "defaultLocation": "CARD-WARD"},
+    {"code": "FRONT", "name": "Front Office", "phone": "+1-508-555-0180", "defaultLocation": "DESK-MAIN"}
+  ],
+  "classToDepartment": {
+    "EMER": "EMER",
+    "IMP": "INPAT",
+    "HH": "HOME",
+    "VR": "VIRT",
+    "AMB": {"default": "FAMMED", "providerNameContains": {"URGENT": "URGENT"}}
+  },
+  "locations": [
+    {"code": "ER-UNIT", "name": "Emergency Unit", "physicalType": "wi", "department": "EMER"},
+    {"code": "ER-WAIT", "name": "ER Waiting", "physicalType": "area", "department": "EMER", "partOf": "ER-UNIT"},
+    {"code": "ER-BED-1", "name": "ER Bed 1", "physicalType": "bd", "department": "EMER", "partOf": "ER-UNIT"},
+    {"code": "ER-BED-2", "name": "ER Bed 2", "physicalType": "bd", "department": "EMER", "partOf": "ER-UNIT"},
+    {"code": "ER-BED-3", "name": "ER Bed 3", "physicalType": "bd", "department": "EMER", "partOf": "ER-UNIT"},
+    {"code": "ER-BED-4", "name": "ER Bed 4", "physicalType": "bd", "department": "EMER", "partOf": "ER-UNIT"},
+    {"code": "CARD-WARD", "name": "Cardiology Ward", "physicalType": "wa", "department": "CARD"},
+    {"code": "CARD-401", "name": "Cardiology Room 401", "physicalType": "ro", "department": "CARD", "partOf": "CARD-WARD"},
+    {"code": "CARD-402", "name": "Cardiology Room 402", "physicalType": "ro", "department": "CARD", "partOf": "CARD-WARD"},
+    {"code": "FAMMED-ROOM1", "name": "Family Medicine Room 1", "physicalType": "ro", "department": "FAMMED"},
+    {"code": "URGENT-ROOM1", "name": "Urgent Care Room 1", "physicalType": "ro", "department": "URGENT"},
+    {"code": "INPAT-WARD3", "name": "Inpatient Ward 3", "physicalType": "wa", "department": "INPAT"},
+    {"code": "PATIENT-HOME", "name": "Patient Home", "physicalType": "ho", "department": "HOME"},
+    {"code": "VIRTUAL-VISIT", "name": "Virtual Visit", "physicalType": "vi", "department": "VIRT"},
+    {"code": "DESK-MAIN", "name": "Main Front Desk", "physicalType": "area", "department": "FRONT"},
+    {"code": "DESK-ER", "name": "Emergency Registration Desk", "physicalType": "area", "department": "EMER", "partOf": "ER-UNIT"},
+    {"code": "DESK-FAMMED", "name": "Family Medicine Desk", "physicalType": "area", "department": "FAMMED"},
+    {"code": "DESK-CARD", "name": "Cardiology Desk", "physicalType": "area", "department": "CARD", "partOf": "CARD-WARD"},
+    {"code": "STORE-OLD", "name": "Old Storage Room", "physicalType": "ro", "department": "FRONT"}
+  ],
+  "staffCounts": {
+    "nurse": {"EMER": 4, "INPAT": 3, "CARD": 3, "FAMMED": 2, "URGENT": 2, "HOME": 2, "VIRT": 1},
+    "moa": {"FRONT": 3, "EMER": 1, "FAMMED": 1, "CARD": 1}
+  },
+  "moaDesks": {"FRONT": "DESK-MAIN", "EMER": "DESK-ER", "FAMMED": "DESK-FAMMED", "CARD": "DESK-CARD"},
+  "demoUsers": [
+    {"key": "elena", "role": "Patient", "given": "Elena", "family": "Marsh"},
+    {"key": "patientB", "role": "Patient", "synthea": true},
+    {"key": "sofia", "role": "MOA", "given": "Sofia", "family": "Alvarez", "gender": "female", "department": "FRONT", "languages": ["en", "es"]},
+    {"key": "priya", "role": "Nurse", "given": "Priya", "family": "Nair", "gender": "female", "department": "EMER", "designation": "RN", "languages": ["en", "hi"]},
+    {"key": "tom", "role": "Nurse", "given": "Tom", "family": "Becker", "gender": "male", "department": "CARD", "designation": "RN", "languages": ["en", "de"]},
+    {"key": "jun", "role": "Nurse", "given": "Jun", "family": "Park", "gender": "male", "department": "HOME", "designation": "LPN", "languages": ["en", "ko"]},
+    {"key": "okafor", "role": "Doctor", "given": "Amara", "family": "Okafor", "gender": "female", "department": "EMER", "specialty": "Emergency medicine", "languages": ["en", "fr"]},
+    {"key": "brennan", "role": "Doctor", "given": "Lucas", "family": "Brennan", "gender": "male", "department": "CARD", "specialty": "Cardiology", "languages": ["en"]}
+  ],
+  "patientB": {
+    "criteria": "Alive. Adult on triadNow. Has an active metformin MedicationRequest. Has no penicillin AllergyIntolerance. Among the eligible patients, the one with the fewest resources.",
+    "pinned": {"id": "0c1b260c-7f32-fdd5-15dd-1160caf24c2b", "name": "Marlin805 Reggie481 Nienow652", "birthDate": "1966-02-18"}
+  }
+}

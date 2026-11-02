@@ -1,0 +1,79 @@
+{
+  "description": "Demo rows for the agent tables. The loader maps the FHIR references to rows.",
+  "chatSessions": [
+    {
+      "identifier": "CHAT-0001",
+      "patient": "Patient/pat-elena-marsh",
+      "staff": "Practitioner/prac-e1005",
+      "userRole": "Doctor",
+      "startedAt": "2026-10-29T15:00:00-04:00",
+      "mode": "rules",
+      "model": null,
+      "turns": [
+        {
+          "seq": 1,
+          "clientTurnId": "demo-0001-1",
+          "speaker": "User",
+          "text": "Is she allergic to penicillin?",
+          "createdAt": "2026-10-29T15:00:05-04:00"
+        },
+        {
+          "seq": 2,
+          "clientTurnId": "demo-0001-2",
+          "speaker": "Assistant",
+          "text": "No. A physician ruled it out with an allergy test on Oct 2, 2026.",
+          "createdAt": "2026-10-29T15:00:06-04:00",
+          "citations": [
+            {
+              "provenance": "Provenance/prov-elena-pen-3",
+              "rank": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auditEvents": [
+    {
+      "identifier": "AUDIT-0001",
+      "at": "2026-10-29T14:59:00-04:00",
+      "action": "read",
+      "outcome": "Allowed",
+      "userRole": "Doctor",
+      "actorStaff": "Practitioner/prac-e1005",
+      "patient": "Patient/pat-elena-marsh",
+      "path": "/api/patients/{patient}/chart"
+    },
+    {
+      "identifier": "AUDIT-0002",
+      "at": "2026-10-29T15:00:06-04:00",
+      "action": "ask",
+      "outcome": "Allowed",
+      "userRole": "Doctor",
+      "actorStaff": "Practitioner/prac-e1005",
+      "patient": "Patient/pat-elena-marsh",
+      "path": "/api/chat/sessions/{session}/turns",
+      "chatTurn": "CHAT-0001#2"
+    },
+    {
+      "identifier": "AUDIT-0003",
+      "at": "2026-10-29T16:20:00-04:00",
+      "action": "read",
+      "outcome": "Denied",
+      "userRole": "Nurse",
+      "actorStaff": "Practitioner/prac-e1004",
+      "patient": "Patient/pat-elena-marsh",
+      "path": "/api/patients/{patient}/chart"
+    },
+    {
+      "identifier": "AUDIT-0004",
+      "at": "2026-10-29T18:00:00-04:00",
+      "action": "read",
+      "outcome": "Allowed",
+      "userRole": "Patient",
+      "actorPatient": "Patient/pat-elena-marsh",
+      "patient": "Patient/pat-elena-marsh",
+      "path": "/api/audit"
+    }
+  ]
+}

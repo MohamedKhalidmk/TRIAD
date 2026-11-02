@@ -1,0 +1,7194 @@
+{
+ "resourceType": "Bundle",
+ "id": "triad-scenarios",
+ "meta": {
+  "lastUpdated": "2026-10-30T09:00:00-04:00"
+ },
+ "type": "collection",
+ "timestamp": "2026-10-30T09:00:00-04:00",
+ "entry": [
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-triad-gh",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-triad-gh",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "prov",
+        "display": "Healthcare Provider"
+       }
+      ],
+      "text": "Healthcare Provider"
+     }
+    ],
+    "name": "TRIAD General Hospital",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0100"
+     },
+     {
+      "system": "email",
+      "value": "info@triad-general.example"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-emer",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-emer",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-EMER"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Emergency",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0110"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-inpat",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-inpat",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-INPAT"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Inpatient Medicine",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0120"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-fammed",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-fammed",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-FAMMED"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Family Medicine",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0130"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-urgent",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-urgent",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-URGENT"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Urgent Care",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0140"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-home",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-home",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-HOME"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Home Health",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0150"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-virt",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-virt",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-VIRT"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Virtual Care",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0160"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-card",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-card",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-CARD"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Cardiology",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0170"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Organization/org-front",
+   "resource": {
+    "resourceType": "Organization",
+    "id": "org-front",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/organization",
+      "value": "TRIAD-GH-FRONT"
+     }
+    ],
+    "active": true,
+    "type": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+        "code": "dept",
+        "display": "Hospital Department"
+       }
+      ],
+      "text": "Hospital Department"
+     }
+    ],
+    "name": "Front Office",
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0180"
+     }
+    ],
+    "address": [
+     {
+      "line": [
+       "1 Triad Way"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01608",
+      "country": "US"
+     }
+    ],
+    "partOf": {
+     "reference": "Organization/org-triad-gh",
+     "display": "TRIAD General Hospital"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-er-unit",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-er-unit",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "ER-UNIT"
+     }
+    ],
+    "status": "active",
+    "name": "Emergency Unit",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "wi",
+       "display": "Wing"
+      }
+     ],
+     "text": "Wing"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-emer"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-er-wait",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-er-wait",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "ER-WAIT"
+     }
+    ],
+    "status": "active",
+    "name": "ER Waiting",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "area",
+       "display": "Area"
+      }
+     ],
+     "text": "Area"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-emer"
+    },
+    "partOf": {
+     "reference": "Location/loc-er-unit",
+     "display": "Emergency Unit"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-er-bed-1",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-er-bed-1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "ER-BED-1"
+     }
+    ],
+    "status": "active",
+    "name": "ER Bed 1",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "bd",
+       "display": "Bed"
+      }
+     ],
+     "text": "Bed"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-emer"
+    },
+    "partOf": {
+     "reference": "Location/loc-er-unit",
+     "display": "Emergency Unit"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-er-bed-2",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-er-bed-2",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "ER-BED-2"
+     }
+    ],
+    "status": "active",
+    "name": "ER Bed 2",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "bd",
+       "display": "Bed"
+      }
+     ],
+     "text": "Bed"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-emer"
+    },
+    "partOf": {
+     "reference": "Location/loc-er-unit",
+     "display": "Emergency Unit"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-er-bed-3",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-er-bed-3",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "ER-BED-3"
+     }
+    ],
+    "status": "active",
+    "name": "ER Bed 3",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "bd",
+       "display": "Bed"
+      }
+     ],
+     "text": "Bed"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-emer"
+    },
+    "partOf": {
+     "reference": "Location/loc-er-unit",
+     "display": "Emergency Unit"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-er-bed-4",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-er-bed-4",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "ER-BED-4"
+     }
+    ],
+    "status": "active",
+    "name": "ER Bed 4",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "bd",
+       "display": "Bed"
+      }
+     ],
+     "text": "Bed"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-emer"
+    },
+    "partOf": {
+     "reference": "Location/loc-er-unit",
+     "display": "Emergency Unit"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-card-ward",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-card-ward",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "CARD-WARD"
+     }
+    ],
+    "status": "active",
+    "name": "Cardiology Ward",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "wa",
+       "display": "Ward"
+      }
+     ],
+     "text": "Ward"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-card"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-card-401",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-card-401",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "CARD-401"
+     }
+    ],
+    "status": "active",
+    "name": "Cardiology Room 401",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "ro",
+       "display": "Room"
+      }
+     ],
+     "text": "Room"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-card"
+    },
+    "partOf": {
+     "reference": "Location/loc-card-ward",
+     "display": "Cardiology Ward"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-card-402",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-card-402",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "CARD-402"
+     }
+    ],
+    "status": "active",
+    "name": "Cardiology Room 402",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "ro",
+       "display": "Room"
+      }
+     ],
+     "text": "Room"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-card"
+    },
+    "partOf": {
+     "reference": "Location/loc-card-ward",
+     "display": "Cardiology Ward"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-fammed-room1",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-fammed-room1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "FAMMED-ROOM1"
+     }
+    ],
+    "status": "active",
+    "name": "Family Medicine Room 1",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "ro",
+       "display": "Room"
+      }
+     ],
+     "text": "Room"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-fammed"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-urgent-room1",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-urgent-room1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "URGENT-ROOM1"
+     }
+    ],
+    "status": "active",
+    "name": "Urgent Care Room 1",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "ro",
+       "display": "Room"
+      }
+     ],
+     "text": "Room"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-urgent"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-inpat-ward3",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-inpat-ward3",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "INPAT-WARD3"
+     }
+    ],
+    "status": "active",
+    "name": "Inpatient Ward 3",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "wa",
+       "display": "Ward"
+      }
+     ],
+     "text": "Ward"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-inpat"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-patient-home",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-patient-home",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "PATIENT-HOME"
+     }
+    ],
+    "status": "active",
+    "name": "Patient Home",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "ho",
+       "display": "House"
+      }
+     ],
+     "text": "House"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-home"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-virtual-visit",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-virtual-visit",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "VIRTUAL-VISIT"
+     }
+    ],
+    "status": "active",
+    "name": "Virtual Visit",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "vi",
+       "display": "Virtual"
+      }
+     ],
+     "text": "Virtual"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-virt"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-desk-main",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-desk-main",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "DESK-MAIN"
+     }
+    ],
+    "status": "active",
+    "name": "Main Front Desk",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "area",
+       "display": "Area"
+      }
+     ],
+     "text": "Area"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-front"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-desk-er",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-desk-er",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "DESK-ER"
+     }
+    ],
+    "status": "active",
+    "name": "Emergency Registration Desk",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "area",
+       "display": "Area"
+      }
+     ],
+     "text": "Area"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-emer"
+    },
+    "partOf": {
+     "reference": "Location/loc-er-unit",
+     "display": "Emergency Unit"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-desk-fammed",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-desk-fammed",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "DESK-FAMMED"
+     }
+    ],
+    "status": "active",
+    "name": "Family Medicine Desk",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "area",
+       "display": "Area"
+      }
+     ],
+     "text": "Area"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-fammed"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-desk-card",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-desk-card",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "DESK-CARD"
+     }
+    ],
+    "status": "active",
+    "name": "Cardiology Desk",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "area",
+       "display": "Area"
+      }
+     ],
+     "text": "Area"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-card"
+    },
+    "partOf": {
+     "reference": "Location/loc-card-ward",
+     "display": "Cardiology Ward"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Location/loc-store-old",
+   "resource": {
+    "resourceType": "Location",
+    "id": "loc-store-old",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/location",
+      "value": "STORE-OLD"
+     }
+    ],
+    "status": "active",
+    "name": "Old Storage Room",
+    "physicalType": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+       "code": "ro",
+       "display": "Room"
+      }
+     ],
+     "text": "Room"
+    },
+    "managingOrganization": {
+     "reference": "Organization/org-front"
+    },
+    "address": {
+     "line": [
+      "1 Triad Way"
+     ],
+     "city": "Worcester",
+     "state": "MA",
+     "postalCode": "01608",
+     "country": "US"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1001",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1001",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1001"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Alvarez",
+      "given": [
+       "Sofia"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "sofia.alvarez@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2001",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "es",
+        "display": "es"
+       }
+      ],
+      "text": "es"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/moa-certificate",
+        "value": "MOA-9934"
+       }
+      ],
+      "code": {
+       "text": "Medical office assistant certificate"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1001",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1001",
+    "active": true,
+    "period": {
+     "start": "2015-09-11"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "organization": {
+     "reference": "Organization/org-front",
+     "display": "Front Office"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "https://triad.example/fhir/CodeSystem/staff-role",
+        "code": "moa",
+        "display": "Medical office assistant"
+       }
+      ],
+      "text": "Medical office assistant"
+     }
+    ],
+    "location": [
+     {
+      "reference": "Location/loc-desk-main",
+      "display": "Main Front Desk"
+     }
+    ],
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "ext. 2100",
+      "use": "work"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1002",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1002",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1002"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-63979"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Nair",
+      "given": [
+       "Priya"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "priya.nair@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2002",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "hi",
+        "display": "hi"
+       }
+      ],
+      "text": "hi"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-63979"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1002",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1002",
+    "active": true,
+    "period": {
+     "start": "2009-12-26"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1002",
+     "display": "Priya Nair"
+    },
+    "organization": {
+     "reference": "Organization/org-emer",
+     "display": "Emergency"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1003",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1003",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1003"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-77753"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Becker",
+      "given": [
+       "Tom"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "tom.becker@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2003",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "de",
+        "display": "de"
+       }
+      ],
+      "text": "de"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-77753"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1003",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1003",
+    "active": true,
+    "period": {
+     "start": "2016-11-09"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1003",
+     "display": "Tom Becker"
+    },
+    "organization": {
+     "reference": "Organization/org-card",
+     "display": "Cardiology"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1004",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1004",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1004"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-26179"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Park",
+      "given": [
+       "Jun"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "jun.park@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2004",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "ko",
+        "display": "ko"
+       }
+      ],
+      "text": "ko"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-26179"
+       }
+      ],
+      "code": {
+       "text": "LPN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1004",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1004",
+    "active": true,
+    "period": {
+     "start": "2018-05-14"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1004",
+     "display": "Jun Park"
+    },
+    "organization": {
+     "reference": "Organization/org-home",
+     "display": "Home Health"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1005",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1005",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1005"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/doctor-licence",
+      "value": "MD-28590"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Okafor",
+      "given": [
+       "Amara"
+      ],
+      "prefix": [
+       "Dr."
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "amara.okafor@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2005",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "fr",
+        "display": "fr"
+       }
+      ],
+      "text": "fr"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/doctor-licence",
+        "value": "MD-28590"
+       }
+      ],
+      "code": {
+       "text": "MD"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1005",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1005",
+    "active": true,
+    "period": {
+     "start": "2012-03-03"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1005",
+     "display": "Amara Okafor"
+    },
+    "organization": {
+     "reference": "Organization/org-emer",
+     "display": "Emergency"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "doctor",
+        "display": "Doctor"
+       }
+      ],
+      "text": "Doctor"
+     }
+    ],
+    "specialty": [
+     {
+      "text": "Emergency medicine"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1006",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1006",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1006"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/doctor-licence",
+      "value": "MD-13282"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Brennan",
+      "given": [
+       "Lucas"
+      ],
+      "prefix": [
+       "Dr."
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "lucas.brennan@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2006",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/doctor-licence",
+        "value": "MD-13282"
+       }
+      ],
+      "code": {
+       "text": "MD"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1006",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1006",
+    "active": true,
+    "period": {
+     "start": "2017-03-22"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1006",
+     "display": "Lucas Brennan"
+    },
+    "organization": {
+     "reference": "Organization/org-card",
+     "display": "Cardiology"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "doctor",
+        "display": "Doctor"
+       }
+      ],
+      "text": "Doctor"
+     }
+    ],
+    "specialty": [
+     {
+      "text": "Cardiology"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1007",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1007",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1007"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-97689"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Dlamini",
+      "given": [
+       "Wei"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "wei.dlamini@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2007",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-97689"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1007",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1007",
+    "active": true,
+    "period": {
+     "start": "2017-03-15"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1007",
+     "display": "Wei Dlamini"
+    },
+    "organization": {
+     "reference": "Organization/org-emer",
+     "display": "Emergency"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1008",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1008",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1008"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-26860"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Bauer",
+      "given": [
+       "Farid"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "farid.bauer@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2008",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "vi",
+        "display": "vi"
+       }
+      ],
+      "text": "vi"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-26860"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1008",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1008",
+    "active": true,
+    "period": {
+     "start": "2018-03-09"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1008",
+     "display": "Farid Bauer"
+    },
+    "organization": {
+     "reference": "Organization/org-emer",
+     "display": "Emergency"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1009",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1009",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1009"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-32786"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Haddad",
+      "given": [
+       "Theo"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "theo.haddad@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2009",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "vi",
+        "display": "vi"
+       }
+      ],
+      "text": "vi"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-32786"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1009",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1009",
+    "active": true,
+    "period": {
+     "start": "2010-01-13"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1009",
+     "display": "Theo Haddad"
+    },
+    "organization": {
+     "reference": "Organization/org-emer",
+     "display": "Emergency"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1010",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1010",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1010"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-14686"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Ortega",
+      "given": [
+       "Aisha"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "aisha.ortega@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2010",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-14686"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1010",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1010",
+    "active": true,
+    "period": {
+     "start": "2009-09-12"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1010",
+     "display": "Aisha Ortega"
+    },
+    "organization": {
+     "reference": "Organization/org-inpat",
+     "display": "Inpatient Medicine"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1011",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1011",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1011"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-48680"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Sato",
+      "given": [
+       "Elif"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "elif.sato@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2011",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-48680"
+       }
+      ],
+      "code": {
+       "text": "NP"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1011",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1011",
+    "active": true,
+    "period": {
+     "start": "2015-02-08"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1011",
+     "display": "Elif Sato"
+    },
+    "organization": {
+     "reference": "Organization/org-inpat",
+     "display": "Inpatient Medicine"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1012",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1012",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1012"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-27595"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Dubois",
+      "given": [
+       "Farid"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "farid.dubois@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2012",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-27595"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1012",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1012",
+    "active": true,
+    "period": {
+     "start": "2011-02-04"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1012",
+     "display": "Farid Dubois"
+    },
+    "organization": {
+     "reference": "Organization/org-inpat",
+     "display": "Inpatient Medicine"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1013",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1013",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1013"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-93822"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Moreau",
+      "given": [
+       "Felix"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "felix.moreau@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2013",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "fr",
+        "display": "fr"
+       }
+      ],
+      "text": "fr"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-93822"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1013",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1013",
+    "active": true,
+    "period": {
+     "start": "2013-11-21"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1013",
+     "display": "Felix Moreau"
+    },
+    "organization": {
+     "reference": "Organization/org-fammed",
+     "display": "Family Medicine"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1014",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1014",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1014"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-27451"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Castillo",
+      "given": [
+       "Farid"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "farid.castillo@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2014",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "ar",
+        "display": "ar"
+       }
+      ],
+      "text": "ar"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-27451"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1014",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1014",
+    "active": true,
+    "period": {
+     "start": "2023-09-08"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1014",
+     "display": "Farid Castillo"
+    },
+    "organization": {
+     "reference": "Organization/org-fammed",
+     "display": "Family Medicine"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1015",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1015",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1015"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-62180"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Novak",
+      "given": [
+       "Nikhil"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "nikhil.novak@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2015",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-62180"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1015",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1015",
+    "active": true,
+    "period": {
+     "start": "2022-12-10"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1015",
+     "display": "Nikhil Novak"
+    },
+    "organization": {
+     "reference": "Organization/org-urgent",
+     "display": "Urgent Care"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1016",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1016",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1016"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-36002"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Bianchi",
+      "given": [
+       "Grace"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "grace.bianchi@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2016",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "tl",
+        "display": "tl"
+       }
+      ],
+      "text": "tl"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-36002"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1016",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1016",
+    "active": true,
+    "period": {
+     "start": "2014-12-17"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1016",
+     "display": "Grace Bianchi"
+    },
+    "organization": {
+     "reference": "Organization/org-urgent",
+     "display": "Urgent Care"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1017",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1017",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1017"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-45421"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Rossi",
+      "given": [
+       "Ivan"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "ivan.rossi@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2017",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "ar",
+        "display": "ar"
+       }
+      ],
+      "text": "ar"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-45421"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1017",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1017",
+    "active": true,
+    "period": {
+     "start": "2009-01-21"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1017",
+     "display": "Ivan Rossi"
+    },
+    "organization": {
+     "reference": "Organization/org-home",
+     "display": "Home Health"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1018",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1018",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1018"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-16615"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Xu",
+      "given": [
+       "Carmen"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "carmen.xu@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2018",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-16615"
+       }
+      ],
+      "code": {
+       "text": "LPN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1018",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1018",
+    "active": true,
+    "period": {
+     "start": "2013-11-08"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1018",
+     "display": "Carmen Xu"
+    },
+    "organization": {
+     "reference": "Organization/org-virt",
+     "display": "Virtual Care"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1019",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1019",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1019"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-26778"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Ellis",
+      "given": [
+       "Dmitri"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "dmitri.ellis@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2019",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "fr",
+        "display": "fr"
+       }
+      ],
+      "text": "fr"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-26778"
+       }
+      ],
+      "code": {
+       "text": "LPN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1019",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1019",
+    "active": true,
+    "period": {
+     "start": "2010-11-22"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1019",
+     "display": "Dmitri Ellis"
+    },
+    "organization": {
+     "reference": "Organization/org-card",
+     "display": "Cardiology"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1020",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1020",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1020"
+     },
+     {
+      "system": "https://triad.example/fhir/sid/nurse-licence",
+      "value": "RN-85187"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Wagner",
+      "given": [
+       "Samir"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "samir.wagner@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2020",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/nurse-licence",
+        "value": "RN-85187"
+       }
+      ],
+      "code": {
+       "text": "RN"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1020",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1020",
+    "active": true,
+    "period": {
+     "start": "2010-05-10"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1020",
+     "display": "Samir Wagner"
+    },
+    "organization": {
+     "reference": "Organization/org-card",
+     "display": "Cardiology"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/practitioner-role",
+        "code": "nurse",
+        "display": "Nurse"
+       }
+      ],
+      "text": "Nurse"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1021",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1021",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1021"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Yilmaz",
+      "given": [
+       "Ximena"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "ximena.yilmaz@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2021",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "pa",
+        "display": "pa"
+       }
+      ],
+      "text": "pa"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1021",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1021",
+    "active": true,
+    "period": {
+     "start": "2024-04-10"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1021",
+     "display": "Ximena Yilmaz"
+    },
+    "organization": {
+     "reference": "Organization/org-emer",
+     "display": "Emergency"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "https://triad.example/fhir/CodeSystem/staff-role",
+        "code": "moa",
+        "display": "Medical office assistant"
+       }
+      ],
+      "text": "Medical office assistant"
+     }
+    ],
+    "location": [
+     {
+      "reference": "Location/loc-desk-er",
+      "display": "Emergency Registration Desk"
+     }
+    ],
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "ext. 2120",
+      "use": "work"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1022",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1022",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1022"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Garcia",
+      "given": [
+       "Eva"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "eva.garcia@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2022",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "tl",
+        "display": "tl"
+       }
+      ],
+      "text": "tl"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/moa-certificate",
+        "value": "MOA-4793"
+       }
+      ],
+      "code": {
+       "text": "Medical office assistant certificate"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1022",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1022",
+    "active": true,
+    "period": {
+     "start": "2009-08-20"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1022",
+     "display": "Eva Garcia"
+    },
+    "organization": {
+     "reference": "Organization/org-fammed",
+     "display": "Family Medicine"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "https://triad.example/fhir/CodeSystem/staff-role",
+        "code": "moa",
+        "display": "Medical office assistant"
+       }
+      ],
+      "text": "Medical office assistant"
+     }
+    ],
+    "location": [
+     {
+      "reference": "Location/loc-desk-fammed",
+      "display": "Family Medicine Desk"
+     }
+    ],
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "ext. 2121",
+      "use": "work"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1023",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1023",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1023"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Chen",
+      "given": [
+       "Liam"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "liam.chen@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2023",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "pa",
+        "display": "pa"
+       }
+      ],
+      "text": "pa"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1023",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1023",
+    "active": true,
+    "period": {
+     "start": "2022-08-18"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1023",
+     "display": "Liam Chen"
+    },
+    "organization": {
+     "reference": "Organization/org-card",
+     "display": "Cardiology"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "https://triad.example/fhir/CodeSystem/staff-role",
+        "code": "moa",
+        "display": "Medical office assistant"
+       }
+      ],
+      "text": "Medical office assistant"
+     }
+    ],
+    "location": [
+     {
+      "reference": "Location/loc-desk-card",
+      "display": "Cardiology Desk"
+     }
+    ],
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "ext. 2122",
+      "use": "work"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1024",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1024",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1024"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Dlamini",
+      "given": [
+       "Samir"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "samir.dlamini@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2024",
+      "use": "work"
+     }
+    ],
+    "gender": "male",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1024",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1024",
+    "active": true,
+    "period": {
+     "start": "2019-06-20"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "organization": {
+     "reference": "Organization/org-front",
+     "display": "Front Office"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "https://triad.example/fhir/CodeSystem/staff-role",
+        "code": "moa",
+        "display": "Medical office assistant"
+       }
+      ],
+      "text": "Medical office assistant"
+     }
+    ],
+    "location": [
+     {
+      "reference": "Location/loc-desk-main",
+      "display": "Main Front Desk"
+     }
+    ],
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "ext. 2123",
+      "use": "work"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Practitioner/prac-e1025",
+   "resource": {
+    "resourceType": "Practitioner",
+    "id": "prac-e1025",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/employee",
+      "value": "E1025"
+     }
+    ],
+    "active": true,
+    "name": [
+     {
+      "use": "official",
+      "family": "Dubois",
+      "given": [
+       "Quinn"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "email",
+      "value": "quinn.dubois@triad-general.example",
+      "use": "work"
+     },
+     {
+      "system": "phone",
+      "value": "+1-508-555-2025",
+      "use": "work"
+     }
+    ],
+    "gender": "female",
+    "communication": [
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "en",
+        "display": "en"
+       }
+      ],
+      "text": "en"
+     },
+     {
+      "coding": [
+       {
+        "system": "urn:ietf:bcp:47",
+        "code": "ar",
+        "display": "ar"
+       }
+      ],
+      "text": "ar"
+     }
+    ],
+    "qualification": [
+     {
+      "identifier": [
+       {
+        "system": "https://triad.example/fhir/sid/moa-certificate",
+        "value": "MOA-5025"
+       }
+      ],
+      "code": {
+       "text": "Medical office assistant certificate"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/PractitionerRole/role-e1025",
+   "resource": {
+    "resourceType": "PractitionerRole",
+    "id": "role-e1025",
+    "active": true,
+    "period": {
+     "start": "2013-12-14"
+    },
+    "practitioner": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "organization": {
+     "reference": "Organization/org-front",
+     "display": "Front Office"
+    },
+    "code": [
+     {
+      "coding": [
+       {
+        "system": "https://triad.example/fhir/CodeSystem/staff-role",
+        "code": "moa",
+        "display": "Medical office assistant"
+       }
+      ],
+      "text": "Medical office assistant"
+     }
+    ],
+    "location": [
+     {
+      "reference": "Location/loc-desk-main",
+      "display": "Main Front Desk"
+     }
+    ],
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "ext. 2124",
+      "use": "work"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Patient/pat-elena-marsh",
+   "resource": {
+    "resourceType": "Patient",
+    "id": "pat-elena-marsh",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/mrn",
+      "value": "MRN-000001",
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+         "code": "MR",
+         "display": "Medical record number"
+        }
+       ],
+       "text": "Medical record number"
+      }
+     },
+     {
+      "system": "https://fhir.infoway-inforoute.ca/NamingSystem/ca-bc-patient-healthcare-id",
+      "value": "9995267502",
+      "type": {
+       "text": "BC Personal Health Number (synthetic)"
+      }
+     }
+    ],
+    "name": [
+     {
+      "use": "official",
+      "family": "Marsh",
+      "given": [
+       "Elena"
+      ]
+     }
+    ],
+    "telecom": [
+     {
+      "system": "phone",
+      "value": "+1-508-555-0142",
+      "use": "mobile"
+     }
+    ],
+    "gender": "female",
+    "birthDate": "1971-05-14",
+    "address": [
+     {
+      "line": [
+       "42 Elm Street"
+      ],
+      "city": "Worcester",
+      "state": "MA",
+      "postalCode": "01609",
+      "country": "US"
+     }
+    ],
+    "communication": [
+     {
+      "language": {
+       "coding": [
+        {
+         "system": "urn:ietf:bcp:47",
+         "code": "en",
+         "display": "English"
+        }
+       ],
+       "text": "English"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Medication/med-amlodipine-5mg",
+   "resource": {
+    "resourceType": "Medication",
+    "id": "med-amlodipine-5mg",
+    "code": {
+     "coding": [
+      {
+       "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+       "code": "197361",
+       "display": "Amlodipine 5 MG Oral Tablet"
+      }
+     ],
+     "text": "Amlodipine 5 MG Oral Tablet"
+    },
+    "form": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "385055001",
+       "display": "Tablet"
+      }
+     ],
+     "text": "Tablet"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Encounter/enc-elena-2025-08-20",
+   "resource": {
+    "resourceType": "Encounter",
+    "id": "enc-elena-2025-08-20",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/encounter",
+      "value": "ENC-ELENA-2025-08-20"
+     }
+    ],
+    "status": "finished",
+    "class": {
+     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+     "code": "AMB",
+     "display": "ambulatory"
+    },
+    "type": [
+     {
+      "text": "Blood pressure check"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "participant": [
+     {
+      "individual": {
+       "reference": "Practitioner/prac-e1006",
+       "display": "Lucas Brennan"
+      }
+     }
+    ],
+    "period": {
+     "start": "2025-08-20T09:30:00-04:00",
+     "end": "2025-08-20T10:00:00-04:00"
+    },
+    "reasonCode": [
+     {
+      "text": "Blood pressure check"
+     }
+    ],
+    "location": [
+     {
+      "location": {
+       "reference": "Location/loc-card-401",
+       "display": "Cardiology Room 401"
+      },
+      "period": {
+       "start": "2025-08-20T09:30:00-04:00",
+       "end": "2025-08-20T10:00:00-04:00"
+      }
+     }
+    ],
+    "serviceProvider": {
+     "reference": "Organization/org-card",
+     "display": "Cardiology"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Encounter/enc-elena-2026-10-02",
+   "resource": {
+    "resourceType": "Encounter",
+    "id": "enc-elena-2026-10-02",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/encounter",
+      "value": "ENC-ELENA-2026-10-02"
+     }
+    ],
+    "status": "finished",
+    "class": {
+     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+     "code": "AMB",
+     "display": "ambulatory"
+    },
+    "type": [
+     {
+      "text": "Penicillin allergy test"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "participant": [
+     {
+      "individual": {
+       "reference": "Practitioner/prac-e1005",
+       "display": "Amara Okafor"
+      }
+     }
+    ],
+    "period": {
+     "start": "2026-10-02T10:00:00-04:00",
+     "end": "2026-10-02T11:30:00-04:00"
+    },
+    "reasonCode": [
+     {
+      "text": "Penicillin allergy test"
+     }
+    ],
+    "location": [
+     {
+      "location": {
+       "reference": "Location/loc-fammed-room1",
+       "display": "Family Medicine Room 1"
+      },
+      "period": {
+       "start": "2026-10-02T10:00:00-04:00",
+       "end": "2026-10-02T11:30:00-04:00"
+      }
+     }
+    ],
+    "serviceProvider": {
+     "reference": "Organization/org-fammed",
+     "display": "Family Medicine"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-elena-2019-06-12",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-elena-2019-06-12",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-ELENA-2019-06-12"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Patient"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "PHONE",
+        "display": "Phone"
+       }
+      ],
+      "text": "Phone"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "sent": "2019-06-12T10:15:00-04:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Phone call. The patient says that she had a rash after penicillin as a child."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-elena-2024-03-05",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-elena-2024-03-05",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-ELENA-2024-03-05"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "OtherClinic"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "sent": "2024-03-05T14:00:00-05:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Records copied from Lakeside Family Clinic. The records list a penicillin allergy."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-elena-2025-08-20",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-elena-2025-08-20",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-ELENA-2025-08-20"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "FACE",
+        "display": "Face"
+       }
+      ],
+      "text": "Face"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "sent": "2025-08-20T10:05:00-04:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1006",
+     "display": "Lucas Brennan"
+    },
+    "payload": [
+     {
+      "contentString": "Visit note. Blood pressure is high on two readings. Diagnosis: essential hypertension. Start amlodipine 5 mg daily. Order a lipid panel."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-elena-2025-08-22",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-elena-2025-08-22",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-ELENA-2025-08-22"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Lab"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "sent": "2025-08-22T16:00:00-04:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1006",
+     "display": "Lucas Brennan"
+    },
+    "payload": [
+     {
+      "contentString": "Lipid panel result received. LDL cholesterol is 112 mg/dL."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-elena-2026-10-02",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-elena-2026-10-02",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-ELENA-2026-10-02"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "FACE",
+        "display": "Face"
+       }
+      ],
+      "text": "Face"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "sent": "2026-10-02T11:40:00-04:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1005",
+     "display": "Amara Okafor"
+    },
+    "payload": [
+     {
+      "contentString": "Visit note. The penicillin skin test and the oral challenge are negative. The patient is not allergic to penicillin."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/AllergyIntolerance/ai-elena-penicillin",
+   "resource": {
+    "resourceType": "AllergyIntolerance",
+    "id": "ai-elena-penicillin",
+    "meta": {
+     "versionId": "1",
+     "lastUpdated": "2019-06-12T10:15:00-04:00"
+    },
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+       "code": "active",
+       "display": "Active"
+      }
+     ],
+     "text": "Active"
+    },
+    "verificationStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+       "code": "unconfirmed",
+       "display": "Unconfirmed"
+      }
+     ],
+     "text": "Unconfirmed"
+    },
+    "type": "allergy",
+    "category": [
+     "medication"
+    ],
+    "criticality": "low",
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "91936005",
+       "display": "Allergy to penicillin"
+      }
+     ],
+     "text": "Allergy to penicillin"
+    },
+    "patient": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "recordedDate": "2019-06-12T10:15:00-04:00",
+    "recorder": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "note": [
+     {
+      "text": "Patient report: rash after penicillin as a child."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/AllergyIntolerance/ai-elena-penicillin",
+   "resource": {
+    "resourceType": "AllergyIntolerance",
+    "id": "ai-elena-penicillin",
+    "meta": {
+     "versionId": "2",
+     "lastUpdated": "2024-03-05T14:00:00-05:00"
+    },
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+       "code": "active",
+       "display": "Active"
+      }
+     ],
+     "text": "Active"
+    },
+    "verificationStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+       "code": "unconfirmed",
+       "display": "Unconfirmed"
+      }
+     ],
+     "text": "Unconfirmed"
+    },
+    "type": "allergy",
+    "category": [
+     "medication"
+    ],
+    "criticality": "low",
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "91936005",
+       "display": "Allergy to penicillin"
+      }
+     ],
+     "text": "Allergy to penicillin"
+    },
+    "patient": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "recordedDate": "2019-06-12T10:15:00-04:00",
+    "recorder": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "note": [
+     {
+      "text": "Penicillin allergy (copied from Lakeside Family Clinic)."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/AllergyIntolerance/ai-elena-penicillin",
+   "resource": {
+    "resourceType": "AllergyIntolerance",
+    "id": "ai-elena-penicillin",
+    "meta": {
+     "versionId": "3",
+     "lastUpdated": "2026-10-02T11:30:00-04:00"
+    },
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+       "code": "inactive",
+       "display": "Inactive"
+      }
+     ],
+     "text": "Inactive"
+    },
+    "verificationStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+       "code": "refuted",
+       "display": "Refuted"
+      }
+     ],
+     "text": "Refuted"
+    },
+    "type": "allergy",
+    "category": [
+     "medication"
+    ],
+    "criticality": "low",
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "91936005",
+       "display": "Allergy to penicillin"
+      }
+     ],
+     "text": "Allergy to penicillin"
+    },
+    "patient": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "recordedDate": "2019-06-12T10:15:00-04:00",
+    "recorder": {
+     "reference": "Practitioner/prac-e1005",
+     "display": "Amara Okafor"
+    },
+    "note": [
+     {
+      "text": "Not allergic. Allergy test negative."
+     }
+    ],
+    "encounter": {
+     "reference": "Encounter/enc-elena-2026-10-02"
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Observation/obs-elena-bp-2025-08-20",
+   "resource": {
+    "resourceType": "Observation",
+    "id": "obs-elena-bp-2025-08-20",
+    "status": "final",
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+        "code": "vital-signs",
+        "display": "Vital Signs"
+       }
+      ],
+      "text": "Vital Signs"
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "85354-9",
+       "display": "Blood pressure panel with all children optional"
+      }
+     ],
+     "text": "Blood pressure panel with all children optional"
+    },
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "encounter": {
+     "reference": "Encounter/enc-elena-2025-08-20"
+    },
+    "effectiveDateTime": "2025-08-20T09:40:00-04:00",
+    "component": [
+     {
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "8480-6",
+         "display": "Systolic blood pressure"
+        }
+       ],
+       "text": "Systolic blood pressure"
+      },
+      "valueQuantity": {
+       "value": 152,
+       "unit": "mm[Hg]",
+       "system": "http://unitsofmeasure.org",
+       "code": "mm[Hg]"
+      }
+     },
+     {
+      "code": {
+       "coding": [
+        {
+         "system": "http://loinc.org",
+         "code": "8462-4",
+         "display": "Diastolic blood pressure"
+        }
+       ],
+       "text": "Diastolic blood pressure"
+      },
+      "valueQuantity": {
+       "value": 96,
+       "unit": "mm[Hg]",
+       "system": "http://unitsofmeasure.org",
+       "code": "mm[Hg]"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Condition/cond-elena-hypertension",
+   "resource": {
+    "resourceType": "Condition",
+    "id": "cond-elena-hypertension",
+    "clinicalStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+       "code": "active",
+       "display": "Active"
+      }
+     ],
+     "text": "Active"
+    },
+    "verificationStatus": {
+     "coding": [
+      {
+       "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+       "code": "confirmed",
+       "display": "Confirmed"
+      }
+     ],
+     "text": "Confirmed"
+    },
+    "severity": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "6736007",
+       "display": "Moderate"
+      }
+     ],
+     "text": "Moderate"
+    },
+    "code": {
+     "coding": [
+      {
+       "system": "http://snomed.info/sct",
+       "code": "59621000",
+       "display": "Essential hypertension"
+      }
+     ],
+     "text": "Essential hypertension"
+    },
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "encounter": {
+     "reference": "Encounter/enc-elena-2025-08-20"
+    },
+    "onsetDateTime": "2025-08-20T09:40:00-04:00",
+    "recordedDate": "2025-08-20T10:00:00-04:00",
+    "recorder": {
+     "reference": "Practitioner/prac-e1006",
+     "display": "Lucas Brennan"
+    },
+    "note": [
+     {
+      "text": "Essential hypertension. Two high readings."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/MedicationRequest/mr-elena-amlodipine",
+   "resource": {
+    "resourceType": "MedicationRequest",
+    "id": "mr-elena-amlodipine",
+    "status": "active",
+    "intent": "order",
+    "medicationReference": {
+     "reference": "Medication/med-amlodipine-5mg",
+     "display": "Amlodipine 5 MG Oral Tablet"
+    },
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "encounter": {
+     "reference": "Encounter/enc-elena-2025-08-20"
+    },
+    "authoredOn": "2025-08-20T10:00:00-04:00",
+    "requester": {
+     "reference": "Practitioner/prac-e1006",
+     "display": "Lucas Brennan"
+    },
+    "dosageInstruction": [
+     {
+      "text": "5 mg by mouth once a day",
+      "timing": {
+       "repeat": {
+        "frequency": 1,
+        "period": 1,
+        "periodUnit": "d"
+       }
+      },
+      "doseAndRate": [
+       {
+        "doseQuantity": {
+         "value": 5,
+         "unit": "mg",
+         "system": "http://unitsofmeasure.org",
+         "code": "mg"
+        }
+       }
+      ]
+     }
+    ],
+    "note": [
+     {
+      "text": "Start amlodipine 5 mg daily."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/ServiceRequest/sr-elena-lipid-panel",
+   "resource": {
+    "resourceType": "ServiceRequest",
+    "id": "sr-elena-lipid-panel",
+    "status": "completed",
+    "intent": "order",
+    "priority": "routine",
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://snomed.info/sct",
+        "code": "108252007",
+        "display": "Laboratory procedure"
+       }
+      ],
+      "text": "Laboratory procedure"
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "57698-3",
+       "display": "Lipid panel with direct LDL - Serum or Plasma"
+      }
+     ],
+     "text": "Lipid panel with direct LDL - Serum or Plasma"
+    },
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "encounter": {
+     "reference": "Encounter/enc-elena-2025-08-20"
+    },
+    "authoredOn": "2025-08-20T10:00:00-04:00",
+    "requester": {
+     "reference": "Practitioner/prac-e1006",
+     "display": "Lucas Brennan"
+    },
+    "specimen": [
+     {
+      "display": "Serum"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/DiagnosticReport/dr-elena-lipid-panel",
+   "resource": {
+    "resourceType": "DiagnosticReport",
+    "id": "dr-elena-lipid-panel",
+    "status": "final",
+    "basedOn": [
+     {
+      "reference": "ServiceRequest/sr-elena-lipid-panel"
+     }
+    ],
+    "category": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+        "code": "LAB",
+        "display": "Laboratory"
+       }
+      ],
+      "text": "Laboratory"
+     }
+    ],
+    "code": {
+     "coding": [
+      {
+       "system": "http://loinc.org",
+       "code": "57698-3",
+       "display": "Lipid panel with direct LDL - Serum or Plasma"
+      }
+     ],
+     "text": "Lipid panel with direct LDL - Serum or Plasma"
+    },
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "encounter": {
+     "reference": "Encounter/enc-elena-2025-08-20"
+    },
+    "effectiveDateTime": "2025-08-21T08:00:00-04:00",
+    "issued": "2025-08-22T15:30:00-04:00",
+    "conclusion": "LDL cholesterol is 112 mg/dL. It is in the target range."
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Procedure/proc-elena-penicillin-test",
+   "resource": {
+    "resourceType": "Procedure",
+    "id": "proc-elena-penicillin-test",
+    "status": "completed",
+    "code": {
+     "coding": [
+      {
+       "system": "https://triad.example/fhir/CodeSystem/local",
+       "code": "penicillin-allergy-test",
+       "display": "Penicillin skin test and oral challenge"
+      }
+     ],
+     "text": "Penicillin skin test and oral challenge"
+    },
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "encounter": {
+     "reference": "Encounter/enc-elena-2026-10-02"
+    },
+    "performedPeriod": {
+     "start": "2026-10-02T10:10:00-04:00",
+     "end": "2026-10-02T11:20:00-04:00"
+    },
+    "performer": [
+     {
+      "actor": {
+       "reference": "Practitioner/prac-e1005",
+       "display": "Amara Okafor"
+      }
+     }
+    ],
+    "outcome": {
+     "text": "Negative. No reaction."
+    }
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-pen-1",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-pen-1",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "AllergyIntolerance/ai-elena-penicillin/_history/1"
+     }
+    ],
+    "recorded": "2019-06-12T10:15:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2019-06-12"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-pen-2",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-pen-2",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "AllergyIntolerance/ai-elena-penicillin/_history/2"
+     }
+    ],
+    "recorded": "2024-03-05T14:00:00-05:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2024-03-05"
+      }
+     },
+     {
+      "role": "revision",
+      "what": {
+       "reference": "AllergyIntolerance/ai-elena-penicillin/_history/1"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-bp",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-bp",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "Observation/obs-elena-bp-2025-08-20"
+     }
+    ],
+    "recorded": "2025-08-20T10:05:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1006",
+       "display": "Lucas Brennan"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2025-08-20"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-hypertension",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-hypertension",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Decision"
+     }
+    ],
+    "target": [
+     {
+      "reference": "Condition/cond-elena-hypertension"
+     }
+    ],
+    "recorded": "2025-08-20T10:05:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1006",
+       "display": "Lucas Brennan"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2025-08-20"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-amlodipine",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-amlodipine",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Decision"
+     }
+    ],
+    "target": [
+     {
+      "reference": "MedicationRequest/mr-elena-amlodipine"
+     }
+    ],
+    "recorded": "2025-08-20T10:05:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1006",
+       "display": "Lucas Brennan"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2025-08-20"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-lipid-order",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-lipid-order",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Decision"
+     }
+    ],
+    "target": [
+     {
+      "reference": "ServiceRequest/sr-elena-lipid-panel"
+     }
+    ],
+    "recorded": "2025-08-20T10:05:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1006",
+       "display": "Lucas Brennan"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2025-08-20"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-lipid-report",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-lipid-report",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "DiagnosticReport/dr-elena-lipid-panel"
+     }
+    ],
+    "recorded": "2025-08-22T16:00:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1006",
+       "display": "Lucas Brennan"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2025-08-22"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-penicillin-test",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-penicillin-test",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Decision"
+     }
+    ],
+    "target": [
+     {
+      "reference": "Procedure/proc-elena-penicillin-test"
+     }
+    ],
+    "recorded": "2026-10-02T11:40:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1005",
+       "display": "Amara Okafor"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2026-10-02"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-elena-pen-3",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-elena-pen-3",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Decision"
+     }
+    ],
+    "target": [
+     {
+      "reference": "AllergyIntolerance/ai-elena-penicillin/_history/3"
+     }
+    ],
+    "recorded": "2026-10-02T11:40:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1005",
+       "display": "Amara Okafor"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-elena-2026-10-02"
+      }
+     },
+     {
+      "role": "revision",
+      "what": {
+       "reference": "AllergyIntolerance/ai-elena-penicillin/_history/2"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-elena",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-elena",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-ELENA"
+     }
+    ],
+    "status": "active",
+    "name": "Elena Marsh care team",
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "period": {
+     "start": "2025-08-20T09:30:00-04:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1005",
+       "display": "Amara Okafor"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1006",
+       "display": "Lucas Brennan"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-034ccd79",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-034ccd79",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-034CCD79"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/034ccd79-62c4-ae8c-fe96-9f67dd6d7207"
+    },
+    "period": {
+     "start": "2026-10-10T13:57:57+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999952895"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-068177c1",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-068177c1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-068177C1"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/068177c1-8d2f-d13f-6a1d-227d04383923"
+    },
+    "period": {
+     "start": "2026-04-14T06:04:17+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999980193"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-091a4b71",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-091a4b71",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-091A4B71"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/091a4b71-31ee-8d39-c0a6-c021b3951aed"
+    },
+    "period": {
+     "start": "2026-04-12T03:16:30+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999994392"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-13cca394",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-13cca394",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-13CCA394"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/13cca394-008d-dcfa-eac3-fc130583f321"
+    },
+    "period": {
+     "start": "2026-05-31T16:10:15+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999948794"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-141a1044",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-141a1044",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-141A1044"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/141a1044-5626-4d31-2f1b-eee5da610008"
+    },
+    "period": {
+     "start": "2026-10-08T01:48:59+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999986190"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-1c51694e",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-1c51694e",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-1C51694E"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/1c51694e-3b0d-eb59-c08c-62414aeba810"
+    },
+    "period": {
+     "start": "2026-08-15T12:52:12+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999990598"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-1d670d3c",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-1d670d3c",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-1D670D3C"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/1d670d3c-f290-52f4-9409-aaffd1eb59f5"
+    },
+    "period": {
+     "start": "2024-03-27T04:27:13+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999998997"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-2571ad10",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-2571ad10",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-2571AD10"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/2571ad10-0831-bf71-4731-6f7c298b20c7"
+    },
+    "period": {
+     "start": "2018-12-03T09:10:23+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999952390"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-2b9f45d6",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-2b9f45d6",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-2B9F45D6"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/2b9f45d6-b742-8a68-3a22-b9ff8df93521"
+    },
+    "period": {
+     "start": "2026-04-10T16:08:05+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999964494"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-2d2b5b8c",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-2d2b5b8c",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-2D2B5B8C"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/2d2b5b8c-4a13-4ca9-c867-64c8dbed0471"
+    },
+    "period": {
+     "start": "2026-03-01T07:10:55+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999992396"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-4091b9f5",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-4091b9f5",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-4091B9F5"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/4091b9f5-1779-c891-ea3d-0ef10828bcbd"
+    },
+    "period": {
+     "start": "2026-07-08T21:21:39+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999990697"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-49dfe873",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-49dfe873",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-49DFE873"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/49dfe873-b7aa-0c75-5a43-4bcc125bc3e9"
+    },
+    "period": {
+     "start": "2026-08-19T00:26:52+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999999698"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-4b286419",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-4b286419",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-4B286419"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/4b286419-9530-1f2f-b9f9-638a40f29024"
+    },
+    "period": {
+     "start": "2026-09-12T09:45:54+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999991596"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-55612fe8",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-55612fe8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-55612FE8"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/55612fe8-9071-4a97-8e4c-8cc653c8394c"
+    },
+    "period": {
+     "start": "2026-08-28T06:22:45+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999998294"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1011",
+       "display": "Elif Sato"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-574b44d2",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-574b44d2",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-574B44D2"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/574b44d2-2cda-01bd-6c1e-c5f80869b83e"
+    },
+    "period": {
+     "start": "2026-09-19T15:47:13+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999985390"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-65cc56ef",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-65cc56ef",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-65CC56EF"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/65cc56ef-1ffc-bfac-aa6f-fe828e6da128"
+    },
+    "period": {
+     "start": "1980-02-03T05:22:01+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999963991"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-6c669866",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-6c669866",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-6C669866"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/6c669866-7041-1992-2938-40ff2a4520f7"
+    },
+    "period": {
+     "start": "1997-10-04T02:43:54+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999882399"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1008",
+       "display": "Farid Bauer"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-815ff645",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-815ff645",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-815FF645"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/815ff645-c396-834b-d0ee-0620a11710cf"
+    },
+    "period": {
+     "start": "2026-08-13T20:13:13+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999992792"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-868f2c18",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-868f2c18",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-868F2C18"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/868f2c18-1210-e4f6-d471-4b0b2e370225"
+    },
+    "period": {
+     "start": "2025-03-19T04:02:46+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999991893"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-89316910",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-89316910",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-89316910"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/89316910-0675-d580-ea7d-2b516045ad3e"
+    },
+    "period": {
+     "start": "2025-12-28T14:39:18+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999981399"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-96273e26",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-96273e26",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-96273E26"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/96273e26-32fc-3db7-aacb-bb44801d336e"
+    },
+    "period": {
+     "start": "2026-04-26T13:02:24+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996090"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-a67f6014",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-a67f6014",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-A67F6014"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/a67f6014-54d1-b630-8d51-954d2d26bd42"
+    },
+    "period": {
+     "start": "2026-07-14T22:56:59+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999994491"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-ae3546fc",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-ae3546fc",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-AE3546FC"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/ae3546fc-4eff-79b7-276e-33c7b1beb735"
+    },
+    "period": {
+     "start": "2026-07-02T02:03:07+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999999995"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-b11899dd",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-b11899dd",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-B11899DD"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/b11899dd-7755-73bd-cc39-d6eea54d15a1"
+    },
+    "period": {
+     "start": "2026-02-09T23:30:23+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999991695"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-b3d9fe5d",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-b3d9fe5d",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-B3D9FE5D"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/b3d9fe5d-04e1-dc3e-ceef-0719f236eff6"
+    },
+    "period": {
+     "start": "2025-04-24T12:20:15+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999963397"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-b6bb2907",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-b6bb2907",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-B6BB2907"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/b6bb2907-5188-8689-8b76-341664e59cb2"
+    },
+    "period": {
+     "start": "2026-07-02T13:49:37+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999988196"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-bae49511",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-bae49511",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-BAE49511"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/bae49511-dd8c-d6df-e7be-b77c768bedcc"
+    },
+    "period": {
+     "start": "2026-09-03T12:21:49+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999999193"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-bb494bf8",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-bb494bf8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-BB494BF8"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/bb494bf8-339d-d47a-e819-b9cd2a11f248"
+    },
+    "period": {
+     "start": "2026-04-22T23:34:33+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999967893"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-bd9dfdd1",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-bd9dfdd1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-BD9DFDD1"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/bd9dfdd1-aebf-018a-774f-e531d29678e5"
+    },
+    "period": {
+     "start": "2026-06-04T04:21:54+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996793"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-c4ff5772",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-c4ff5772",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-C4FF5772"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/c4ff5772-cb90-f9bd-9f85-4542e0ebf5fd"
+    },
+    "period": {
+     "start": "2026-03-05T23:01:41+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999957498"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-cc63c2f1",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-cc63c2f1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-CC63C2F1"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/cc63c2f1-1db0-28cb-0324-8be7310ddadd"
+    },
+    "period": {
+     "start": "2026-06-22T20:11:18+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999942094"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-d1974b52",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-d1974b52",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-D1974B52"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/d1974b52-f588-45cf-5c27-9e5b1e47d889"
+    },
+    "period": {
+     "start": "2026-09-19T08:54:47+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999979799"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-d8bb1b82",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-d8bb1b82",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-D8BB1B82"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/d8bb1b82-8deb-201a-0fe8-308f79ce31a8"
+    },
+    "period": {
+     "start": "2025-09-22T04:59:32+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999994491"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-dacd76f7",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-dacd76f7",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-DACD76F7"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/dacd76f7-1058-504d-47e9-c2cebc1ac573"
+    },
+    "period": {
+     "start": "2026-07-24T12:06:30+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999995191"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-dbfd10e4",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-dbfd10e4",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-DBFD10E4"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/dbfd10e4-5882-fd43-1dfe-6b95d943bd1b"
+    },
+    "period": {
+     "start": "2024-07-10T02:32:55+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999975094"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-e34fa1e8",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-e34fa1e8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-E34FA1E8"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/e34fa1e8-0cbc-0d22-89d4-6996de874bd8"
+    },
+    "period": {
+     "start": "2026-10-07T03:22:09+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999965293"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-e5863ab8",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-e5863ab8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-E5863AB8"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/e5863ab8-893d-3e6b-3da4-b903413869e2"
+    },
+    "period": {
+     "start": "2024-08-29T05:55:00+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999993295"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-e867c605",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-e867c605",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-E867C605"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/e867c605-5382-756c-1d1f-a012fbc8d3b5"
+    },
+    "period": {
+     "start": "2026-03-18T03:37:09+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999997890"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-ec084d82",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-ec084d82",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-EC084D82"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/ec084d82-e517-88af-cc1d-a0881be0f970"
+    },
+    "period": {
+     "start": "2026-02-13T10:16:22+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999962993"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1014",
+       "display": "Farid Castillo"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-ef74fec9",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-ef74fec9",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-EF74FEC9"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/ef74fec9-541e-fab6-90f5-540f1e951194"
+    },
+    "period": {
+     "start": "2026-06-16T22:36:11+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999981795"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/CareTeam/ct-syn-f75ba0c0",
+   "resource": {
+    "resourceType": "CareTeam",
+    "id": "ct-syn-f75ba0c0",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/care-team",
+      "value": "CT-SYN-F75BA0C0"
+     }
+    ],
+    "status": "active",
+    "name": "Generated care team (latest visit)",
+    "subject": {
+     "reference": "Patient/f75ba0c0-3571-3d63-e40b-fbd8571ce025"
+    },
+    "period": {
+     "start": "1989-08-18T01:36:21+00:00"
+    },
+    "participant": [
+     {
+      "role": [
+       {
+        "text": "Doctor"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999981894"
+      }
+     },
+     {
+      "role": [
+       {
+        "text": "Nurse"
+       }
+      ],
+      "member": {
+       "reference": "Practitioner/prac-e1013",
+       "display": "Felix Moreau"
+      }
+     }
+    ],
+    "managingOrganization": [
+     {
+      "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  }
+ ]
+}
