@@ -95,7 +95,7 @@ export interface RecordResult { messageId: number; assertions: AssertionView[]; 
 export interface CodePreset { category: Category; code: string; codeSystem: string; display: string; details: Record<string, string | number | null>; }
 
 // Chat
-export interface Card { rank: number; assertion: AssertionView; supersedes: AssertionView[]; } // supersedes: newest first; empty for a patient
+export interface Card { rank: number; assertion: AssertionView; supersedes: AssertionView[]; } // supersedes: oldest first; empty for a patient
 export interface ChatTurn {
   id: number; seq: number; speaker: 'User' | 'Assistant'; text: string; createdAt: string;
   kind: 'ask' | 'tell' | null;  // null for a user turn
