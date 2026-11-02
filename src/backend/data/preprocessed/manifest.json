@@ -1,0 +1,51 @@
+{
+  "source": {
+    "name": "Synthea 100 Sample Synthetic Patient Records, FHIR R4",
+    "url": "https://raw.githubusercontent.com/synthetichealth/synthea-sample-data/84f59805d481b9f01f3141ef39e68bdbbeb80132/downloads/latest/synthea_sample_data_fhir_latest.zip",
+    "commit": "84f59805d481b9f01f3141ef39e68bdbbeb80132",
+    "zipSha256": "66141b772671452f590f9b7bb999eb201f1f16beb94a84ab0885ed723b36b315",
+    "zipBytes": 24052464,
+    "bundleFiles": 114,
+    "citation": "Walonoski J, et al. Synthea: An approach, method, and software mechanism for generating synthetic patients and the synthetic electronic health care record. JAMIA 2018;25(3):230-238. doi:10.1093/jamia/ocx079"
+  },
+  "output": {
+    "file": "synthea_r4.ndjson.gz",
+    "ndjsonSha256": "9ea0b93775b96870997c340a4dc88917a292727b681bd123a01764d60e75c230",
+    "resources": 81957,
+    "order": "Bundle files in name order; entries in bundle order."
+  },
+  "keptCounts": {
+    "AllergyIntolerance": 101,
+    "CarePlan": 327,
+    "CareTeam": 327,
+    "Condition": 3418,
+    "Device": 507,
+    "DiagnosticReport": 9281,
+    "DocumentReference": 5087,
+    "Encounter": 5087,
+    "ImagingStudy": 377,
+    "Immunization": 1521,
+    "Location": 268,
+    "Medication": 571,
+    "MedicationAdministration": 571,
+    "MedicationRequest": 3221,
+    "Observation": 34024,
+    "Organization": 267,
+    "Patient": 112,
+    "Practitioner": 267,
+    "PractitionerRole": 267,
+    "Procedure": 13737,
+    "Provenance": 112,
+    "SupplyDelivery": 2507
+  },
+  "excludedCounts": {
+    "Claim": 8308,
+    "ExplanationOfBenefit": 8308
+  },
+  "excludedNote": "Billing resources are not kept. Provenance resources still reference them. The reader accepts references to excluded types.",
+  "droppedWrappers": {
+    "note": "Bundle entry fullUrl and request are not kept. They can be rebuilt from the resource.",
+    "entriesWithRequest": 98573
+  },
+  "duplicateResourcesSkipped": 0
+}
