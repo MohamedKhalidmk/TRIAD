@@ -195,7 +195,7 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
   4. Recommend a salbutamol inhaler. (Recommendation)
   5. Move the patient to "ER Bed 2".
   6. Ask the Care Assistant: "Any allergies?"
-- **Expected result:** The chart shows the new items with the nurse as author. The answer cites the allergy records with their authors.
+- **Expected result:** The chart shows the new items with the nurse as author. Patient B has no allergy on record. The answer says that no allergy is recorded, and it cites no item.
 
 ### Step 4. Physician (doctor)
 
@@ -307,6 +307,8 @@ This step shows the main idea of TRIAD. A long record does not make the assistan
 ---
 
 ## 6. How to check the flows
+
+The API contract for these flows is in `doc/api.md`.
 
 There are four ways to check the flows. The first way is the fastest.
 
