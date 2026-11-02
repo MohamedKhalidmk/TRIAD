@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate the TRIAD ER diagram as a two-page draw.io file.
+"""Generate the TRIAD ER diagram as a one-page draw.io file.
 
-Page 1: the clinical core and the authorship model (the professor's comments).
-Page 2: the agent layer (chat, citations), the audit log and the lineage store.
+The page shows the clinical core, the authorship model (the professor's comments),
+the agent layer (chat, citations), the audit log and the lineage store.
 
 The diagram is a tree: there is exactly one path between any two entity sets.
 Only the unary relationship Supersedes points back to its own entity set.
@@ -10,7 +10,7 @@ The script checks this rule and stops if a relationship closes a loop.
 
 Make the diagram again after a model change:
     python3 src/backend/models/er/build_erd.py
-    drawio -x -f pdf -a --crop -o TRIAD_ERD.pdf TRIAD_ERD.drawio
+    drawio -x -f pdf --crop -o TRIAD_ERD.pdf TRIAD_ERD.drawio
 
 Notation (the same as the Milestone 2 diagram):
     box = entity; double box = weak entity; diamond = relationship;
@@ -18,7 +18,7 @@ Notation (the same as the Milestone 2 diagram):
     double oval = multivalued attribute; ovals on an oval = composite attribute;
     solid underline = key; dashed underline = partial key;
     triangle = ISA (it points toward the subtypes); crow's feet = cardinality;
-    grey = TRIAD contribution; dashed box = a copy of an entity from page 1.
+    grey = TRIAD contribution.
 """
 from __future__ import annotations
 
@@ -185,8 +185,8 @@ class Page:
 
 
 def page_core() -> Page:
-    p = Page("Core and authorship", 3300, 1980)
-    p.text("<b>TRIAD ER diagram, page 1: clinical core and authorship</b>", 40, 20, 1200, 30, size=22)
+    p = Page("TRIAD ER diagram", 3300, 2080)
+    p.text("<b>TRIAD ER diagram (Milestone 4)</b>", 40, 20, 1200, 30, size=22)
 
     # ----- The authorship chain (the professor's comment 2) -----
     p.entity("Staff", "Staff", 330, 900)
@@ -213,9 +213,9 @@ def page_core() -> Page:
                               ("Origin", 1060, 740, "plain"), ("SentAt", 760, 810, "plain"),
                               ("Text", 1080, 810, "plain")]:
         p.attr("Message", label, x, y, kind)
-    for label, x, y, kind in [("Seq", 1310, 750, "partial"), ("AssertedAt", 1390, 700, "plain"),
-                              ("Intent", 1510, 670, "plain"), ("Source", 1630, 700, "plain"),
-                              ("Verification", 1720, 750, "plain"), ("Statement", 1690, 810, "plain")]:
+    for label, x, y, kind in [("Seq", 1290, 790, "partial"), ("AssertedAt", 1320, 730, "plain"),
+                              ("Intent", 1390, 670, "plain"), ("Source", 1610, 670, "plain"),
+                              ("Verification", 1690, 730, "plain"), ("Statement", 1700, 790, "plain")]:
         p.attr("Assertion", label, x, y, kind, grey=True)
     for label, x, y, kind in [("Identifier", 1880, 750, "key"), ("Category", 1950, 700, "plain"),
                               ("Code", 2070, 670, "plain"), ("CodeSystem", 2200, 700, "plain"),
@@ -314,82 +314,72 @@ def page_core() -> Page:
                               ("Manufacturer", 2680, 1770, "plain")]:
         p.attr("Medication", label, x, y, kind)
 
-    p.legend(640, 1640, extra=["Page 2 shows the agent layer, the audit log and the lineage store."])
-    return p
-
-
-def page_agent() -> Page:
-    p = Page("Agent layer, audit and lineage", 2600, 1500)
-    p.text("<b>TRIAD ER diagram, page 2: agent layer, audit log and lineage store</b>", 40, 20, 1400, 30, size=22)
-
-    p.entity("Assertion", "Assertion", 330, 640, weak=True, grey=True, copy=True)
-    p.relation("Cites", "Cites", 640, 640, grey=True)
-    p.entity("ChatTurn", "ChatTurn", 960, 640, weak=True, grey=True)
-    p.link("Cites", "ChatTurn", "many")
-    p.link("Cites", "Assertion", "many")
-    p.attr("Cites", "Rank", 640, 750, grey=True)
-    for label, x, y, kind in [("Seq", 1180, 560, "partial"), ("Speaker", 1210, 620, "plain"),
-                              ("Text", 1200, 680, "plain"), ("CreatedAt", 1170, 740, "plain"),
-                              ("ClientTurnId", 800, 770, "plain")]:
-        p.attr("ChatTurn", label, x, y, kind, grey=True)
-
-    p.relation("Includes", "Includes", 960, 420, identifying=True, grey=True)
-    p.entity("ChatSession", "ChatSession", 960, 210, grey=True)
+    # ----- Agent layer (above Assertion) -----
+    p.entity("ChatSession", "ChatSession", 1500, 120, grey=True)
+    p.relation("Includes", "Includes", 1500, 270, identifying=True, grey=True)
+    p.entity("ChatTurn", "ChatTurn", 1500, 420, weak=True, grey=True)
+    p.relation("Cites", "Cites", 1500, 570, grey=True)
     p.link("Includes", "ChatSession", "one")
     p.link("Includes", "ChatTurn", "many")
-    for label, x, y, kind in [("Identifier", 720, 150, "key"), ("StartedAt", 720, 230, "plain"),
-                              ("Mode", 760, 300, "plain"), ("Model", 1180, 320, "plain")]:
+    p.link("Cites", "ChatTurn", "many")
+    p.link("Cites", "Assertion", "many")
+    p.attr("Cites", "Rank", 1650, 575, grey=True)
+    for label, x, y, kind in [("Identifier", 1290, 80, "key"), ("StartedAt", 1280, 140, "plain"),
+                              ("Mode", 1330, 200, "plain"), ("Model", 1690, 60, "plain")]:
         p.attr("ChatSession", label, x, y, kind, grey=True)
-    p.attr("ChatSession", "User", 1200, 150, grey=True, key="ChatUser")
-    p.attr("ChatUser", "Role", 1350, 90, grey=True)
-    p.attr("ChatUser", "Identifier", 1400, 150, grey=True)
-    p.attr("ChatSession", "Subject", 1220, 235, grey=True, key="ChatSubject")
-    p.attr("ChatSubject", "Name", 1390, 225, grey=True)
-    p.attr("ChatSubject", "DateOfBirth", 1430, 290, grey=True)
+    p.attr("ChatSession", "User", 1720, 125, grey=True, key="ChatUser")
+    p.attr("ChatUser", "Role", 1860, 90, grey=True)
+    p.attr("ChatUser", "Identifier", 1890, 150, grey=True)
+    p.attr("ChatSession", "Subject", 1720, 195, grey=True, key="ChatSubject")
+    p.attr("ChatSubject", "Name", 1870, 215, grey=True)
+    p.attr("ChatSubject", "DateOfBirth", 1860, 275, grey=True)
+    for label, x, y, kind in [("Seq", 1320, 350, "partial"), ("Speaker", 1320, 490, "plain"),
+                              ("Text", 1690, 350, "plain"), ("CreatedAt", 1700, 420, "plain"),
+                              ("ClientTurnId", 1700, 490, "plain")]:
+        p.attr("ChatTurn", label, x, y, kind, grey=True)
 
-    p.relation("InTurn", "InTurn", 960, 900)
-    p.entity("AuditEvent", "AuditEvent", 960, 1120)
+    # ----- Audit log (left of the chat) -----
+    p.relation("InTurn", "InTurn", 1200, 420)
+    p.entity("AuditEvent", "AuditEvent", 940, 420)
     p.link("InTurn", "ChatTurn", "zeroOne")
     p.link("InTurn", "AuditEvent", "many")
-    for label, x, y, kind in [("Identifier", 730, 1060, "key"), ("At", 730, 1130, "plain"),
-                              ("Action", 760, 1200, "plain"), ("Outcome", 930, 1250, "plain"),
-                              ("Path", 1100, 1250, "plain")]:
+    for label, x, y, kind in [("Identifier", 790, 330, "key"), ("At", 760, 400, "plain"),
+                              ("Action", 770, 465, "plain"), ("Outcome", 830, 530, "plain"),
+                              ("Path", 960, 310, "plain")]:
         p.attr("AuditEvent", label, x, y, kind)
-    p.attr("AuditEvent", "Actor", 1210, 1080, key="AuditActor")
-    p.attr("AuditActor", "Role", 1370, 1030)
-    p.attr("AuditActor", "Identifier", 1410, 1090)
-    p.attr("AuditEvent", "Subject", 1220, 1160, key="AuditSubject")
-    p.attr("AuditSubject", "Name", 1400, 1160)
-    p.attr("AuditSubject", "DateOfBirth", 1410, 1220)
-    p.text("Chat sessions and audit records are logs. They keep the user and the patient as values<br>"
-           "(User, Actor, Subject). The values stay correct when a row changes, and they add no loop.",
-           40, 1330, 1300, 50, size=15)
+    p.attr("AuditEvent", "Actor", 1090, 300, key="AuditActor")
+    p.attr("AuditActor", "Role", 1120, 230)
+    p.attr("AuditActor", "Identifier", 990, 230)
+    p.attr("AuditEvent", "Subject", 1010, 540, key="AuditSubject")
+    p.attr("AuditSubject", "Name", 1150, 560)
+    p.attr("AuditSubject", "DateOfBirth", 1000, 610)
 
-    # Lineage store (physical layer).
-    p.text("<b>Lineage store</b> (physical layer). It keeps every source FHIR resource as it came in,<br>"
-           "so TRIAD can link to any FHIR server with almost no data loss. Each mapped row keeps<br>"
-           "the value FhirRef (ResourceType/LogicalId/VersionId) of its source resource.",
-           1640, 80, 900, 80, size=15)
-    p.entity("FhirSource", "FhirSource", 2000, 330)
-    p.relation("HoldsResource", "Holds\nResource", 2000, 560, identifying=True)
-    p.entity("FhirResource", "FhirResource", 2000, 790, weak=True)
+    # ----- Lineage store (physical layer, a separate part of the tree) -----
+    p.entity("FhirSource", "FhirSource", 2200, 110)
+    p.relation("HoldsResource", "Holds\nResource", 2200, 295, identifying=True)
+    p.entity("FhirResource", "FhirResource", 2200, 480, weak=True)
     p.link("HoldsResource", "FhirSource", "one")
     p.link("HoldsResource", "FhirResource", "many")
-    for label, x, y, kind in [("Name", 1820, 250, "key"), ("BaseUrl", 2180, 250, "plain"),
-                              ("FhirVersion", 2220, 320, "plain"), ("RetrievedAt", 2200, 390, "plain"),
-                              ("Sha256", 1800, 400, "plain")]:
+    for label, x, y, kind in [("Name", 2030, 65, "key"), ("Sha256", 2030, 160, "plain"),
+                              ("BaseUrl", 2370, 65, "plain"), ("FhirVersion", 2385, 125, "plain"),
+                              ("RetrievedAt", 2375, 185, "plain")]:
         p.attr("FhirSource", label, x, y, kind)
-    for label, x, y, kind in [("ResourceType", 1780, 700, "partial"), ("LogicalId", 1790, 790, "partial"),
-                              ("VersionId", 1800, 880, "partial"), ("LastUpdated", 2220, 740, "plain"),
-                              ("Json", 2210, 840, "plain")]:
+    for label, x, y, kind in [("ResourceType", 2020, 420, "partial"), ("LogicalId", 2010, 480, "partial"),
+                              ("VersionId", 2025, 540, "partial"), ("LastUpdated", 2380, 450, "plain"),
+                              ("Json", 2370, 515, "plain")]:
         p.attr("FhirResource", label, x, y, kind)
 
-    p.legend(1640, 1000, extra=["Dashed box: a copy of an entity from page 1."])
+    p.legend(640, 1640, extra=[
+        "Chat sessions and audit records are logs. User, Actor and Subject are values,",
+        "so they stay correct when a row changes and they add no loop.",
+        "FhirSource and FhirResource are the lineage store (a physical layer). It keeps each",
+        "source FHIR resource. Each mapped row keeps the value FhirRef of its source resource.",
+    ])
     return p
 
 
 def main() -> None:
-    pages = [page_core(), page_agent()]
+    pages = [page_core()]
     xml = '<mxfile host="build_erd.py" type="device">' + "".join(pg.xml(i) for i, pg in enumerate(pages)) + "</mxfile>\n"
     OUT.write_text(xml, encoding="utf-8")
     groups: dict[str, list[str]] = {}

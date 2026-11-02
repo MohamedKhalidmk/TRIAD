@@ -5,10 +5,9 @@ The Milestone 2 draft stays in `assets/designing_erd/` as a record.
 
 | File | Content |
 |---|---|
-| `TRIAD_ERD.drawio` | The diagram. It has two pages. |
-| `TRIAD_ERD.pdf` | Both pages as PDF. |
-| `TRIAD_ERD_page1.png` | Page 1: the clinical core and the authorship model. |
-| `TRIAD_ERD_page2.png` | Page 2: the agent layer, the audit log and the lineage store. |
+| `TRIAD_ERD.drawio` | The diagram. It has one page: the clinical core, the authorship model, the agent layer, the audit log and the lineage store. |
+| `TRIAD_ERD.pdf` | The diagram as PDF. |
+| `TRIAD_ERD.png` | The diagram as PNG (2x scale). |
 | `build_erd.py` | The script that makes `TRIAD_ERD.drawio`. It also checks that the diagram is a tree. |
 
 To make the diagram again:
@@ -16,9 +15,8 @@ To make the diagram again:
 ```bash
 python3 src/backend/models/er/build_erd.py
 cd src/backend/models/er
-drawio -x -f pdf -a --crop -o TRIAD_ERD.pdf TRIAD_ERD.drawio
-drawio -x -p 1 -f png -s 2 -o TRIAD_ERD_page1.png TRIAD_ERD.drawio
-drawio -x -p 2 -f png -s 2 -o TRIAD_ERD_page2.png TRIAD_ERD.drawio
+drawio -x -f pdf --crop -o TRIAD_ERD.pdf TRIAD_ERD.drawio
+drawio -x -p 1 -f png -s 2 -o TRIAD_ERD.png TRIAD_ERD.drawio
 ```
 
 ## 1. How to read the diagram
@@ -27,7 +25,6 @@ drawio -x -p 2 -f png -s 2 -o TRIAD_ERD_page2.png TRIAD_ERD.drawio
 |---|---|
 | Box | Entity. |
 | Double box | Weak entity. Its owner identifies it. |
-| Dashed box | A copy of an entity from page 1. |
 | Diamond | Relationship. |
 | Double diamond | Identifying relationship of a weak entity. |
 | Oval | Attribute. |
@@ -97,7 +94,7 @@ We also added attributes to other entities: Visit (Type, Reason), ClinicalEntry 
 | New ClinicalEntry subtype: **CareTeam**, with the multivalued composite attribute Member (Identifier, Role). | FHIR `CareTeam` is a clinical resource. The access rule uses it: only staff on the current care team of a visit can open the chart. A change to the team is a new assertion that supersedes the old one, so each change has an author and a history. Member keeps the staff identifier as a value (a FHIR reference by identifier), because a Staff–CareTeam relationship would close a loop. |
 | New: the agent layer (ChatSession, ChatTurn, `Includes`, `Cites`). | The Care Assistant keeps its conversations. Each answer cites the assertions that it used, so a wrong answer can be traced to a relationship. A "tell" turn creates a message. The answer to it cites the new assertions. |
 | New: AuditEvent, with `InTurn` (ChatTurn). | FHIR `AuditEvent`. It records who read or changed the data of a patient, and the denied attempts. |
-| New: the lineage store (FhirSource, FhirResource). | It keeps every source FHIR resource. TRIAD can then link to any FHIR server with almost no data loss. Each mapped row keeps the value FhirRef of its source resource. It is a physical layer, so page 2 shows it as a separate part. |
+| New: the lineage store (FhirSource, FhirResource). | It keeps every source FHIR resource. TRIAD can then link to any FHIR server with almost no data loss. Each mapped row keeps the value FhirRef of its source resource. It is a physical layer, so the diagram shows it as a separate part (top right). |
 
 ## 4. Relationships and cardinalities
 
