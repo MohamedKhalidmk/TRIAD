@@ -316,7 +316,7 @@ function ChartItem({ item, byId, history, isPatient, canAct, actions }: ChartIte
           )}
           {!isPatient && item.supersedesId !== null && (
             <button type="button" className="link-button" onClick={() => actions.openChain(item)}>
-              {count !== null && count > 0 ? `Superseded ${count}` : 'Show the chain'}
+              {count !== null && count > 0 ? `Supersedes ${count}` : 'Show the chain'}
             </button>
           )}
         </div>
