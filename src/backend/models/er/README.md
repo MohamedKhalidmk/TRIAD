@@ -5,7 +5,7 @@ The Milestone 2 draft stays in `assets/designing_erd/` as a record.
 
 | File | Content |
 |---|---|
-| `TRIAD_ERD.drawio` | The diagram. It has one page: the clinical core, the authorship model, the agent layer, the audit log and the lineage store. |
+| `TRIAD_ERD.drawio` | The diagram. It has one page: the clinical core, the authorship model, the agent layer and the audit log. |
 | `TRIAD_ERD.pdf` | The diagram as PDF. |
 | `TRIAD_ERD.png` | The diagram as PNG (2x scale). |
 | `build_erd.py` | The script that makes `TRIAD_ERD.drawio`. It also checks that the diagram is a tree. |
@@ -47,6 +47,12 @@ drawio -x -p 1 -f png -s 2 -o TRIAD_ERD.png TRIAD_ERD.drawio
 5. **Logs keep values, not relationships.** A chat session and an audit record keep the user and the patient as attribute values (User, Actor, Subject). A log must stay correct when a row changes. These values also add no loop to the tree.
 6. **No foreign keys at the conceptual level.** Relationships show all associations.
 7. **Names are singular.** Each relationship has a unique name.
+8. **Each message has at least one assertion** (`Contains` is total on the Message side). A message reaches its patient only through its assertions. Thus a message with no assertion would have no patient. An intake note becomes an Observation entry (chief complaint). If the agent finds no fact in a chat turn, no message is made.
+9. **One entry, many claims.** An entry is recorded during the visit where it first appears. A later claim about the same fact (confirm, refute, a patient report, a test result) is a new assertion about the same entry. It needs no new visit. A claim with different content (a new code, for example asthma → heart failure, or a new care-team membership) is a new entry in the current visit. Its assertion supersedes the old one. FHIR versions of one resource (`meta.versionId`) become assertions about one entry.
+10. **Each entry has at most one current assertion.** A new assertion about an entry that has a current assertion must supersede it.
+11. **Current care team.** A care-team entry is current when its assertion is current (nothing supersedes it) and its Status is "active". A staff member can open a chart only if a current care-team entry of that patient has them as a Member.
+12. **Values that hold a key are checked.** A Member must match exactly one Staff Identifier. The Name and DateOfBirth of a patient (the key that logs keep) cannot change after registration. The Subject of an audit record that points to a chat turn must equal the Subject of its chat session.
+13. **WorksIn and TakesPlaceIn can repeat a pair.** A person can have two roles in one department (the key includes RoleCode). A visit can go back to a location at a later time (the key includes StartDate).
 
 ## 3. Changes from Milestone 2
 
@@ -63,7 +69,7 @@ Each new attribute has a source field in FHIR R4. The onboarding step fills it f
 | MOA | (none) | CertificationNumber, Desk, PhoneExtension |
 | Location | Name, Type | Identifier, Name, Type, PhysicalType, PhoneNumber, Address |
 
-We also added attributes to other entities: Visit (Type, Reason), ClinicalEntry (Display, Text), Diagnosis (AbatementDate, ClinicalStatus, Severity), Allergy (Type, AllergyCategory), LabOrder (Priority, Specimen), Prescription (Status) and Medication (Manufacturer).
+We also added attributes to other entities: Visit (Type, Reason), ClinicalEntry (Display, Text), Diagnosis (AbatementDate, ClinicalStatus, Severity), Allergy (Type, AllergyCategory, ClinicalStatus), LabOrder (Priority, Specimen), Prescription (Status) and Medication (Manufacturer).
 
 ### Comment 2: "Staff issue Message and a Message has Assertion … the identifying entity set for the weak Assertion is Message"
 
@@ -94,7 +100,7 @@ We also added attributes to other entities: Visit (Type, Reason), ClinicalEntry 
 | New ClinicalEntry subtype: **CareTeam**, with the multivalued composite attribute Member (Identifier, Role). | FHIR `CareTeam` is a clinical resource. The access rule uses it: only staff on the current care team of a visit can open the chart. A change to the team is a new assertion that supersedes the old one, so each change has an author and a history. Member keeps the staff identifier as a value (a FHIR reference by identifier), because a Staff–CareTeam relationship would close a loop. |
 | New: the agent layer (ChatSession, ChatTurn, `Includes`, `Cites`). | The Care Assistant keeps its conversations. Each answer cites the assertions that it used, so a wrong answer can be traced to a relationship. A "tell" turn creates a message. The answer to it cites the new assertions. |
 | New: AuditEvent, with `InTurn` (ChatTurn). | FHIR `AuditEvent`. It records who read or changed the data of a patient, and the denied attempts. |
-| New: the lineage store (FhirSource, FhirResource). | It keeps every source FHIR resource. TRIAD can then link to any FHIR server with almost no data loss. Each mapped row keeps the value FhirRef of its source resource. It is a physical layer, so the diagram shows it as a separate part (top right). |
+| Removed for now: a lineage store (a copy of each source FHIR resource in the database). | The model stays small. The source FHIR files stay in `src/backend/data/`, so the data can be loaded again. The Identifier of each row keeps the FHIR identifier or id of its source. |
 
 ## 4. Relationships and cardinalities
 
@@ -102,7 +108,7 @@ We also added attributes to other entities: Visit (Type, Reason), ClinicalEntry 
 |---|---|---|
 | WorksIn | Staff – Department | Many-to-many (PractitionerRole), with RoleCode, Specialty, StartDate and EndDate. Each staff member works in one or many departments. |
 | Issues | Staff – Message | A staff member issues zero or many messages. A message has zero or one issuer. With no issuer, Origin is "Patient". |
-| Contains | Message – Assertion | Identifying. A message contains zero or many assertions. Each assertion belongs to exactly one message. |
+| Contains | Message – Assertion | Identifying. A message contains one or many assertions. Each assertion belongs to exactly one message. |
 | About | Assertion – ClinicalEntry | Each assertion is about exactly one entry. Each entry has one or many assertions. |
 | Supersedes | Assertion – Assertion | Unary. An assertion replaces zero or one assertion. Zero or one assertion replaces it. |
 | During | ClinicalEntry – Visit | Each entry is recorded during exactly one visit. A visit has zero or many entries. |
@@ -112,9 +118,8 @@ We also added attributes to other entities: Visit (Type, Reason), ClinicalEntry 
 | Includes | ChatSession – ChatTurn | Identifying. A session includes zero or many turns. |
 | Cites | ChatTurn – Assertion | Many-to-many, with Rank. An answer cites the assertions that it used. |
 | InTurn | AuditEvent – ChatTurn | An audit record can point to the chat turn that caused it. |
-| HoldsResource | FhirSource – FhirResource | Identifying. A source holds many resources. |
 
-The tree has 23 entity sets in one part (with the subtypes) and the lineage store as a second part.
+The tree has 23 entity sets (with the subtypes) in one part.
 To reach the patient of an assertion, follow Assertion → ClinicalEntry → Visit → Patient. There is only one path.
 
 ## 5. FHIR R4 alignment
@@ -140,13 +145,13 @@ To reach the patient of an assertion, follow Assertion → ClinicalEntry → Vis
 | AuditEvent | AuditEvent |
 | ChatSession, ChatTurn, Cites | No FHIR resource. This is the TRIAD agent layer. |
 
-FHIR also has links that TRIAD does not show as relationships, because they would close loops: `Encounter.serviceProvider`, `Location.managingOrganization`, `Location.partOf`, `Organization.partOf` and `Condition.subject`. The lineage store keeps them, so no data is lost.
+FHIR also has links that TRIAD does not show as relationships, because they would close loops: `Encounter.serviceProvider`, `Location.managingOrganization`, `Location.partOf`, `Organization.partOf` and `Condition.subject`. The source FHIR files in `src/backend/data/` keep them.
 
 ## 6. The assertion pipeline
 
 1. A message arrives: a phone note, a visit note, a copied record, a patient report or a chat turn.
 2. A staff member issues the message, or the patient sends it through the app (Origin = Patient).
 3. Each fact in the message becomes an assertion. The assertion points to the clinical entry that it is about. The entry belongs to a visit, and the visit belongs to a patient.
-4. An agent can extract an assertion for a person. Then the source is "Agent" and the verification is "unconfirmed". The person stays accountable.
+4. An agent can extract an assertion for a person. Then the source is "Agent" and the verification is "unconfirmed". The person stays accountable. If the agent finds no fact, it makes no message.
 5. When a new assertion changes an earlier one, `Supersedes` links them. Care-team changes use the same rule.
 6. The current record is the set of assertions that nothing supersedes. To read the history, follow `Supersedes` back. Each step names a person and a source message.

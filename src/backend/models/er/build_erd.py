@@ -2,7 +2,7 @@
 """Generate the TRIAD ER diagram as a one-page draw.io file.
 
 The page shows the clinical core, the authorship model (the professor's comments),
-the agent layer (chat, citations), the audit log and the lineage store.
+the agent layer (chat, citations) and the audit log.
 
 The diagram is a tree: there is exactly one path between any two entity sets.
 Only the unary relationship Supersedes points back to its own entity set.
@@ -201,7 +201,7 @@ def page_core() -> Page:
     p.link("Issues", "Staff", "zeroOne")
     p.link("Issues", "Message", "many")
     p.link("Contains", "Message", "one")
-    p.link("Contains", "Assertion", "many")
+    p.link("Contains", "Assertion", "oneMany")
     p.link("About", "Assertion", "oneMany")
     p.link("About", "ClinicalEntry", "one")
     p.link("Supersedes", "Assertion", "zeroOne", "Replaces", exit_=(0, 0.5), entry=(0.15, 1))
@@ -285,7 +285,7 @@ def page_core() -> Page:
     subtypes = [
         ("Diagnosis", ["OnsetDate", "AbatementDate", "ClinicalStatus", "Severity"]),
         ("Procedure", ["PerformedDate", "Outcome"]),
-        ("Allergy", ["Substance", "Type", "AllergyCategory", "Criticality"]),
+        ("Allergy", ["Substance", "Type", "AllergyCategory", "Criticality", "ClinicalStatus"]),
         ("Observation", ["Value", "Unit"]),
         ("LabOrder", ["TestName", "Priority", "Specimen"]),
         ("LabReport", ["IssuedDate", "Conclusion"]),
@@ -297,7 +297,8 @@ def page_core() -> Page:
         p.entity(name, name, 2740, cy, w=170)
         offsets = {2: [(2980, -25), (2980, 25)],
                    3: [(2975, -50), (3165, 0), (2975, 50)],
-                   4: [(2975, -50), (3165, -22), (2975, 50), (3165, 22)]}[len(attrs)]
+                   4: [(2975, -50), (3165, -22), (2975, 50), (3165, 22)],
+                   5: [(2975, -55), (3165, -45), (2975, 55), (3165, 45), (3175, 0)]}[len(attrs)]
         for (x, dy), label in zip(offsets, attrs):
             p.attr(name, label, x, cy + dy)
     # CareTeam.Member is a multivalued composite attribute (a FHIR Reference by identifier).
@@ -354,26 +355,10 @@ def page_core() -> Page:
     p.attr("AuditSubject", "Name", 1150, 560)
     p.attr("AuditSubject", "DateOfBirth", 1000, 610)
 
-    # ----- Lineage store (physical layer, a separate part of the tree) -----
-    p.entity("FhirSource", "FhirSource", 2200, 110)
-    p.relation("HoldsResource", "Holds\nResource", 2200, 295, identifying=True)
-    p.entity("FhirResource", "FhirResource", 2200, 480, weak=True)
-    p.link("HoldsResource", "FhirSource", "one")
-    p.link("HoldsResource", "FhirResource", "many")
-    for label, x, y, kind in [("Name", 2030, 65, "key"), ("Sha256", 2030, 160, "plain"),
-                              ("BaseUrl", 2370, 65, "plain"), ("FhirVersion", 2385, 125, "plain"),
-                              ("RetrievedAt", 2375, 185, "plain")]:
-        p.attr("FhirSource", label, x, y, kind)
-    for label, x, y, kind in [("ResourceType", 2020, 420, "partial"), ("LogicalId", 2010, 480, "partial"),
-                              ("VersionId", 2025, 540, "partial"), ("LastUpdated", 2380, 450, "plain"),
-                              ("Json", 2370, 515, "plain")]:
-        p.attr("FhirResource", label, x, y, kind)
-
     p.legend(640, 1640, extra=[
         "Chat sessions and audit records are logs. User, Actor and Subject are values,",
         "so they stay correct when a row changes and they add no loop.",
-        "FhirSource and FhirResource are the lineage store (a physical layer). It keeps each",
-        "source FHIR resource. Each mapped row keeps the value FhirRef of its source resource.",
+        "CareTeam.Member keeps the staff Identifier as a value (a FHIR reference by identifier).",
     ])
     return p
 

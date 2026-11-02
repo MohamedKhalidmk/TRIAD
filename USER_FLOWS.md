@@ -4,7 +4,7 @@ This file describes what the TRIAD prototype shows to each user type.
 It is a living document. We change it when the app changes.
 The flows in this file drive the dataset, the database, the API and the screens.
 
-**Status:** version 2 (2026-11-01). The team approved sections 0.1 and 0.2. Version 2 follows the tree-shaped ER model: care-team changes are assertions, and the arrival step comes before the waiting-room step.
+**Status:** version 3 (2026-11-01). The team approved sections 0.1 and 0.2. Version 2 follows the tree-shaped ER model: care-team changes are assertions, and the arrival step comes before the waiting-room step. Version 3 adds the review fixes: the current care team is active and not superseded, the MOA can supersede care-team entries, a patient report about an item is an assertion about that item, and each message has at least one fact.
 
 ---
 
@@ -19,9 +19,9 @@ The data comes from the Synthea FHIR R4 sample (112 patients).
 Synthea spreads these patients over 234 providers in Massachusetts.
 The loader moves ("re-homes") all of them into TRIAD General Hospital:
 
-- Each Synthea visit goes to one hospital department. The visit class selects the department.
+- Each Synthea visit goes to the default location of one department. The visit class selects the department. The department of a visit is the department of its location.
 - Each Synthea doctor works in the department where they saw the most visits.
-- The original Synthea providers and sites stay in the lineage store. We do not lose them.
+- The original Synthea providers and sites stay in the source FHIR files (`src/backend/data/`). The database keeps only TRIAD General.
 
 | Synthea visit class | Department |
 |---|---|
@@ -107,17 +107,19 @@ The backend checks each action. A denied action gives a 403 message and an audit
 | Assign or move the visit location | — | yes | care team | care team |
 | Add or remove care-team members | — | yes | — | if on the team |
 | Record assertions (allowed intent) | Report (own) | Report | Report, Recommendation, Observation and lab results | any |
-| Supersede an assertion | own reports, items in "My record" | — | Reports, Recommendations | any |
+| Supersede an assertion | own reports, items in "My record" | care-team entries | Reports, Recommendations | any |
 | Ask the Care Assistant | about self, visible items | — | care team | care team |
 | Tell the Care Assistant a fact (LLM or fake LLM) | own reports | — | yes | yes |
-| View the FHIR source of a row | — | — | care team | care team |
 | Manage the directory (departments, locations, staff, medications) | — | yes | — | — |
 | View the audit log | own | — | — | care-team patients |
 
 ### 2.1 Rules
 
-- **Care team rule.** A nurse or a doctor can open a chart only if they are a member of a current care-team entry of that patient. A care-team entry is current when no assertion supersedes it. A change to the care team is a new entry that supersedes the earlier one, so each change has an author and a date.
-- **Patient reports.** A report that a patient sends through the app is a message with no staff issuer. Its origin is "Patient". It goes into the open visit. If no visit is open, the app opens a virtual visit (class VR).
+- **Care team rule.** A nurse or a doctor can open a chart only if they are a member of a current care-team entry of that patient. A care-team entry is current when nothing supersedes its assertion and its status is "active". A change to the care team is a new entry that supersedes the earlier one, so each change has an author and a date. The Care team tab shows the current team of the open visit only.
+- **Patient reports.** A report that a patient sends through the app is a message with no staff issuer. Its origin is "Patient" and its channel is "App".
+  - A report about an item that exists (for example "I stopped taking metformin") is a new assertion about that item. It needs no new visit.
+  - A report about a new fact goes into the open visit. If no visit is open, the app opens a virtual visit (class VR) that ends at once, so it never becomes the open visit.
+- **Each message has at least one fact.** An intake note becomes an observation (chief complaint). If the Care Assistant finds no fact in a "tell" turn, it makes no message.
 - **Supersede guard.** When the current item is visible to the patient, only a doctor decision or the patient's own report can supersede it.
 - **Patient-visible rule.** A patient sees an item only if all of these are true:
   - It is the current item. Nothing supersedes it.
@@ -128,7 +130,7 @@ The backend checks each action. A denied action gives a 403 message and an audit
     - a report that the patient sent.
 - **Chain view for patients.** A patient sees the current item only. A patient does not see the items that it superseded.
 - **Synthea items.** Synthea diagnoses, prescriptions, procedures and allergies count as doctor decisions. Synthea observations and lab reports count as reports. They are confirmed when their status is final.
-- **"What is my plan?"** The answer uses the open visit. If no visit is open, it uses the latest visit.
+- **"What is my plan?"** The answer uses the open visit. If no visit is open, it uses the latest visit that is not a virtual report visit.
 - **MOA patient page.** An MOA sees demographics, visits and the care team. An MOA does not see the chart or the chat.
 - **Audit.** Every action on one patient writes an audit record. A denied action also writes a record.
 
@@ -168,6 +170,7 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
   - The visit is open in "ER Waiting".
   - The care team has Priya Nair and Dr. Amara Okafor only.
   - Each care-team change is a new care-team entry that supersedes the earlier one. The chain shows: {Nair, Okafor} ← {Nair, Okafor, Park} ← {Nair, Okafor}. Each step names Sofia Alvarez as the author.
+  - The intake note is an observation (chief complaint) in the open visit.
 
 ### Step 2. Waiting room (Patient B)
 
@@ -178,7 +181,7 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
   2. On the metformin item, select **Report**. Write: "I stopped taking metformin."
 - **Expected result:**
   1. The answer lists metformin.
-  2. The report goes into the open emergency visit. Its message has no staff issuer. Its origin is "Patient".
+  2. The report is a new assertion about the metformin item. Its message has no staff issuer. Its origin is "Patient" and its channel is "App".
   3. The report supersedes the metformin prescription. The chain is: prescription ← patient report.
 
 ### Step 3. Triage (nurse)
