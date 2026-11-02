@@ -162,7 +162,7 @@ interface RecordResult { messageId: number; assertions: AssertionView[]; }
 interface CodePreset { category: Category; code: string; codeSystem: string; display: string; details: Record<string, string | number | null>; }
 
 // Chat
-interface Card { rank: number; assertion: AssertionView; supersedes: AssertionView[]; } // supersedes: newest first; empty for a patient
+interface Card { rank: number; assertion: AssertionView; supersedes: AssertionView[]; } // supersedes: oldest first; empty for a patient
 interface ChatTurn {
   id: number; seq: number; speaker: 'User' | 'Assistant'; text: string; createdAt: string;
   kind: 'ask' | 'tell' | null;  // null for a user turn
@@ -262,6 +262,7 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
   - Prescription: `medicationCode`, `medicationSystem`, `medicationName`, `dosage`, `frequency`, `status` (`active`, `draft`, `stopped`, `completed`).
     The backend finds the Medication by (code, system). If it does not exist, the backend adds it.
 - In an `AssertionView`, `details` of a Prescription has `medication` (the name), `dosage`, `frequency` and `status`.
+  `details` of a CareTeam has `name`, `status` and `members` (the member names, separated by commas).
 
 ### 3.5 Care Assistant (chat)
 
@@ -285,6 +286,7 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 The backend writes one audit record for each of these: a chart read, a chain read, an audit read, each write about one patient,
 each chat turn (`ask` or `tell`, with `chatTurnId`) and each 403 about one patient (Outcome = Denied).
 It does not write a record for list endpoints or for `GET /api/patients/{id}`.
+The `path` of a record is the route, with a name for each id, for example `/api/patients/{patient}/chart` (the form of the demo data).
 
 ### 3.7 Directory
 

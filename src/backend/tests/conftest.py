@@ -1,4 +1,4 @@
-"""Shared test fixtures: the scenario database (01 + 02) and the full database (onboarding)."""
+"""Shared test fixtures: the scenario database (01 + 02), the full database (onboarding) and the API client."""
 from __future__ import annotations
 
 import shutil
@@ -49,3 +49,34 @@ def db(full_db) -> sqlite3.Connection:
     conn = connect(full_db)
     yield conn
     conn.close()
+
+
+DEMO_NOW = "2026-10-30T09:00:00-04:00"
+
+
+def make_client(db_path: Path, **settings):
+    """A FastAPI TestClient on `db_path` (fake chat mode, fixed demo time, no frontend)."""
+    import main
+    from fastapi.testclient import TestClient
+    values = dict(db_path=db_path, now=DEMO_NOW, llm_mode="fake", frontend_dist=db_path.parent / "no-frontend")
+    values.update(settings)
+    return TestClient(main.create_app(config.Settings.from_env(**values)))
+
+
+@pytest.fixture
+def full_copy(full_db, tmp_path) -> Path:
+    """A new copy of the full database for a test that changes data."""
+    path = tmp_path / "full-copy.db"
+    shutil.copy(full_db, path)
+    return path
+
+
+@pytest.fixture
+def client(full_copy):
+    """An API client on a new copy of the full database."""
+    return make_client(full_copy)
+
+
+def as_user(key: str) -> dict:
+    """The header of the current user."""
+    return {"X-Triad-User": key}
