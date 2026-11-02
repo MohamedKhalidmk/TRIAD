@@ -50,8 +50,8 @@ They do not change the Synthea data.
 | File | Kind | Content |
 |---|---|---|
 | `hospital_profile.json` | Written by hand | The one hospital (TRIAD General Hospital), its departments and locations, the rule that moves each Synthea visit to a department, the staff counts, the demo users and the pinned Patient B. |
-| `triad_scenarios.fhir.json` | Made by a script | A FHIR R4 collection bundle: the hospital and its departments, the locations, the seeded staff (doctors, nurses, MOAs), Patient A and the history of Patient A, and the care teams of Synthea patients that do not have an active care team. |
-| `demo_activity.json` | Made by a script | One saved chat of Patient A, with a citation, and four audit records (one denied access). |
+| `triad_scenarios.fhir.json` | Made by a script | A FHIR R4 collection bundle (232 resources): the hospital and its departments, the locations, the seeded staff (doctors, nurses, MOAs), Patient A and the history of Patient A, and a care team for each Synthea patient that has no active care team. Each care team has an encounter, the message that set it and a Provenance. |
+| `demo_activity.json` | Made by a script | One saved chat of Patient A, with a citation, and four audit records (one denied access). These logs keep the user and the patient as values. |
 
 ### Make the scenario files again
 
@@ -69,5 +69,7 @@ If Patient B changes, the script stops.
 - A `Provenance` is a TRIAD assertion. The `target` is the clinical resource. The entity with the role `source` is the message.
 - The entity with the role `revision` gives the earlier claim. This is the TRIAD "Supersedes" link.
 - The penicillin allergy of Patient A has three versions (`meta.versionId` 1, 2 and 3). Each version is one claim: the 2019 phone report, the 2024 copy from another clinic, and the 2026 allergy test.
+- The 2019 phone call is a visit (class VR), because each clinical entry belongs to one visit.
+- A care-team member is a FHIR reference by identifier (employee number or NPI).
 
-All 147 entries pass the FHIR R4B model checks of the `fhir.resources` Python package.
+All 232 entries pass the FHIR R4B model checks of the `fhir.resources` Python package.

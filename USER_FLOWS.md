@@ -4,7 +4,7 @@ This file describes what the TRIAD prototype shows to each user type.
 It is a living document. We change it when the app changes.
 The flows in this file drive the dataset, the database, the API and the screens.
 
-**Status:** version 1 (2026-11-01). The team approved sections 0.1 and 0.2.
+**Status:** version 2 (2026-11-01). The team approved sections 0.1 and 0.2. Version 2 follows the tree-shaped ER model: care-team changes are assertions, and the arrival step comes before the waiting-room step.
 
 ---
 
@@ -54,11 +54,11 @@ The dataset must give the items in this table. Phase 2 of the plan builds them.
 | Item | Requirement |
 |---|---|
 | Departments | Emergency, Inpatient Medicine, Family Medicine, Urgent Care, Home Health, Virtual Care, Cardiology, Front Office. All are part of TRIAD General Hospital. |
-| Locations | Emergency Unit with ER Waiting, ER Bed 1 to ER Bed 4 and the Emergency Registration Desk; Cardiology Ward with Cardiology Room 401, Cardiology Room 402 and the Cardiology Desk; Family Medicine Room 1 and the Family Medicine Desk; Urgent Care Room 1; Inpatient Ward 3; Patient Home; Virtual Visit; Main Front Desk; Old Storage Room (not used, for the delete step). Each department has one default location for re-homed visits. |
+| Locations | Emergency Unit, ER Waiting, ER Bed 1 to ER Bed 4 and the Emergency Registration Desk; Cardiology Ward, Cardiology Room 401, Cardiology Room 402 and the Cardiology Desk; Family Medicine Room 1 and the Family Medicine Desk; Urgent Care Room 1; Inpatient Ward 3; Patient Home; Virtual Visit; Main Front Desk; Old Storage Room (not used, for the delete step). Each department has one default location for re-homed visits. |
 | Doctors | The 234 Synthea doctors that the visits use, plus the demo doctors in 0.4. |
 | Nurses (method A) | Emergency 4, Inpatient Medicine 3, Cardiology 3, Family Medicine 2, Urgent Care 2, Home Health 2, Virtual Care 1. |
 | MOAs (method A) | Front Office 3, Emergency 1, Family Medicine 1, Cardiology 1. |
-| Care teams | Every patient has at least one active care team. Use the Synthea care team if one exists. If not, use the doctor of the latest visit and one nurse of that department. |
+| Care teams | Every patient has at least one care-team entry. The entry is a clinical entry (FHIR CareTeam) in a visit, with its message and its assertion. Use the Synthea care team if one is active. If not, use the doctor of the latest visit and one nurse of that department. A Front Office MOA is the author. |
 | Staff languages | Each staff member has one or more languages. |
 | Patient A | A curated patient with the penicillin history from the 3MT slide (see 0.4). |
 | Patient B | A Synthea patient. The patient is alive and is an adult on the demo date. The patient has an active metformin prescription and no penicillin allergy. Of the 3 eligible patients, Patient B has the fewest resources (879). |
@@ -116,7 +116,8 @@ The backend checks each action. A denied action gives a 403 message and an audit
 
 ### 2.1 Rules
 
-- **Care team rule.** A nurse or a doctor can open a chart only if they are on an active care team of that patient.
+- **Care team rule.** A nurse or a doctor can open a chart only if they are a member of a current care-team entry of that patient. A care-team entry is current when no assertion supersedes it. A change to the care team is a new entry that supersedes the earlier one, so each change has an author and a date.
+- **Patient reports.** A report that a patient sends through the app is a message with no staff issuer. Its origin is "Patient". It goes into the open visit. If no visit is open, the app opens a virtual visit (class VR).
 - **Supersede guard.** When the current item is visible to the patient, only a doctor decision or the patient's own report can supersede it.
 - **Patient-visible rule.** A patient sees an item only if all of these are true:
   - It is the current item. Nothing supersedes it.
@@ -152,7 +153,23 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
 - **Action:** Ask the Care Assistant: "Is she allergic to penicillin?"
 - **Expected result:** "No. A physician ruled it out with an allergy test on Oct 2, 2026." The card shows the current assertion. Below it, the card shows two superseded assertions with a line through them: "Other clinic, 2024: penicillin allergy (copied)" and "Front desk, 2019: penicillin allergy".
 
-### Step 1. Waiting room (Patient B)
+### Step 1. Arrival (front desk)
+
+- **User:** Sofia Alvarez (MOA).
+- **Page:** `/patients` (Front desk), then `/patients/:id` (Visit and Care team tabs).
+- **Action:**
+  1. Find Patient B by name and date of birth.
+  2. Change the phone number. (**UPDATE**)
+  3. Check in an emergency visit. Assign the location "ER Waiting".
+  4. Set the care team: Priya Nair and Dr. Amara Okafor.
+  5. Add Jun Park by mistake. Then remove Jun Park.
+  6. Write an intake note: "Shortness of breath since this morning."
+- **Expected result:**
+  - The visit is open in "ER Waiting".
+  - The care team has Priya Nair and Dr. Amara Okafor only.
+  - Each care-team change is a new care-team entry that supersedes the earlier one. The chain shows: {Nair, Okafor} ← {Nair, Okafor, Park} ← {Nair, Okafor}. Each step names Sofia Alvarez as the author.
+
+### Step 2. Waiting room (Patient B)
 
 - **User:** Patient B.
 - **Page:** `/patients/:id` (My record).
@@ -161,20 +178,8 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
   2. On the metformin item, select **Report**. Write: "I stopped taking metformin."
 - **Expected result:**
   1. The answer lists metformin.
-  2. The report supersedes the metformin prescription. The chain is: prescription ← patient report.
-
-### Step 2. Arrival (front desk)
-
-- **User:** Sofia Alvarez (MOA).
-- **Page:** `/patients` (Front desk), then `/patients/:id` (Visit and Care team tabs).
-- **Action:**
-  1. Find Patient B by name and date of birth.
-  2. Change the phone number. (**UPDATE**)
-  3. Check in an emergency visit. Assign the location "ER Waiting".
-  4. Add Priya Nair and Dr. Amara Okafor to the care team.
-  5. Add Jun Park by mistake. Then remove Jun Park. (**DELETE**)
-  6. Write an intake note: "Shortness of breath since this morning."
-- **Expected result:** The visit is open in "ER Waiting". The care team has Priya Nair and Dr. Amara Okafor only.
+  2. The report goes into the open emergency visit. Its message has no staff issuer. Its origin is "Patient".
+  3. The report supersedes the metformin prescription. The chain is: prescription ← patient report.
 
 ### Step 3. Triage (nurse)
 
@@ -215,7 +220,7 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
 - **User:** Priya Nair (Nurse), then Sofia Alvarez (MOA).
 - **Action:**
   1. The nurse moves the patient to "Cardiology Room 401".
-  2. The MOA adds Tom Becker to the care team.
+  2. The MOA adds Tom Becker to the care team. This is a new care-team entry that supersedes the earlier one.
 - **Expected result:** The visit shows two locations with times. Tom Becker can open the chart.
 
 ### Step 6. Evening (Patient B)

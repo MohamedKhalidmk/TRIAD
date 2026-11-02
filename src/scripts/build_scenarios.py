@@ -293,12 +293,13 @@ class Builder:
             "form": concept(SNOMED, "385055001", "Tablet"),
         })
 
-        def encounter(eid: str, start: str, end: str, dept: str, loc: str, doctor: dict, reason: str) -> None:
+        def encounter(eid: str, start: str, end: str, dept: str, loc: str, doctor: dict, reason: str,
+                      act: tuple[str, str] = ("AMB", "ambulatory")) -> None:
             self.add({
                 "resourceType": "Encounter", "id": eid,
                 "identifier": [{"system": f"{self.base}/sid/encounter", "value": eid.upper()}],
                 "status": "finished",
-                "class": coding(ACT_CODE, "AMB", "ambulatory"),
+                "class": coding(ACT_CODE, act[0], act[1]),
                 "type": [{"text": reason}],
                 "subject": pat_ref,
                 "participant": [{"individual": ref("Practitioner", doctor["id"], doctor["name"])}],
@@ -309,6 +310,9 @@ class Builder:
                 "serviceProvider": ref("Organization", f"org-{dept.lower()}", self.dept_name(dept)),
             })
 
+        # A phone call is a visit (class VR, virtual). Each clinical entry needs one visit.
+        encounter("enc-elena-2019-06-12", "2019-06-12T10:10:00-04:00", "2019-06-12T10:20:00-04:00",
+                  "FRONT", "VIRTUAL-VISIT", sofia, "Phone call", act=("VR", "virtual"))
         encounter("enc-elena-2025-08-20", "2025-08-20T09:30:00-04:00", "2025-08-20T10:00:00-04:00",
                   "CARD", "CARD-401", brennan, "Blood pressure check")
         encounter("enc-elena-2026-10-02", "2026-10-02T10:00:00-04:00", "2026-10-02T11:30:00-04:00",
@@ -343,9 +347,9 @@ class Builder:
         # The penicillin allergy has three versions. Each version is one claim.
         allergy_id = "ai-elena-penicillin"
         versions = [
-            ("1", "2019-06-12T10:15:00-04:00", "active", "unconfirmed", None,
+            ("1", "2019-06-12T10:15:00-04:00", "active", "unconfirmed", "enc-elena-2019-06-12",
              "Patient report: rash after penicillin as a child.", sofia),
-            ("2", "2024-03-05T14:00:00-05:00", "active", "unconfirmed", None,
+            ("2", "2024-03-05T14:00:00-05:00", "active", "unconfirmed", "enc-elena-2019-06-12",
              "Penicillin allergy (copied from Lakeside Family Clinic).", sofia),
             ("3", "2026-10-02T11:30:00-04:00", "inactive", "refuted", "enc-elena-2026-10-02",
              "Not allergic. Allergy test negative.", okafor),
@@ -473,17 +477,21 @@ class Builder:
         provenance("prov-elena-pen-3", f"{allergy}/3", "2026-10-02T11:40:00-04:00", okafor,
                    "msg-elena-2026-10-02", "Decision", revision=f"{allergy}/2")
 
-        self.care_team("ct-elena", "CT-ELENA", pat_ref, [okafor, brennan], "2025-08-20T09:30:00-04:00",
-                       "Elena Marsh care team")
+        self.care_team("ct-elena", "CT-ELENA", pat_ref, "enc-elena-2026-10-02", [okafor, brennan],
+                       "2026-10-02T12:00:00-04:00", "Elena Marsh care team", sofia)
 
-    def care_team(self, cid: str, value: str, subject: dict, members: list[dict], start: str, name: str) -> None:
+    def care_team(self, cid: str, value: str, subject: dict, encounter_id: str, members: list[dict],
+                  start: str, name: str, issuer: dict) -> None:
+        """Write a CareTeam (a clinical entry), the message that set it and its Provenance (the assertion)."""
         participants = []
         for m in members:
+            # The member is a FHIR reference by identifier (TRIAD keeps it as a value).
             if "npi" in m:
-                member = {"reference": f"Practitioner?identifier={self.sid['npi']}|{m['npi']}"}
+                member = {"type": "Practitioner", "identifier": {"system": self.sid["npi"], "value": m["npi"]}}
                 role = "Doctor"
             else:
-                member = ref("Practitioner", m["id"], m["name"])
+                member = {"type": "Practitioner", "identifier": {"system": self.sid["employee"], "value": m["employee"]},
+                          "display": m["name"]}
                 role = m["role"]
             participants.append({"role": [{"text": role}], "member": member})
         self.add({
@@ -492,9 +500,34 @@ class Builder:
             "status": "active",
             "name": name,
             "subject": subject,
+            "encounter": ref("Encounter", encounter_id),
             "period": {"start": start},
             "participant": participants,
             "managingOrganization": [ref("Organization", "org-triad-gh")],
+        })
+        mid = f"msg-{cid}"
+        names = ", ".join(m.get("name", f"NPI {m.get('npi')}") for m in members)
+        self.add({
+            "resourceType": "Communication", "id": mid,
+            "identifier": [{"system": self.sid["message"], "value": mid.upper()}],
+            "extension": [{"url": self.ext["origin"], "valueCode": "Staff"}],
+            "status": "completed",
+            "medium": [concept(PART_MODE, "ELECTRONIC", "Electronic")],
+            "subject": subject,
+            "sent": start,
+            "sender": ref("Practitioner", issuer["id"], issuer["name"]),
+            "payload": [{"contentString": f"Care team set: {names}."}],
+        })
+        self.add({
+            "resourceType": "Provenance", "id": f"prov-{cid}",
+            "extension": [{"url": self.ext["intent"], "valueCode": "Report"}],
+            "target": [{"reference": f"CareTeam/{cid}"}],
+            "recorded": start,
+            "agent": [{
+                "type": concept("http://terminology.hl7.org/CodeSystem/provenance-participant-type", "author", "Author"),
+                "who": ref("Practitioner", issuer["id"], issuer["name"]),
+            }],
+            "entity": [{"role": "source", "what": {"reference": f"Communication/{mid}"}}],
         })
 
     # ----- care teams for Synthea patients -----
@@ -512,8 +545,11 @@ class Builder:
             if latest["npi"]:
                 members.append({"npi": latest["npi"]})
             members.append(nurse)
+            front = [s for s in self.staff if s["role"] == "MOA" and s["department"] == "FRONT"]
+            issuer = front[int(hashlib.sha256(pid.encode()).hexdigest(), 16) % len(front)]
             self.care_team(f"ct-syn-{pid[:8]}", f"CT-SYN-{pid[:8].upper()}", ref("Patient", pid),
-                           members, latest["start"], "Generated care team (latest visit)")
+                           latest["id"], members, latest["start"], "Care team set at onboarding (latest visit)",
+                           issuer)
 
     def department_for(self, act_class: str, provider_name: str) -> str:
         rule = self.p["classToDepartment"].get(act_class, "FAMMED")
@@ -528,14 +564,21 @@ class Builder:
     def demo_activity(self) -> dict:
         okafor = self.staff_by_key("okafor")
         jun = self.staff_by_key("jun")
-        elena = "Patient/pat-elena-marsh"
+        emp = self.sid["employee"]
+
+        def staff_user(s: dict, role: str) -> dict:
+            return {"role": role, "identifier": {"system": emp, "value": s["employee"]}}
+
+        elena = {"name": "Elena Marsh", "birthDate": "1971-05-14"}
+        elena_user = {"role": "Patient", "identifier": {"system": self.sid["mrn"], "value": "MRN-000001"}}
         return {
-            "description": "Demo rows for the agent tables. The loader maps the FHIR references to rows.",
+            "description": ("Demo rows for the agent tables. Chat sessions and audit records are logs: "
+                            "they keep the user and the patient as values. Citations point to Provenance "
+                            "resources, which the loader maps to assertions."),
             "chatSessions": [{
                 "identifier": "CHAT-0001",
-                "patient": elena,
-                "staff": f"Practitioner/{okafor['id']}",
-                "userRole": "Doctor",
+                "user": staff_user(okafor, "Doctor"),
+                "subject": elena,
                 "startedAt": "2026-10-29T15:00:00-04:00",
                 "mode": "rules",
                 "model": None,
@@ -550,17 +593,16 @@ class Builder:
             }],
             "auditEvents": [
                 {"identifier": "AUDIT-0001", "at": "2026-10-29T14:59:00-04:00", "action": "read",
-                 "outcome": "Allowed", "userRole": "Doctor", "actorStaff": f"Practitioner/{okafor['id']}",
-                 "patient": elena, "path": "/api/patients/{patient}/chart"},
+                 "outcome": "Allowed", "actor": staff_user(okafor, "Doctor"), "subject": elena,
+                 "path": "/api/patients/{patient}/chart"},
                 {"identifier": "AUDIT-0002", "at": "2026-10-29T15:00:06-04:00", "action": "ask",
-                 "outcome": "Allowed", "userRole": "Doctor", "actorStaff": f"Practitioner/{okafor['id']}",
-                 "patient": elena, "path": "/api/chat/sessions/{session}/turns", "chatTurn": "CHAT-0001#2"},
+                 "outcome": "Allowed", "actor": staff_user(okafor, "Doctor"), "subject": elena,
+                 "path": "/api/chat/sessions/{session}/turns", "chatTurn": "CHAT-0001#2"},
                 {"identifier": "AUDIT-0003", "at": "2026-10-29T16:20:00-04:00", "action": "read",
-                 "outcome": "Denied", "userRole": "Nurse", "actorStaff": f"Practitioner/{jun['id']}",
-                 "patient": elena, "path": "/api/patients/{patient}/chart"},
+                 "outcome": "Denied", "actor": staff_user(jun, "Nurse"), "subject": elena,
+                 "path": "/api/patients/{patient}/chart"},
                 {"identifier": "AUDIT-0004", "at": "2026-10-29T18:00:00-04:00", "action": "read",
-                 "outcome": "Allowed", "userRole": "Patient", "actorPatient": elena,
-                 "patient": elena, "path": "/api/audit"},
+                 "outcome": "Allowed", "actor": elena_user, "subject": elena, "path": "/api/audit"},
             ],
         }
 
@@ -634,7 +676,7 @@ def scan_synthea(profile: dict) -> dict:
                         npi = reference.split("|")[-1]
                         break
                 provider = (r.get("serviceProvider") or {}).get("reference", "").split("|")[-1]
-                encounters[p].append({"start": r["period"]["start"], "class": r["class"]["code"],
+                encounters[p].append({"id": r["id"], "start": r["period"]["start"], "class": r["class"]["code"],
                                       "npi": npi, "providerId": provider})
     latest = {}
     for p, items in encounters.items():
@@ -680,8 +722,8 @@ def main() -> None:
     for entry in builder.entries:
         res = entry["resource"]
         if res["resourceType"] == "CareTeam" and res["subject"]["reference"].endswith(chosen):
-            members = [p["member"].get("reference", "") for p in res["participant"]]
-            if any(m.endswith(jun["id"]) for m in members):
+            members = [p["member"].get("identifier", {}).get("value", "") for p in res["participant"]]
+            if jun["employee"] in members:
                 sys.exit("Jun Park must not be on a care team of Patient B.")
 
     bundle = builder.bundle()

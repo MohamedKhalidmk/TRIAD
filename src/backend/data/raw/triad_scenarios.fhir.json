@@ -3852,6 +3852,67 @@
    }
   },
   {
+   "fullUrl": "https://triad.example/fhir/Encounter/enc-elena-2019-06-12",
+   "resource": {
+    "resourceType": "Encounter",
+    "id": "enc-elena-2019-06-12",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/encounter",
+      "value": "ENC-ELENA-2019-06-12"
+     }
+    ],
+    "status": "finished",
+    "class": {
+     "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+     "code": "VR",
+     "display": "virtual"
+    },
+    "type": [
+     {
+      "text": "Phone call"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "participant": [
+     {
+      "individual": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "period": {
+     "start": "2019-06-12T10:10:00-04:00",
+     "end": "2019-06-12T10:20:00-04:00"
+    },
+    "reasonCode": [
+     {
+      "text": "Phone call"
+     }
+    ],
+    "location": [
+     {
+      "location": {
+       "reference": "Location/loc-virtual-visit",
+       "display": "Virtual Visit"
+      },
+      "period": {
+       "start": "2019-06-12T10:10:00-04:00",
+       "end": "2019-06-12T10:20:00-04:00"
+      }
+     }
+    ],
+    "serviceProvider": {
+     "reference": "Organization/org-front",
+     "display": "Front Office"
+    }
+   }
+  },
+  {
    "fullUrl": "https://triad.example/fhir/Encounter/enc-elena-2025-08-20",
    "resource": {
     "resourceType": "Encounter",
@@ -4260,7 +4321,10 @@
      {
       "text": "Patient report: rash after penicillin as a child."
      }
-    ]
+    ],
+    "encounter": {
+     "reference": "Encounter/enc-elena-2019-06-12"
+    }
    }
   },
   {
@@ -4320,7 +4384,10 @@
      {
       "text": "Penicillin allergy (copied from Lakeside Family Clinic)."
      }
-    ]
+    ],
+    "encounter": {
+     "reference": "Encounter/enc-elena-2019-06-12"
+    }
    }
   },
   {
@@ -5147,8 +5214,11 @@
      "reference": "Patient/pat-elena-marsh",
      "display": "Elena Marsh"
     },
+    "encounter": {
+     "reference": "Encounter/enc-elena-2026-10-02"
+    },
     "period": {
-     "start": "2025-08-20T09:30:00-04:00"
+     "start": "2026-10-02T12:00:00-04:00"
     },
     "participant": [
      {
@@ -5158,7 +5228,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1005",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1005"
+       },
        "display": "Amara Okafor"
       }
      },
@@ -5169,7 +5243,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1006",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1006"
+       },
        "display": "Lucas Brennan"
       }
      }
@@ -5177,6 +5255,97 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-elena",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-elena",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-ELENA"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/pat-elena-marsh",
+     "display": "Elena Marsh"
+    },
+    "sent": "2026-10-02T12:00:00-04:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: Amara Okafor, Lucas Brennan."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-elena",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-elena",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-elena"
+     }
+    ],
+    "recorded": "2026-10-02T12:00:00-04:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-elena"
+      }
      }
     ]
    }
@@ -5193,9 +5362,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/034ccd79-62c4-ae8c-fe96-9f67dd6d7207"
+    },
+    "encounter": {
+     "reference": "Encounter/034ccd79-62c4-ae8c-92f5-b0162a314be7"
     },
     "period": {
      "start": "2026-10-10T13:57:57+00:00"
@@ -5208,7 +5380,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999952895"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999952895"
+       }
       }
      },
      {
@@ -5218,7 +5394,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -5226,6 +5406,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-034ccd79",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-034ccd79",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-034CCD79"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/034ccd79-62c4-ae8c-fe96-9f67dd6d7207"
+    },
+    "sent": "2026-10-10T13:57:57+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999952895, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-034ccd79",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-034ccd79",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-034ccd79"
+     }
+    ],
+    "recorded": "2026-10-10T13:57:57+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-034ccd79"
+      }
      }
     ]
    }
@@ -5242,9 +5512,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/068177c1-8d2f-d13f-6a1d-227d04383923"
+    },
+    "encounter": {
+     "reference": "Encounter/068177c1-8d2f-d13f-663b-538193ac6115"
     },
     "period": {
      "start": "2026-04-14T06:04:17+00:00"
@@ -5257,7 +5530,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999980193"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999980193"
+       }
       }
      },
      {
@@ -5267,7 +5544,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5275,6 +5556,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-068177c1",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-068177c1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-068177C1"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/068177c1-8d2f-d13f-6a1d-227d04383923"
+    },
+    "sent": "2026-04-14T06:04:17+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999980193, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-068177c1",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-068177c1",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-068177c1"
+     }
+    ],
+    "recorded": "2026-04-14T06:04:17+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-068177c1"
+      }
      }
     ]
    }
@@ -5291,9 +5662,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/091a4b71-31ee-8d39-c0a6-c021b3951aed"
+    },
+    "encounter": {
+     "reference": "Encounter/091a4b71-31ee-8d39-b973-32e043a3f65d"
     },
     "period": {
      "start": "2026-04-12T03:16:30+00:00"
@@ -5306,7 +5680,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999994392"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999994392"
+       }
       }
      },
      {
@@ -5316,7 +5694,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5324,6 +5706,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-091a4b71",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-091a4b71",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-091A4B71"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/091a4b71-31ee-8d39-c0a6-c021b3951aed"
+    },
+    "sent": "2026-04-12T03:16:30+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999994392, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-091a4b71",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-091a4b71",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-091a4b71"
+     }
+    ],
+    "recorded": "2026-04-12T03:16:30+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-091a4b71"
+      }
      }
     ]
    }
@@ -5340,9 +5812,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/13cca394-008d-dcfa-eac3-fc130583f321"
+    },
+    "encounter": {
+     "reference": "Encounter/13cca394-008d-dcfa-d591-1ebbfff2c10f"
     },
     "period": {
      "start": "2026-05-31T16:10:15+00:00"
@@ -5355,7 +5830,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999948794"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999948794"
+       }
       }
      },
      {
@@ -5365,7 +5844,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5373,6 +5856,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-13cca394",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-13cca394",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-13CCA394"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/13cca394-008d-dcfa-eac3-fc130583f321"
+    },
+    "sent": "2026-05-31T16:10:15+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999948794, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-13cca394",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-13cca394",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-13cca394"
+     }
+    ],
+    "recorded": "2026-05-31T16:10:15+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-13cca394"
+      }
      }
     ]
    }
@@ -5389,9 +5962,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/141a1044-5626-4d31-2f1b-eee5da610008"
+    },
+    "encounter": {
+     "reference": "Encounter/141a1044-5626-4d31-7b07-8cfb25338189"
     },
     "period": {
      "start": "2026-10-08T01:48:59+00:00"
@@ -5404,7 +5980,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999986190"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999986190"
+       }
       }
      },
      {
@@ -5414,7 +5994,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5422,6 +6006,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-141a1044",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-141a1044",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-141A1044"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/141a1044-5626-4d31-2f1b-eee5da610008"
+    },
+    "sent": "2026-10-08T01:48:59+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999986190, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-141a1044",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-141a1044",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-141a1044"
+     }
+    ],
+    "recorded": "2026-10-08T01:48:59+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-141a1044"
+      }
      }
     ]
    }
@@ -5438,9 +6112,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/1c51694e-3b0d-eb59-c08c-62414aeba810"
+    },
+    "encounter": {
+     "reference": "Encounter/1c51694e-3b0d-eb59-d438-7dbaa9e86e9e"
     },
     "period": {
      "start": "2026-08-15T12:52:12+00:00"
@@ -5453,7 +6130,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999990598"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999990598"
+       }
       }
      },
      {
@@ -5463,7 +6144,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -5471,6 +6156,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-1c51694e",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-1c51694e",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-1C51694E"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/1c51694e-3b0d-eb59-c08c-62414aeba810"
+    },
+    "sent": "2026-08-15T12:52:12+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999990598, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-1c51694e",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-1c51694e",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-1c51694e"
+     }
+    ],
+    "recorded": "2026-08-15T12:52:12+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-1c51694e"
+      }
      }
     ]
    }
@@ -5487,9 +6262,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/1d670d3c-f290-52f4-9409-aaffd1eb59f5"
+    },
+    "encounter": {
+     "reference": "Encounter/1d670d3c-f290-52f4-4ca7-ec4e0780865a"
     },
     "period": {
      "start": "2024-03-27T04:27:13+00:00"
@@ -5502,7 +6280,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999998997"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999998997"
+       }
       }
      },
      {
@@ -5512,7 +6294,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5520,6 +6306,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-1d670d3c",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-1d670d3c",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-1D670D3C"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/1d670d3c-f290-52f4-9409-aaffd1eb59f5"
+    },
+    "sent": "2024-03-27T04:27:13+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999998997, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-1d670d3c",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-1d670d3c",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-1d670d3c"
+     }
+    ],
+    "recorded": "2024-03-27T04:27:13+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-1d670d3c"
+      }
      }
     ]
    }
@@ -5536,9 +6412,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/2571ad10-0831-bf71-4731-6f7c298b20c7"
+    },
+    "encounter": {
+     "reference": "Encounter/2571ad10-0831-bf71-cd1a-e4a11c4b2eb8"
     },
     "period": {
      "start": "2018-12-03T09:10:23+00:00"
@@ -5551,7 +6430,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999952390"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999952390"
+       }
       }
      },
      {
@@ -5561,7 +6444,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -5569,6 +6456,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-2571ad10",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-2571ad10",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-2571AD10"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/2571ad10-0831-bf71-4731-6f7c298b20c7"
+    },
+    "sent": "2018-12-03T09:10:23+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999952390, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-2571ad10",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-2571ad10",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-2571ad10"
+     }
+    ],
+    "recorded": "2018-12-03T09:10:23+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-2571ad10"
+      }
      }
     ]
    }
@@ -5585,9 +6562,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/2b9f45d6-b742-8a68-3a22-b9ff8df93521"
+    },
+    "encounter": {
+     "reference": "Encounter/2b9f45d6-b742-8a68-6907-325461c65b0d"
     },
     "period": {
      "start": "2026-04-10T16:08:05+00:00"
@@ -5600,7 +6580,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999964494"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999964494"
+       }
       }
      },
      {
@@ -5610,7 +6594,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5618,6 +6606,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-2b9f45d6",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-2b9f45d6",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-2B9F45D6"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/2b9f45d6-b742-8a68-3a22-b9ff8df93521"
+    },
+    "sent": "2026-04-10T16:08:05+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999964494, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-2b9f45d6",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-2b9f45d6",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-2b9f45d6"
+     }
+    ],
+    "recorded": "2026-04-10T16:08:05+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-2b9f45d6"
+      }
      }
     ]
    }
@@ -5634,9 +6712,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/2d2b5b8c-4a13-4ca9-c867-64c8dbed0471"
+    },
+    "encounter": {
+     "reference": "Encounter/2d2b5b8c-4a13-4ca9-1584-95e8e9e9da3e"
     },
     "period": {
      "start": "2026-03-01T07:10:55+00:00"
@@ -5649,7 +6730,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999992396"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999992396"
+       }
       }
      },
      {
@@ -5659,7 +6744,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5667,6 +6756,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-2d2b5b8c",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-2d2b5b8c",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-2D2B5B8C"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/2d2b5b8c-4a13-4ca9-c867-64c8dbed0471"
+    },
+    "sent": "2026-03-01T07:10:55+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999992396, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-2d2b5b8c",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-2d2b5b8c",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-2d2b5b8c"
+     }
+    ],
+    "recorded": "2026-03-01T07:10:55+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-2d2b5b8c"
+      }
      }
     ]
    }
@@ -5683,9 +6862,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/4091b9f5-1779-c891-ea3d-0ef10828bcbd"
+    },
+    "encounter": {
+     "reference": "Encounter/4091b9f5-1779-c891-fde9-cdb56c97eeb5"
     },
     "period": {
      "start": "2026-07-08T21:21:39+00:00"
@@ -5698,7 +6880,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999990697"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999990697"
+       }
       }
      },
      {
@@ -5708,7 +6894,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -5716,6 +6906,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-4091b9f5",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-4091b9f5",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-4091B9F5"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/4091b9f5-1779-c891-ea3d-0ef10828bcbd"
+    },
+    "sent": "2026-07-08T21:21:39+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999990697, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-4091b9f5",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-4091b9f5",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-4091b9f5"
+     }
+    ],
+    "recorded": "2026-07-08T21:21:39+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-4091b9f5"
+      }
      }
     ]
    }
@@ -5732,9 +7012,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/49dfe873-b7aa-0c75-5a43-4bcc125bc3e9"
+    },
+    "encounter": {
+     "reference": "Encounter/49dfe873-b7aa-0c75-93d9-fe7fa38dcb6d"
     },
     "period": {
      "start": "2026-08-19T00:26:52+00:00"
@@ -5747,7 +7030,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999999698"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999999698"
+       }
       }
      },
      {
@@ -5757,7 +7044,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5765,6 +7056,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-49dfe873",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-49dfe873",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-49DFE873"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/49dfe873-b7aa-0c75-5a43-4bcc125bc3e9"
+    },
+    "sent": "2026-08-19T00:26:52+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999999698, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-49dfe873",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-49dfe873",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-49dfe873"
+     }
+    ],
+    "recorded": "2026-08-19T00:26:52+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-49dfe873"
+      }
      }
     ]
    }
@@ -5781,9 +7162,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/4b286419-9530-1f2f-b9f9-638a40f29024"
+    },
+    "encounter": {
+     "reference": "Encounter/4b286419-9530-1f2f-f2b0-59a68e4954b2"
     },
     "period": {
      "start": "2026-09-12T09:45:54+00:00"
@@ -5796,7 +7180,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999991596"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999991596"
+       }
       }
      },
      {
@@ -5806,7 +7194,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -5814,6 +7206,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-4b286419",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-4b286419",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-4B286419"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/4b286419-9530-1f2f-b9f9-638a40f29024"
+    },
+    "sent": "2026-09-12T09:45:54+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999991596, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-4b286419",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-4b286419",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-4b286419"
+     }
+    ],
+    "recorded": "2026-09-12T09:45:54+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-4b286419"
+      }
      }
     ]
    }
@@ -5830,9 +7312,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/55612fe8-9071-4a97-8e4c-8cc653c8394c"
+    },
+    "encounter": {
+     "reference": "Encounter/55612fe8-9071-4a97-a960-e465a436082d"
     },
     "period": {
      "start": "2026-08-28T06:22:45+00:00"
@@ -5845,7 +7330,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999998294"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999998294"
+       }
       }
      },
      {
@@ -5855,7 +7344,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1011",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1011"
+       },
        "display": "Elif Sato"
       }
      }
@@ -5863,6 +7356,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-55612fe8",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-55612fe8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-55612FE8"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/55612fe8-9071-4a97-8e4c-8cc653c8394c"
+    },
+    "sent": "2026-08-28T06:22:45+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999998294, Elif Sato."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-55612fe8",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-55612fe8",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-55612fe8"
+     }
+    ],
+    "recorded": "2026-08-28T06:22:45+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-55612fe8"
+      }
      }
     ]
    }
@@ -5879,9 +7462,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/574b44d2-2cda-01bd-6c1e-c5f80869b83e"
+    },
+    "encounter": {
+     "reference": "Encounter/574b44d2-2cda-01bd-0f9e-b75aeb81860a"
     },
     "period": {
      "start": "2026-09-19T15:47:13+00:00"
@@ -5894,7 +7480,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999985390"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999985390"
+       }
       }
      },
      {
@@ -5904,7 +7494,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -5912,6 +7506,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-574b44d2",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-574b44d2",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-574B44D2"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/574b44d2-2cda-01bd-6c1e-c5f80869b83e"
+    },
+    "sent": "2026-09-19T15:47:13+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999985390, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-574b44d2",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-574b44d2",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-574b44d2"
+     }
+    ],
+    "recorded": "2026-09-19T15:47:13+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-574b44d2"
+      }
      }
     ]
    }
@@ -5928,9 +7612,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/65cc56ef-1ffc-bfac-aa6f-fe828e6da128"
+    },
+    "encounter": {
+     "reference": "Encounter/65cc56ef-1ffc-bfac-cd0c-769f211fdd72"
     },
     "period": {
      "start": "1980-02-03T05:22:01+00:00"
@@ -5943,7 +7630,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999963991"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999963991"
+       }
       }
      },
      {
@@ -5953,7 +7644,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -5961,6 +7656,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-65cc56ef",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-65cc56ef",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-65CC56EF"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/65cc56ef-1ffc-bfac-aa6f-fe828e6da128"
+    },
+    "sent": "1980-02-03T05:22:01+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999963991, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-65cc56ef",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-65cc56ef",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-65cc56ef"
+     }
+    ],
+    "recorded": "1980-02-03T05:22:01+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-65cc56ef"
+      }
      }
     ]
    }
@@ -5977,9 +7762,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/6c669866-7041-1992-2938-40ff2a4520f7"
+    },
+    "encounter": {
+     "reference": "Encounter/6c669866-7041-1992-a822-18db245b1919"
     },
     "period": {
      "start": "1997-10-04T02:43:54+00:00"
@@ -5992,7 +7780,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999882399"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999882399"
+       }
       }
      },
      {
@@ -6002,7 +7794,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1008",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1008"
+       },
        "display": "Farid Bauer"
       }
      }
@@ -6010,6 +7806,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-6c669866",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-6c669866",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-6C669866"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/6c669866-7041-1992-2938-40ff2a4520f7"
+    },
+    "sent": "1997-10-04T02:43:54+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999882399, Farid Bauer."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-6c669866",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-6c669866",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-6c669866"
+     }
+    ],
+    "recorded": "1997-10-04T02:43:54+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-6c669866"
+      }
      }
     ]
    }
@@ -6026,9 +7912,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/815ff645-c396-834b-d0ee-0620a11710cf"
+    },
+    "encounter": {
+     "reference": "Encounter/815ff645-c396-834b-e719-79d606de719e"
     },
     "period": {
      "start": "2026-08-13T20:13:13+00:00"
@@ -6041,7 +7930,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999992792"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999992792"
+       }
       }
      },
      {
@@ -6051,7 +7944,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6059,6 +7956,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-815ff645",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-815ff645",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-815FF645"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/815ff645-c396-834b-d0ee-0620a11710cf"
+    },
+    "sent": "2026-08-13T20:13:13+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999992792, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-815ff645",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-815ff645",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-815ff645"
+     }
+    ],
+    "recorded": "2026-08-13T20:13:13+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-815ff645"
+      }
      }
     ]
    }
@@ -6075,9 +8062,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/868f2c18-1210-e4f6-d471-4b0b2e370225"
+    },
+    "encounter": {
+     "reference": "Encounter/868f2c18-1210-e4f6-7900-392c8cbca4c9"
     },
     "period": {
      "start": "2025-03-19T04:02:46+00:00"
@@ -6090,7 +8080,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999991893"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999991893"
+       }
       }
      },
      {
@@ -6100,7 +8094,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6108,6 +8106,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-868f2c18",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-868f2c18",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-868F2C18"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/868f2c18-1210-e4f6-d471-4b0b2e370225"
+    },
+    "sent": "2025-03-19T04:02:46+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999991893, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-868f2c18",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-868f2c18",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-868f2c18"
+     }
+    ],
+    "recorded": "2025-03-19T04:02:46+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-868f2c18"
+      }
      }
     ]
    }
@@ -6124,9 +8212,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/89316910-0675-d580-ea7d-2b516045ad3e"
+    },
+    "encounter": {
+     "reference": "Encounter/89316910-0675-d580-093d-938ca795dbb9"
     },
     "period": {
      "start": "2025-12-28T14:39:18+00:00"
@@ -6139,7 +8230,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999981399"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999981399"
+       }
       }
      },
      {
@@ -6149,7 +8244,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6157,6 +8256,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-89316910",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-89316910",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-89316910"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/89316910-0675-d580-ea7d-2b516045ad3e"
+    },
+    "sent": "2025-12-28T14:39:18+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999981399, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-89316910",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-89316910",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-89316910"
+     }
+    ],
+    "recorded": "2025-12-28T14:39:18+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-89316910"
+      }
      }
     ]
    }
@@ -6173,9 +8362,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/96273e26-32fc-3db7-aacb-bb44801d336e"
+    },
+    "encounter": {
+     "reference": "Encounter/96273e26-32fc-3db7-95b1-841e1ed6d285"
     },
     "period": {
      "start": "2026-04-26T13:02:24+00:00"
@@ -6188,7 +8380,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996090"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999996090"
+       }
       }
      },
      {
@@ -6198,7 +8394,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6206,6 +8406,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-96273e26",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-96273e26",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-96273E26"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/96273e26-32fc-3db7-aacb-bb44801d336e"
+    },
+    "sent": "2026-04-26T13:02:24+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999996090, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-96273e26",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-96273e26",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-96273e26"
+     }
+    ],
+    "recorded": "2026-04-26T13:02:24+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-96273e26"
+      }
      }
     ]
    }
@@ -6222,9 +8512,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/a67f6014-54d1-b630-8d51-954d2d26bd42"
+    },
+    "encounter": {
+     "reference": "Encounter/a67f6014-54d1-b630-c5af-06ac1030887f"
     },
     "period": {
      "start": "2026-07-14T22:56:59+00:00"
@@ -6237,7 +8530,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999994491"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999994491"
+       }
       }
      },
      {
@@ -6247,7 +8544,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6255,6 +8556,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-a67f6014",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-a67f6014",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-A67F6014"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/a67f6014-54d1-b630-8d51-954d2d26bd42"
+    },
+    "sent": "2026-07-14T22:56:59+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999994491, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-a67f6014",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-a67f6014",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-a67f6014"
+     }
+    ],
+    "recorded": "2026-07-14T22:56:59+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-a67f6014"
+      }
      }
     ]
    }
@@ -6271,9 +8662,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/ae3546fc-4eff-79b7-276e-33c7b1beb735"
+    },
+    "encounter": {
+     "reference": "Encounter/ae3546fc-4eff-79b7-e029-208d74242a4f"
     },
     "period": {
      "start": "2026-07-02T02:03:07+00:00"
@@ -6286,7 +8680,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999999995"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999999995"
+       }
       }
      },
      {
@@ -6296,7 +8694,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6304,6 +8706,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-ae3546fc",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-ae3546fc",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-AE3546FC"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/ae3546fc-4eff-79b7-276e-33c7b1beb735"
+    },
+    "sent": "2026-07-02T02:03:07+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999999995, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-ae3546fc",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-ae3546fc",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-ae3546fc"
+     }
+    ],
+    "recorded": "2026-07-02T02:03:07+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-ae3546fc"
+      }
      }
     ]
    }
@@ -6320,9 +8812,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/b11899dd-7755-73bd-cc39-d6eea54d15a1"
+    },
+    "encounter": {
+     "reference": "Encounter/b11899dd-7755-73bd-6bf4-62ed30856a50"
     },
     "period": {
      "start": "2026-02-09T23:30:23+00:00"
@@ -6335,7 +8830,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999991695"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999991695"
+       }
       }
      },
      {
@@ -6345,7 +8844,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -6353,6 +8856,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-b11899dd",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-b11899dd",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-B11899DD"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/b11899dd-7755-73bd-cc39-d6eea54d15a1"
+    },
+    "sent": "2026-02-09T23:30:23+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999991695, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-b11899dd",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-b11899dd",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-b11899dd"
+     }
+    ],
+    "recorded": "2026-02-09T23:30:23+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-b11899dd"
+      }
      }
     ]
    }
@@ -6369,9 +8962,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/b3d9fe5d-04e1-dc3e-ceef-0719f236eff6"
+    },
+    "encounter": {
+     "reference": "Encounter/b3d9fe5d-04e1-dc3e-a4b7-087fb982c4b1"
     },
     "period": {
      "start": "2025-04-24T12:20:15+00:00"
@@ -6384,7 +8980,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999963397"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999963397"
+       }
       }
      },
      {
@@ -6394,7 +8994,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6402,6 +9006,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-b3d9fe5d",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-b3d9fe5d",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-B3D9FE5D"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/b3d9fe5d-04e1-dc3e-ceef-0719f236eff6"
+    },
+    "sent": "2025-04-24T12:20:15+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999963397, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-b3d9fe5d",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-b3d9fe5d",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-b3d9fe5d"
+     }
+    ],
+    "recorded": "2025-04-24T12:20:15+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-b3d9fe5d"
+      }
      }
     ]
    }
@@ -6418,9 +9112,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/b6bb2907-5188-8689-8b76-341664e59cb2"
+    },
+    "encounter": {
+     "reference": "Encounter/b6bb2907-5188-8689-1b11-e2d5ff8119e5"
     },
     "period": {
      "start": "2026-07-02T13:49:37+00:00"
@@ -6433,7 +9130,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999988196"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999988196"
+       }
       }
      },
      {
@@ -6443,7 +9144,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6451,6 +9156,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-b6bb2907",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-b6bb2907",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-B6BB2907"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/b6bb2907-5188-8689-8b76-341664e59cb2"
+    },
+    "sent": "2026-07-02T13:49:37+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999988196, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-b6bb2907",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-b6bb2907",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-b6bb2907"
+     }
+    ],
+    "recorded": "2026-07-02T13:49:37+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-b6bb2907"
+      }
      }
     ]
    }
@@ -6467,9 +9262,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/bae49511-dd8c-d6df-e7be-b77c768bedcc"
+    },
+    "encounter": {
+     "reference": "Encounter/bae49511-dd8c-d6df-d576-d9c95b4f1454"
     },
     "period": {
      "start": "2026-09-03T12:21:49+00:00"
@@ -6482,7 +9280,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999999193"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999999193"
+       }
       }
      },
      {
@@ -6492,7 +9294,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6500,6 +9306,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-bae49511",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-bae49511",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-BAE49511"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/bae49511-dd8c-d6df-e7be-b77c768bedcc"
+    },
+    "sent": "2026-09-03T12:21:49+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999999193, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-bae49511",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-bae49511",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-bae49511"
+     }
+    ],
+    "recorded": "2026-09-03T12:21:49+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-bae49511"
+      }
      }
     ]
    }
@@ -6516,9 +9412,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/bb494bf8-339d-d47a-e819-b9cd2a11f248"
+    },
+    "encounter": {
+     "reference": "Encounter/bb494bf8-339d-d47a-74fd-3c7d3e8af4dd"
     },
     "period": {
      "start": "2026-04-22T23:34:33+00:00"
@@ -6531,7 +9430,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999967893"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999967893"
+       }
       }
      },
      {
@@ -6541,7 +9444,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -6549,6 +9456,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-bb494bf8",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-bb494bf8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-BB494BF8"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/bb494bf8-339d-d47a-e819-b9cd2a11f248"
+    },
+    "sent": "2026-04-22T23:34:33+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999967893, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-bb494bf8",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-bb494bf8",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-bb494bf8"
+     }
+    ],
+    "recorded": "2026-04-22T23:34:33+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-bb494bf8"
+      }
      }
     ]
    }
@@ -6565,9 +9562,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/bd9dfdd1-aebf-018a-774f-e531d29678e5"
+    },
+    "encounter": {
+     "reference": "Encounter/bd9dfdd1-aebf-018a-2d64-c53db56d2c58"
     },
     "period": {
      "start": "2026-06-04T04:21:54+00:00"
@@ -6580,7 +9580,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999996793"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999996793"
+       }
       }
      },
      {
@@ -6590,7 +9594,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -6598,6 +9606,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-bd9dfdd1",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-bd9dfdd1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-BD9DFDD1"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/bd9dfdd1-aebf-018a-774f-e531d29678e5"
+    },
+    "sent": "2026-06-04T04:21:54+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999996793, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-bd9dfdd1",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-bd9dfdd1",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-bd9dfdd1"
+     }
+    ],
+    "recorded": "2026-06-04T04:21:54+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-bd9dfdd1"
+      }
      }
     ]
    }
@@ -6614,9 +9712,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/c4ff5772-cb90-f9bd-9f85-4542e0ebf5fd"
+    },
+    "encounter": {
+     "reference": "Encounter/c4ff5772-cb90-f9bd-c5e6-5eed29792445"
     },
     "period": {
      "start": "2026-03-05T23:01:41+00:00"
@@ -6629,7 +9730,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999957498"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999957498"
+       }
       }
      },
      {
@@ -6639,7 +9744,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -6647,6 +9756,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-c4ff5772",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-c4ff5772",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-C4FF5772"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/c4ff5772-cb90-f9bd-9f85-4542e0ebf5fd"
+    },
+    "sent": "2026-03-05T23:01:41+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999957498, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-c4ff5772",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-c4ff5772",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-c4ff5772"
+     }
+    ],
+    "recorded": "2026-03-05T23:01:41+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-c4ff5772"
+      }
      }
     ]
    }
@@ -6663,9 +9862,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/cc63c2f1-1db0-28cb-0324-8be7310ddadd"
+    },
+    "encounter": {
+     "reference": "Encounter/cc63c2f1-1db0-28cb-3b47-6b452a329602"
     },
     "period": {
      "start": "2026-06-22T20:11:18+00:00"
@@ -6678,7 +9880,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999942094"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999942094"
+       }
       }
      },
      {
@@ -6688,7 +9894,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -6696,6 +9906,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-cc63c2f1",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-cc63c2f1",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-CC63C2F1"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/cc63c2f1-1db0-28cb-0324-8be7310ddadd"
+    },
+    "sent": "2026-06-22T20:11:18+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999942094, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-cc63c2f1",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-cc63c2f1",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-cc63c2f1"
+     }
+    ],
+    "recorded": "2026-06-22T20:11:18+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-cc63c2f1"
+      }
      }
     ]
    }
@@ -6712,9 +10012,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/d1974b52-f588-45cf-5c27-9e5b1e47d889"
+    },
+    "encounter": {
+     "reference": "Encounter/d1974b52-f588-45cf-e9d2-12f806755016"
     },
     "period": {
      "start": "2026-09-19T08:54:47+00:00"
@@ -6727,7 +10030,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999979799"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999979799"
+       }
       }
      },
      {
@@ -6737,7 +10044,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6745,6 +10056,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-d1974b52",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-d1974b52",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-D1974B52"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/d1974b52-f588-45cf-5c27-9e5b1e47d889"
+    },
+    "sent": "2026-09-19T08:54:47+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999979799, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-d1974b52",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-d1974b52",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-d1974b52"
+     }
+    ],
+    "recorded": "2026-09-19T08:54:47+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-d1974b52"
+      }
      }
     ]
    }
@@ -6761,9 +10162,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/d8bb1b82-8deb-201a-0fe8-308f79ce31a8"
+    },
+    "encounter": {
+     "reference": "Encounter/d8bb1b82-8deb-201a-cefa-151ccd8899a1"
     },
     "period": {
      "start": "2025-09-22T04:59:32+00:00"
@@ -6776,7 +10180,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999994491"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999994491"
+       }
       }
      },
      {
@@ -6786,7 +10194,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -6794,6 +10206,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-d8bb1b82",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-d8bb1b82",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-D8BB1B82"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/d8bb1b82-8deb-201a-0fe8-308f79ce31a8"
+    },
+    "sent": "2025-09-22T04:59:32+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999994491, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-d8bb1b82",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-d8bb1b82",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-d8bb1b82"
+     }
+    ],
+    "recorded": "2025-09-22T04:59:32+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-d8bb1b82"
+      }
      }
     ]
    }
@@ -6810,9 +10312,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/dacd76f7-1058-504d-47e9-c2cebc1ac573"
+    },
+    "encounter": {
+     "reference": "Encounter/dacd76f7-1058-504d-9cba-d42bf29bb69d"
     },
     "period": {
      "start": "2026-07-24T12:06:30+00:00"
@@ -6825,7 +10330,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999995191"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999995191"
+       }
       }
      },
      {
@@ -6835,7 +10344,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6843,6 +10356,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-dacd76f7",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-dacd76f7",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-DACD76F7"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/dacd76f7-1058-504d-47e9-c2cebc1ac573"
+    },
+    "sent": "2026-07-24T12:06:30+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999995191, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-dacd76f7",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-dacd76f7",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-dacd76f7"
+     }
+    ],
+    "recorded": "2026-07-24T12:06:30+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-dacd76f7"
+      }
      }
     ]
    }
@@ -6859,9 +10462,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/dbfd10e4-5882-fd43-1dfe-6b95d943bd1b"
+    },
+    "encounter": {
+     "reference": "Encounter/dbfd10e4-5882-fd43-8501-08b214382c3c"
     },
     "period": {
      "start": "2024-07-10T02:32:55+00:00"
@@ -6874,7 +10480,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999975094"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999975094"
+       }
       }
      },
      {
@@ -6884,7 +10494,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6892,6 +10506,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-dbfd10e4",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-dbfd10e4",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-DBFD10E4"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/dbfd10e4-5882-fd43-1dfe-6b95d943bd1b"
+    },
+    "sent": "2024-07-10T02:32:55+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999975094, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-dbfd10e4",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-dbfd10e4",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-dbfd10e4"
+     }
+    ],
+    "recorded": "2024-07-10T02:32:55+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-dbfd10e4"
+      }
      }
     ]
    }
@@ -6908,9 +10612,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/e34fa1e8-0cbc-0d22-89d4-6996de874bd8"
+    },
+    "encounter": {
+     "reference": "Encounter/e34fa1e8-0cbc-0d22-9571-968cf564315a"
     },
     "period": {
      "start": "2026-10-07T03:22:09+00:00"
@@ -6923,7 +10630,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999965293"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999965293"
+       }
       }
      },
      {
@@ -6933,7 +10644,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -6941,6 +10656,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-e34fa1e8",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-e34fa1e8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-E34FA1E8"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/e34fa1e8-0cbc-0d22-89d4-6996de874bd8"
+    },
+    "sent": "2026-10-07T03:22:09+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999965293, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-e34fa1e8",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-e34fa1e8",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-e34fa1e8"
+     }
+    ],
+    "recorded": "2026-10-07T03:22:09+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-e34fa1e8"
+      }
      }
     ]
    }
@@ -6957,9 +10762,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/e5863ab8-893d-3e6b-3da4-b903413869e2"
+    },
+    "encounter": {
+     "reference": "Encounter/e5863ab8-893d-3e6b-5ec9-36bf8451259b"
     },
     "period": {
      "start": "2024-08-29T05:55:00+00:00"
@@ -6972,7 +10780,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999993295"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999993295"
+       }
       }
      },
      {
@@ -6982,7 +10794,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -6990,6 +10806,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-e5863ab8",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-e5863ab8",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-E5863AB8"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/e5863ab8-893d-3e6b-3da4-b903413869e2"
+    },
+    "sent": "2024-08-29T05:55:00+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999993295, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-e5863ab8",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-e5863ab8",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-e5863ab8"
+     }
+    ],
+    "recorded": "2024-08-29T05:55:00+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-e5863ab8"
+      }
      }
     ]
    }
@@ -7006,9 +10912,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/e867c605-5382-756c-1d1f-a012fbc8d3b5"
+    },
+    "encounter": {
+     "reference": "Encounter/e867c605-5382-756c-e8db-0c448f374c9b"
     },
     "period": {
      "start": "2026-03-18T03:37:09+00:00"
@@ -7021,7 +10930,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999997890"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999997890"
+       }
       }
      },
      {
@@ -7031,7 +10944,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -7039,6 +10956,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-e867c605",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-e867c605",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-E867C605"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/e867c605-5382-756c-1d1f-a012fbc8d3b5"
+    },
+    "sent": "2026-03-18T03:37:09+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1024",
+     "display": "Samir Dlamini"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999997890, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-e867c605",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-e867c605",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-e867c605"
+     }
+    ],
+    "recorded": "2026-03-18T03:37:09+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1024",
+       "display": "Samir Dlamini"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-e867c605"
+      }
      }
     ]
    }
@@ -7055,9 +11062,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/ec084d82-e517-88af-cc1d-a0881be0f970"
+    },
+    "encounter": {
+     "reference": "Encounter/ec084d82-e517-88af-1ea9-514f60a2fc3f"
     },
     "period": {
      "start": "2026-02-13T10:16:22+00:00"
@@ -7070,7 +11080,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999962993"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999962993"
+       }
       }
      },
      {
@@ -7080,7 +11094,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1014",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1014"
+       },
        "display": "Farid Castillo"
       }
      }
@@ -7088,6 +11106,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-ec084d82",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-ec084d82",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-EC084D82"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/ec084d82-e517-88af-cc1d-a0881be0f970"
+    },
+    "sent": "2026-02-13T10:16:22+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1001",
+     "display": "Sofia Alvarez"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999962993, Farid Castillo."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-ec084d82",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-ec084d82",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-ec084d82"
+     }
+    ],
+    "recorded": "2026-02-13T10:16:22+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1001",
+       "display": "Sofia Alvarez"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-ec084d82"
+      }
      }
     ]
    }
@@ -7104,9 +11212,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/ef74fec9-541e-fab6-90f5-540f1e951194"
+    },
+    "encounter": {
+     "reference": "Encounter/ef74fec9-541e-fab6-df67-4ea96d2b40a8"
     },
     "period": {
      "start": "2026-06-16T22:36:11+00:00"
@@ -7119,7 +11230,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999981795"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999981795"
+       }
       }
      },
      {
@@ -7129,7 +11244,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -7137,6 +11256,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-ef74fec9",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-ef74fec9",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-EF74FEC9"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/ef74fec9-541e-fab6-90f5-540f1e951194"
+    },
+    "sent": "2026-06-16T22:36:11+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999981795, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-ef74fec9",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-ef74fec9",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-ef74fec9"
+     }
+    ],
+    "recorded": "2026-06-16T22:36:11+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-ef74fec9"
+      }
      }
     ]
    }
@@ -7153,9 +11362,12 @@
      }
     ],
     "status": "active",
-    "name": "Generated care team (latest visit)",
+    "name": "Care team set at onboarding (latest visit)",
     "subject": {
      "reference": "Patient/f75ba0c0-3571-3d63-e40b-fbd8571ce025"
+    },
+    "encounter": {
+     "reference": "Encounter/f75ba0c0-3571-3d63-56c7-2be3acdfaf01"
     },
     "period": {
      "start": "1989-08-18T01:36:21+00:00"
@@ -7168,7 +11380,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner?identifier=http://hl7.org/fhir/sid/us-npi|9999981894"
+       "type": "Practitioner",
+       "identifier": {
+        "system": "http://hl7.org/fhir/sid/us-npi",
+        "value": "9999981894"
+       }
       }
      },
      {
@@ -7178,7 +11394,11 @@
        }
       ],
       "member": {
-       "reference": "Practitioner/prac-e1013",
+       "type": "Practitioner",
+       "identifier": {
+        "system": "https://triad.example/fhir/sid/employee",
+        "value": "E1013"
+       },
        "display": "Felix Moreau"
       }
      }
@@ -7186,6 +11406,96 @@
     "managingOrganization": [
      {
       "reference": "Organization/org-triad-gh"
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Communication/msg-ct-syn-f75ba0c0",
+   "resource": {
+    "resourceType": "Communication",
+    "id": "msg-ct-syn-f75ba0c0",
+    "identifier": [
+     {
+      "system": "https://triad.example/fhir/sid/message",
+      "value": "MSG-CT-SYN-F75BA0C0"
+     }
+    ],
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/message-origin",
+      "valueCode": "Staff"
+     }
+    ],
+    "status": "completed",
+    "medium": [
+     {
+      "coding": [
+       {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+        "code": "ELECTRONIC",
+        "display": "Electronic"
+       }
+      ],
+      "text": "Electronic"
+     }
+    ],
+    "subject": {
+     "reference": "Patient/f75ba0c0-3571-3d63-e40b-fbd8571ce025"
+    },
+    "sent": "1989-08-18T01:36:21+00:00",
+    "sender": {
+     "reference": "Practitioner/prac-e1025",
+     "display": "Quinn Dubois"
+    },
+    "payload": [
+     {
+      "contentString": "Care team set: NPI 9999981894, Felix Moreau."
+     }
+    ]
+   }
+  },
+  {
+   "fullUrl": "https://triad.example/fhir/Provenance/prov-ct-syn-f75ba0c0",
+   "resource": {
+    "resourceType": "Provenance",
+    "id": "prov-ct-syn-f75ba0c0",
+    "extension": [
+     {
+      "url": "https://triad.example/fhir/StructureDefinition/assertion-intent",
+      "valueCode": "Report"
+     }
+    ],
+    "target": [
+     {
+      "reference": "CareTeam/ct-syn-f75ba0c0"
+     }
+    ],
+    "recorded": "1989-08-18T01:36:21+00:00",
+    "agent": [
+     {
+      "type": {
+       "coding": [
+        {
+         "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+         "code": "author",
+         "display": "Author"
+        }
+       ],
+       "text": "Author"
+      },
+      "who": {
+       "reference": "Practitioner/prac-e1025",
+       "display": "Quinn Dubois"
+      }
+     }
+    ],
+    "entity": [
+     {
+      "role": "source",
+      "what": {
+       "reference": "Communication/msg-ct-syn-f75ba0c0"
+      }
      }
     ]
    }
