@@ -27,7 +27,7 @@ def statements(text: str) -> list[str]:
 
 
 def violation_cases() -> list[tuple[str, str, str]]:
-    text = (config.SQL_DIR / "05_constraint_violations.sql").read_text(encoding="utf-8")
+    text = (config.DML_DIR / "05_constraint_violations.sql").read_text(encoding="utf-8")
     parts = re.split(r"^-- CASE: (.+)$", text, flags=re.M)[1:]
     cases = []
     for name, body in zip(parts[0::2], parts[1::2]):
@@ -55,16 +55,17 @@ def test_02_fills_all_29_tables(scenario_db):
 @pytest.mark.skipif(shutil.which("sqlite3") is None, reason="the sqlite3 command-line shell is not installed")
 def test_scripts_run_with_the_sqlite3_shell(tmp_path):
     db = tmp_path / "shell.db"
-    for name in ("01_create_tables.sql", "02_insert_seed.sql", "03_select_queries.sql"):
-        result = subprocess.run(["sqlite3", "-bail", str(db)], input=(config.SQL_DIR / name).read_text(),
+    for path in (config.DDL_DIR / "01_create_tables.sql", config.DML_DIR / "02_insert_seed.sql",
+                 config.DML_DIR / "03_select_queries.sql"):
+        result = subprocess.run(["sqlite3", "-bail", str(db)], input=path.read_text(),
                                 capture_output=True, text=True)
-        assert result.returncode == 0, f"{name}: {result.stderr}"
+        assert result.returncode == 0, f"{path.name}: {result.stderr}"
 
 
 def test_03_select_queries_run_and_answer_the_slide_question(scenario_db):
     conn = connect(scenario_db)
     results = [conn.execute(sql).fetchall() for sql in statements(
-        (config.SQL_DIR / "03_select_queries.sql").read_text(encoding="utf-8"))]
+        (config.DML_DIR / "03_select_queries.sql").read_text(encoding="utf-8"))]
     assert len(results) == 14  # Q1-Q13, with Q9 in two parts
     q3 = results[2]
     assert [tuple(r) for r in q3] == [("No", "Physician", "2026-10-02", "Not allergic. Allergy test negative.")]
@@ -74,7 +75,7 @@ def test_03_select_queries_run_and_answer_the_slide_question(scenario_db):
 
 def test_04_update_delete_runs_on_a_copy(scenario_copy):
     conn = connect(scenario_copy)
-    conn.executescript((config.SQL_DIR / "04_update_delete.sql").read_text(encoding="utf-8"))
+    conn.executescript((config.DML_DIR / "04_update_delete.sql").read_text(encoding="utf-8"))
     chain = conn.execute(
         "SELECT a.SupersedesId, a.Statement FROM Assertion a JOIN ClinicalEntry e ON e.Id = a.ClinicalEntryId "
         "WHERE e.IdentifierValue = 'MedicationRequest/mr-elena-amlodipine' ORDER BY a.Id").fetchall()

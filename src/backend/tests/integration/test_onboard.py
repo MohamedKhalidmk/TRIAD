@@ -121,7 +121,7 @@ def test_the_committed_report_and_seed_file_are_current(full_db, tmp_path):
     from infrastructure.sqlite.sql_export import export_scenarios
     out = tmp_path / "02.sql"
     export_scenarios(connect(full_db), out)
-    assert out.read_text(encoding="utf-8") == (config.SQL_DIR / "02_insert_seed.sql").read_text(encoding="utf-8"), \
+    assert out.read_text(encoding="utf-8") == (config.DML_DIR / "02_insert_seed.sql").read_text(encoding="utf-8"), \
         "Run: python src/backend/main.py export-sql"
     committed = json.loads(config.ONBOARD_REPORT_PATH.read_text(encoding="utf-8"))
     assert committed["rows"] == {t: scalar(connect(full_db), f"SELECT COUNT(*) FROM {t}") for t in TABLES}, \

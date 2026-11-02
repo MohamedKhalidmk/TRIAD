@@ -7,6 +7,8 @@ from pathlib import Path
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BACKEND_DIR / "data"
 SQL_DIR = BACKEND_DIR / "models" / "relational" / "sql"
+DDL_DIR = SQL_DIR / "ddl"   # CREATE statements: the schema
+DML_DIR = SQL_DIR / "dml"   # INSERT, SELECT, UPDATE and DELETE statements
 
 DB_PATH = Path(os.environ.get("TRIAD_DB_PATH", DATA_DIR / "triad.db"))
 SYNTHEA_PATH = DATA_DIR / "preprocessed" / "synthea_r4.ndjson.gz"

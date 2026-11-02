@@ -1,6 +1,6 @@
 -- TRIAD INSERT, UPDATE and DELETE examples (Milestone 4).
 -- Run this file on a COPY of the database, because it changes the data:
---     cp triad.db demo.db && sqlite3 demo.db < 04_update_delete.sql
+--     cp triad.db demo.db && sqlite3 demo.db < dml/04_update_delete.sql
 -- Each statement must succeed. 05_constraint_violations.sql shows the statements that must fail.
 
 PRAGMA foreign_keys = ON;

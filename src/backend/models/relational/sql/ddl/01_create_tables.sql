@@ -1,7 +1,7 @@
 -- TRIAD relational schema (Milestone 4). SQLite 3.43 or later.
 -- This script creates all 29 relations, their keys, the checks and the triggers.
--- Run it on a new, empty database:
---     sqlite3 triad.db < 01_create_tables.sql
+-- Run it on a new, empty database, from the folder src/backend/models/relational/sql:
+--     sqlite3 triad.db < ddl/01_create_tables.sql
 -- The foreign keys follow the relationships of the ER diagram (a tree).
 -- Values that hold a key (CareTeamMember, ChatSession, AuditEvent) have no foreign key. Triggers check them.
 

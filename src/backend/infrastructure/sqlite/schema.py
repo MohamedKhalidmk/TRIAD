@@ -6,7 +6,7 @@ import sqlite3
 from pathlib import Path
 from typing import Callable
 
-from infrastructure.config import SCHEMA_VERSION, SQL_DIR
+from infrastructure.config import DDL_DIR, SCHEMA_VERSION
 from infrastructure.sqlite.connection import connect
 
 
@@ -15,8 +15,8 @@ def run_script(conn: sqlite3.Connection, path: Path) -> None:
 
 
 def init_db(conn: sqlite3.Connection) -> None:
-    """Run 01_create_tables.sql. It sets PRAGMA user_version to the schema version."""
-    run_script(conn, SQL_DIR / "01_create_tables.sql")
+    """Run ddl/01_create_tables.sql. It sets PRAGMA user_version to the schema version."""
+    run_script(conn, DDL_DIR / "01_create_tables.sql")
 
 
 def schema_version(path: Path) -> int:

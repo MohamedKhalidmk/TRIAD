@@ -1,6 +1,6 @@
 -- TRIAD constraint checks (Milestone 4). Each CASE below MUST FAIL with the EXPECT error.
 -- Run this file on a COPY of the scenario database (01 + 02). The shell prints one error per case:
---     cp triad.db check.db && sqlite3 check.db < 05_constraint_violations.sql
+--     cp triad.db check.db && sqlite3 check.db < dml/05_constraint_violations.sql
 -- The test src/backend/tests/integration/test_schema.py runs each case on a new copy.
 -- Some cases first add a test patient. Each case uses its own test names, so the cases do not clash.
 

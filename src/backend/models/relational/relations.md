@@ -1,7 +1,7 @@
 # TRIAD relational schema (Milestone 4)
 
 This file maps the ER diagram (`../er/TRIAD_ERD.png`) to 29 relations.
-The SQL is in `sql/01_create_tables.sql`. Report page 3 uses this list.
+The DDL is in `sql/ddl/01_create_tables.sql`. The DML is in `sql/dml/` (see `sql/README.md`). Report page 3 uses this list.
 
 ## Notation
 

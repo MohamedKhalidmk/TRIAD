@@ -4,7 +4,7 @@ Commands:
     python src/backend/main.py init-db    [--db PATH]               create the empty schema
     python src/backend/main.py ensure-db  [--db PATH] [--reset-db]  build and load the database if it is missing
     python src/backend/main.py onboard    [--db PATH]               load the FHIR data into an empty schema
-    python src/backend/main.py export-sql [--db PATH] [--out FILE]  write 02_insert_seed.sql (the scenario data)
+    python src/backend/main.py export-sql [--db PATH] [--out FILE]  write dml/02_insert_seed.sql (the scenario data)
 """
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("command", choices=["init-db", "ensure-db", "onboard", "export-sql"])
     parser.add_argument("--db", type=Path, default=config.DB_PATH, help="Path of the SQLite database.")
     parser.add_argument("--reset-db", action="store_true", help="Build the database again (ensure-db).")
-    parser.add_argument("--out", type=Path, default=config.SQL_DIR / "02_insert_seed.sql",
+    parser.add_argument("--out", type=Path, default=config.DML_DIR / "02_insert_seed.sql",
                         help="Output file of export-sql.")
     args = parser.parse_args(argv)
 

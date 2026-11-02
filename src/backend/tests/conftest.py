@@ -12,8 +12,8 @@ from infrastructure.sqlite.connection import connect
 from infrastructure.sqlite.schema import ensure_db
 
 
-def run_sql_file(conn: sqlite3.Connection, name: str) -> None:
-    conn.executescript((config.SQL_DIR / name).read_text(encoding="utf-8"))
+def run_sql_file(conn: sqlite3.Connection, path: Path) -> None:
+    conn.executescript(path.read_text(encoding="utf-8"))
 
 
 @pytest.fixture(scope="session")
@@ -21,8 +21,8 @@ def scenario_db(tmp_path_factory) -> Path:
     """A database made only from the SQL scripts 01 and 02 (no Python onboarding)."""
     path = tmp_path_factory.mktemp("scenario") / "scenario.db"
     conn = connect(path)
-    run_sql_file(conn, "01_create_tables.sql")
-    run_sql_file(conn, "02_insert_seed.sql")
+    run_sql_file(conn, config.DDL_DIR / "01_create_tables.sql")
+    run_sql_file(conn, config.DML_DIR / "02_insert_seed.sql")
     conn.close()
     return path
 

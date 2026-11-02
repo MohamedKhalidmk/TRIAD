@@ -1,9 +1,9 @@
-"""Write the scenario data as plain SQL INSERT statements (02_insert_seed.sql).
+"""Write the scenario data as plain SQL INSERT statements (dml/02_insert_seed.sql).
 
 The scope is the TRIAD General directory (departments, locations, TRIAD staff), Patient A
 (Elena Marsh) with all her records, and the demo chat and audit rows. The file fills all 29 tables.
 Each foreign key is a subselect on the natural key of the target row, as the course manual shows.
-So the file does not depend on row ids, and it runs after 01_create_tables.sql on a new database.
+So the file does not depend on row ids, and it runs after ddl/01_create_tables.sql on a new database.
 """
 from __future__ import annotations
 
@@ -120,9 +120,10 @@ def export_scenarios(conn: sqlite3.Connection, out: Path) -> int:
     lines = [
         "-- TRIAD scenario data (Milestone 4). This file is made by:",
         "--     python src/backend/main.py export-sql",
-        "-- Do not edit it by hand. Run it after 01_create_tables.sql on a new database:",
-        "--     sqlite3 triad.db < 01_create_tables.sql",
-        "--     sqlite3 triad.db < 02_insert_seed.sql",
+        "-- Do not edit it by hand. Run it after ddl/01_create_tables.sql on a new database,",
+        "-- from the folder src/backend/models/relational/sql:",
+        "--     sqlite3 triad.db < ddl/01_create_tables.sql",
+        "--     sqlite3 triad.db < dml/02_insert_seed.sql",
         "-- It holds the TRIAD General directory, Patient A (Elena Marsh) and the demo chat and audit rows.",
         "-- Each foreign key is a subselect on the natural key of the target row (no row ids).",
         "-- The full data set (112 Synthea patients) comes from the onboarding step (main.py ensure-db).",
