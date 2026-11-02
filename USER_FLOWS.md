@@ -153,7 +153,7 @@ Chat mode: if no API key is set, the app uses the **fake LLM**. All steps then w
 - **User:** Dr. Amara Okafor (Doctor).
 - **Page:** `/patients/:id` for Elena Marsh.
 - **Action:** Ask the Care Assistant: "Is she allergic to penicillin?"
-- **Expected result:** "No. A physician ruled it out with an allergy test on Oct 2, 2026." The card shows the current assertion. Below it, the card shows two superseded assertions with a line through them: "Other clinic, 2024: penicillin allergy (copied)" and "Front desk, 2019: penicillin allergy".
+- **Expected result:** "No. A physician ruled it out with an allergy test on Oct 2, 2026." The card shows the current assertion. Below it, the card shows two superseded assertions with a line through them, oldest first (as on the slide): "Front desk, 2019: penicillin allergy" and "Other clinic, 2024: penicillin allergy (copied)".
 
 ### Step 1. Arrival (front desk)
 

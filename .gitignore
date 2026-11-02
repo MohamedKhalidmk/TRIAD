@@ -42,3 +42,6 @@ src/frontend/dist/
 # Test output
 test-results/
 playwright-report/
+
+# Claude Code agent worktrees (local only)
+/.claude/worktrees/

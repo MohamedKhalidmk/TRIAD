@@ -181,7 +181,7 @@ The chat looks like the chat of the 3MT slide:
 
 - The answer text, then one evidence card for each citation, by rank.
 - The card shows the current assertion: the author label, the date and the statement, for example "**Physician**, Oct 2, 2026: not allergic (allergy test)".
-- Under "Supersedes", the card lists the superseded assertions in the order of the API (newest first), with a line through each one ("Front desk, 2019: penicillin allergy").
+- Under "Supersedes", the card lists the superseded assertions in the order of the API (oldest first, as on the 3MT slide), with a line through each one ("Front desk, 2019: penicillin allergy").
   A patient gets no superseded assertions from the API, so a patient sees no "Supersedes" list.
 - A card of a new assertion from a "tell" turn has the badge "Recorded, unconfirmed".
 - The window bar shows the chat mode of the session (`rules`, `fake` or `llm`).

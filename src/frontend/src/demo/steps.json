@@ -29,7 +29,7 @@
       "expected": [
         "The answer is: \"No. A physician ruled it out with an allergy test on Oct 2, 2026.\"",
         "The card shows the current assertion.",
-        "Below it, the card shows two superseded assertions with a line through them: \"Other clinic, 2024: penicillin allergy (copied)\" and \"Front desk, 2019: penicillin allergy\"."
+        "Below it, the card shows two superseded assertions with a line through them, oldest first: \"Front desk, 2019: penicillin allergy\" and \"Other clinic, 2024: penicillin allergy (copied)\"."
       ]
     },
     {
