@@ -1,7 +1,7 @@
 // The top bar: the hospital name, the links of the role, the clock, the Demo guide button
 // and the acting-as bar (the user type and the user).
-// The clock: if GET /api/health gives clock "system", it shows the local time of the browser.
-// If it gives "fixed" or no clock (an old backend), it shows the demo time of the server.
+// The clock: if GET /api/health gives clock "system", it shows the time of the server (the clock of this
+// computer), and it moves on in the browser. If it gives "fixed" or no clock (an old backend), it shows the demo time.
 // The top bar writes its height to the CSS variable --topbar-height. The chat pane uses it (styles.css).
 
 import { useEffect, useRef, useState } from 'react';
@@ -50,26 +50,43 @@ function pad2(value: number): string {
   return value < 10 ? `0${value}` : String(value);
 }
 
-/** The local time of the browser as "YYYY-MM-DDTHH:MM". It changes each 30 s while "enabled" is true. */
-function useLocalTime(enabled: boolean): string {
-  // new Date() is correct here: it is the clock of this computer, not a date-only string of the API.
-  const [now, setNow] = useState(() => new Date());
+/** The offset of an ISO time in minutes: "-07:00" gives -420. "Z" or no offset gives 0. */
+function offsetMinutes(iso: string): number {
+  const match = /([+-])(\d{2}):?(\d{2})$/.exec(iso);
+  if (!match) return 0;
+  const minutes = Number(match[2]) * 60 + Number(match[3]);
+  return match[1] === '-' ? -minutes : minutes;
+}
+
+/**
+ * The time of the server as "YYYY-MM-DDTHH:MM", in the offset of the server. It starts at `serverNow` (the last
+ * health response) and moves on each 30 s while "enabled" is true. The clock does not use the time zone data of
+ * the browser. That data can be different from the data of the computer (for example, British Columbia uses
+ * UTC-7 for all the year), so the clock always agrees with the times of the new records.
+ */
+function useServerTime(serverNow: string, enabled: boolean): string {
+  const [elapsed, setElapsed] = useState(0);
   useEffect(() => {
     if (!enabled) return;
-    setNow(new Date());
-    const timer = window.setInterval(() => setNow(new Date()), CLOCK_INTERVAL_MS);
+    const start = Date.now();
+    setElapsed(0);
+    const timer = window.setInterval(() => setElapsed(Date.now() - start), CLOCK_INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [enabled]);
-  return `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}T${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+  }, [serverNow, enabled]);
+  const moment = Date.parse(serverNow);
+  if (Number.isNaN(moment)) return serverNow;
+  // Move the time by the offset, then read the UTC fields: they are the wall-clock time of the server.
+  const wall = new Date(moment + elapsed + offsetMinutes(serverNow) * 60_000);
+  return `${wall.getUTCFullYear()}-${pad2(wall.getUTCMonth() + 1)}-${pad2(wall.getUTCDate())}T${pad2(wall.getUTCHours())}:${pad2(wall.getUTCMinutes())}`;
 }
 
 /** The long form shows above 1180 px (in two lines up to 1300 px), the short form below (styles.css). */
 function Clock({ health }: { health: Health }) {
   const system = health.clock === 'system';
-  const localTime = useLocalTime(system);
+  const localTime = useServerTime(health.now, system);
   if (system) {
     return (
-      <span className="clock" title="The local time of this computer">
+      <span className="clock" title="The time of the server. It is the clock of this computer. New records get this time.">
         <span className="clock-long">
           <span>{formatDateTime(localTime)}</span>
           <span className="clock-mode">Chat: {health.mode}</span>

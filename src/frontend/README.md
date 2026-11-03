@@ -132,7 +132,9 @@ The helpers are in `src/lib/dates.ts`.
 
 The clock in the top bar follows the value `clock` of `GET /api/health`:
 
-- `system` (`TRIAD_NOW=system`): the local time of the computer, for example "Nov 3, 2026 15:52". It changes each 30 s.
+- `system` (`TRIAD_NOW=system`): the time of the server, for example "Nov 3, 2026 15:52". It starts at `now` of the
+  health response and moves on each 30 s, in the offset of the server. It does not use the time zone data of the
+  browser, so it always agrees with the times of the new records.
 - `fixed`, or no value (an old backend): the demo time of the server, for example "Demo time: Oct 30, 2026 09:19".
 - Below 1180 px, the clock shows the short form: "15:52" or "Demo 09:19".
 
