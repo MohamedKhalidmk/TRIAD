@@ -1,19 +1,22 @@
 // The Chart tab (staff) and "My record" (patient): the current items, grouped by category.
 // GET /api/patients/{id}/chart. "Show history" (staff) adds the superseded assertions (history=true).
+// The server finds the text (q), filters the category and sends one page. The chips show the counts of the server.
+// Each chart read writes an audit record, so the search waits 300 ms after the last key.
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { api, queryKeys } from '../api/endpoints';
+import { api, queryKeys, type ChartParams } from '../api/endpoints';
 import type { AssertionView, Category, Patient, UserView } from '../api/types';
 import { Badge, IntentBadge, SourceBadge, VerificationBadge } from '../components/Badges';
 import { EmptyState, ErrorPanel, Loading } from '../components/ErrorView';
+import { formatCount, Pager } from '../components/Pager';
 import { formatDateTime } from '../lib/dates';
 import { CATEGORY_GROUP_LABELS, CATEGORY_ORDER } from '../lib/labels';
+import { useDebounced } from '../lib/useDebounced';
+import { keepPageOf, usePage } from '../lib/usePage';
 import { detailSummary, pickIntent, supersededCount } from './assertionText';
 import { ChainDialog } from './ChainView';
 import { detailsFromItem, isEntryCategory, LOINC_SYSTEM, type RecordSeed } from './recordModel';
-
-const ROWS_PER_GROUP = 8;
 
 interface ChartTabProps {
   patient: Patient;
@@ -21,10 +24,13 @@ interface ChartTabProps {
   onRecord: (seed: RecordSeed) => void;
 }
 
-export function useChart(patientId: number, history: boolean) {
+/** One page of the chart. The previous page of the same patient stays on the screen while the next page loads. */
+export function useChart(patientId: number, params: ChartParams, enabled = true) {
   return useQuery({
-    queryKey: queryKeys.chart(patientId, history),
-    queryFn: ({ signal }) => api.chart(patientId, history ? { history: true } : {}, signal),
+    queryKey: queryKeys.chart(patientId, params),
+    queryFn: ({ signal }) => api.chart(patientId, params, signal),
+    placeholderData: keepPageOf(queryKeys.patientCharts(patientId)),
+    enabled,
   });
 }
 
@@ -34,28 +40,29 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
   const [filter, setFilter] = useState('');
   const [category, setCategory] = useState<Category | 'all'>('all');
   const [chainOf, setChainOf] = useState<number | null>(null);
-  const chart = useChart(patient.id, history && !isPatient);
+  const q = useDebounced(filter.trim(), 300);
+  const withHistory = history && !isPatient;
+  const page = usePage([patient.id, withHistory, q, category]);
+  const listRef = useRef<HTMLDivElement>(null);
+  const chart = useChart(patient.id, {
+    history: withHistory || undefined,
+    q: q || undefined,
+    category: category === 'all' ? undefined : category,
+    ...page.params,
+  });
   const intents = patient.permissions.recordIntents;
   // No record buttons when the chart is not open to the user (for example the 403 panel of Use case 7).
   const canRecord = !isPatient && intents.length > 0 && patient.permissions.viewChart && !chart.isError;
 
-  const items = chart.data?.items ?? [];
+  const items = useMemo(() => chart.data?.items ?? [], [chart.data]);
   const byId = useMemo(() => new Map(items.map((item) => [item.id, item])), [items]);
-  const needle = filter.trim().toLowerCase();
-  const visible = items.filter(
-    (item) =>
-      (category === 'all' || item.category === category) &&
-      (!needle ||
-        item.display.toLowerCase().includes(needle) ||
-        item.statement.toLowerCase().includes(needle) ||
-        item.author.name.toLowerCase().includes(needle)),
-  );
-  const counts = useMemo(() => {
-    const result = new Map<Category, number>();
-    for (const item of items) result.set(item.category, (result.get(item.category) ?? 0) + 1);
-    return result;
-  }, [items]);
-  const groups = CATEGORY_ORDER.map((cat) => ({ category: cat, items: visible.filter((item) => item.category === cat) })).filter(
+  // The counts of the server: the items of each category with the search, on all pages. "All" is their sum.
+  const counts = chart.data?.counts ?? {};
+  const countOf = (cat: Category) => counts[cat] ?? 0;
+  const allCount = CATEGORY_ORDER.reduce((sum, cat) => sum + countOf(cat), 0);
+  const filtered = q !== '' || category !== 'all';
+  // The groups of this page. The server sends the items in the category order, so a group can go on to the next page.
+  const groups = CATEGORY_ORDER.map((cat) => ({ category: cat, items: items.filter((item) => item.category === cat) })).filter(
     (group) => group.items.length > 0,
   );
 
@@ -182,7 +189,7 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
         <ErrorPanel error={chart.error} onRetry={() => chart.refetch()} />
       ) : (
         <>
-          {items.length > 0 && (
+          {(filtered || filter !== '' || allCount > 0) && (
             <div className="filter-bar">
               <div className="field field-inline">
                 <label htmlFor="chart-filter">Find in the chart</label>
@@ -197,9 +204,9 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
               </div>
               <div className="chips" role="group" aria-label="Category">
                 <button type="button" className={category === 'all' ? 'chip chip-selected' : 'chip'} aria-pressed={category === 'all'} onClick={() => setCategory('all')}>
-                  All ({items.length})
+                  All ({formatCount(allCount)})
                 </button>
-                {CATEGORY_ORDER.filter((cat) => counts.has(cat)).map((cat) => (
+                {CATEGORY_ORDER.filter((cat) => countOf(cat) > 0 || cat === category).map((cat) => (
                   <button
                     key={cat}
                     type="button"
@@ -207,28 +214,32 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
                     aria-pressed={category === cat}
                     onClick={() => setCategory(cat)}
                   >
-                    {CATEGORY_GROUP_LABELS[cat]} ({counts.get(cat)})
+                    {CATEGORY_GROUP_LABELS[cat]} ({formatCount(countOf(cat))})
                   </button>
                 ))}
               </div>
             </div>
           )}
           {groups.length === 0 ? (
-            <EmptyState>{items.length === 0 ? (isPatient ? 'Your record has no visible items now.' : 'The chart has no items.') : 'No item matches the filter.'}</EmptyState>
+            <EmptyState>{!filtered ? (isPatient ? 'Your record has no visible items now.' : 'The chart has no items.') : 'No item matches the filter.'}</EmptyState>
           ) : (
-            groups.map((group) => (
-              <ChartGroup
-                key={`${group.category}-${needle}-${category}`}
-                category={group.category}
-                items={group.items}
-                byId={byId}
-                history={history && !isPatient}
-                isPatient={isPatient}
-                canAct={canRecord}
-                actions={actions}
-              />
-            ))
+            <div ref={listRef} className={chart.isPlaceholderData ? 'stack paged-busy' : 'stack'}>
+              {groups.map((group) => (
+                <ChartGroup
+                  key={group.category}
+                  category={group.category}
+                  items={group.items}
+                  total={countOf(group.category)}
+                  byId={byId}
+                  history={withHistory}
+                  isPatient={isPatient}
+                  canAct={canRecord}
+                  actions={actions}
+                />
+              ))}
+            </div>
           )}
+          <Pager page={chart.data} state={page} label="the chart" busy={chart.isPlaceholderData} scrollTo={listRef} />
         </>
       )}
       <ChainDialog assertionId={chainOf} onClose={() => setChainOf(null)} />
@@ -246,7 +257,10 @@ interface ItemActions {
 
 interface ChartGroupProps {
   category: Category;
+  /** The items of the group on this page. */
   items: AssertionView[];
+  /** The items of the category on all pages. */
+  total: number;
   byId: Map<number, AssertionView>;
   history: boolean;
   isPatient: boolean;
@@ -254,25 +268,18 @@ interface ChartGroupProps {
   actions: ItemActions;
 }
 
-function ChartGroup({ category, items, byId, history, isPatient, canAct, actions }: ChartGroupProps) {
-  const [all, setAll] = useState(false);
-  const shown = all ? items : items.slice(0, ROWS_PER_GROUP);
+function ChartGroup({ category, items, total, byId, history, isPatient, canAct, actions }: ChartGroupProps) {
   const headingId = `chart-group-${category}`;
   return (
     <section className="chart-group" aria-labelledby={headingId}>
       <h3 id={headingId}>
-        {CATEGORY_GROUP_LABELS[category]} <span className="count">{items.length}</span>
+        {CATEGORY_GROUP_LABELS[category]} <span className="count">{formatCount(Math.max(total, items.length))}</span>
       </h3>
       <ul className="chart-items">
-        {shown.map((item) => (
+        {items.map((item) => (
           <ChartItem key={item.id} item={item} byId={byId} history={history} isPatient={isPatient} canAct={canAct} actions={actions} />
         ))}
       </ul>
-      {items.length > ROWS_PER_GROUP && (
-        <button type="button" className="link-button" onClick={() => setAll(!all)}>
-          {all ? 'Show fewer' : `Show all ${items.length}`}
-        </button>
-      )}
     </section>
   );
 }

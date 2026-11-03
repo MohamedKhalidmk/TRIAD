@@ -16,6 +16,13 @@ export interface ApiError { code: 'no_user' | 'forbidden' | 'not_found' | 'confl
 export interface Identifier { system: string; value: string; }
 export interface Address { street: string | null; city: string | null; region: string | null; postalCode: string | null; country: string | null; }
 
+// Pages (section 1.5). Each list endpoint takes limit (1 to 200, default 25) and offset (0 or more, default 0).
+export interface Page<T> {
+  items: T[];
+  total: number;             // the number of rows on all pages
+  limit: number; offset: number;
+}
+
 // Users
 export interface UserView {
   key: string; role: Role; name: string;
@@ -58,8 +65,12 @@ export interface AssertionView {
   supersedesId: number | null; supersededById: number | null; isCurrent: boolean;
   patientVisible: boolean;   // the patient-visible rule of USER_FLOWS.md section 2.1
 }
-export interface Chart { patientId: number; items: AssertionView[]; }   // newest first
-export interface Chain { headId: number; items: AssertionView[]; }      // newest first; items[0] is the current one. A patient gets the head only.
+// Chart: in the category order of the UI (Allergy, Diagnosis, Prescription, Observation, LabOrder, LabReport, Procedure, CareTeam), then newest first.
+export interface Chart extends Page<AssertionView> {
+  patientId: number;
+  counts: Partial<Record<Category, number>>; // the items of each category, with the same filters but without the category filter. A category with 0 items is missing.
+}
+export interface Chain extends Page<AssertionView> { headId: number; } // newest first; on the first page, items[0] is the current one. A patient gets the head only.
 
 // Care team
 export interface CareTeamMember {
@@ -112,6 +123,7 @@ export interface AuditEvent {
   action: 'read' | 'create' | 'update' | 'delete' | 'ask' | 'tell'; outcome: 'Allowed' | 'Denied';
   actorRole: Role; actorKey: string; actorName: string | null; path: string; chatTurnId: number | null;
 }
+export interface AuditPage extends Page<AuditEvent> { denied: number; } // newest first; denied: the denied records on all pages
 
 // Directory
 export interface Department { id: number; identifier: Identifier; name: string; type: string | null; phoneNumber: string | null; email: string | null; address: Address; staffCount: number; }

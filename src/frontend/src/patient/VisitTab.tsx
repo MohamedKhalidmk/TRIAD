@@ -1,21 +1,25 @@
 // The Visit tab: the visits of the patient, newest first, with their locations and times.
+// The open visit stays at the top. The other visits have pages (GET /api/patients/{id}/visits?limit=&offset=).
 // MOA: check in, move the location, end the visit, write an intake note.
 // Care team: move the location. A doctor on the care team: end the visit.
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fieldError } from '../api/client';
-import { api, queryKeys, type CheckInBody } from '../api/endpoints';
+import { api, MAX_LIMIT, queryKeys, type CheckInBody } from '../api/endpoints';
 import type { Location, Patient, UserView, Visit, VisitClass } from '../api/types';
 import { Badge } from '../components/Badges';
 import { ConfirmDialog } from '../components/Dialog';
 import { EmptyState, ErrorBanner, ErrorPanel, FieldList, Loading } from '../components/ErrorView';
 import { formText, SelectField, TextField } from '../components/Field';
+import { formatCount, Pager } from '../components/Pager';
 import { formatDateTime, formatRange } from '../lib/dates';
 import { VISIT_CLASS_LABELS, VISIT_CLASSES } from '../lib/labels';
+import { keepPageOf, PAGE_SIZE, usePage } from '../lib/usePage';
 import { LOINC_SYSTEM, type RecordSeed } from './recordModel';
 
-const VISITS_SHOWN = 6;
+const FIRST_PAGE = { limit: PAGE_SIZE, offset: 0 };
+const ALL_LOCATIONS = { limit: MAX_LIMIT, offset: 0 };
 
 interface VisitTabProps {
   patient: Patient;
@@ -34,25 +38,36 @@ function useInvalidateVisit(patientId: number) {
 
 export function VisitTab({ patient, user, onRecord }: VisitTabProps) {
   const permissions = patient.permissions;
+  const page = usePage([patient.id]);
+  const listRef = useRef<HTMLUListElement>(null);
+  // The first page has the open visit (the visits are newest first). On the first page, it is the same query as the list.
+  const firstPage = useQuery({
+    queryKey: queryKeys.visitPage(patient.id, FIRST_PAGE),
+    queryFn: ({ signal }) => api.visits(patient.id, FIRST_PAGE, signal),
+  });
   const visits = useQuery({
-    queryKey: queryKeys.visits(patient.id),
-    queryFn: ({ signal }) => api.visits(patient.id, signal),
+    queryKey: queryKeys.visitPage(patient.id, page.params),
+    queryFn: ({ signal }) => api.visits(patient.id, page.params, signal),
+    placeholderData: keepPageOf(queryKeys.visits(patient.id)),
   });
   const needsLocations = permissions.checkIn || permissions.moveLocation;
+  // The location selects need all locations (19 rows), so they ask for the largest page.
   const locations = useQuery({
-    queryKey: queryKeys.locations,
-    queryFn: ({ signal }) => api.locations({}, signal),
+    queryKey: queryKeys.locationPage('', '', ALL_LOCATIONS),
+    queryFn: ({ signal }) => api.locations(ALL_LOCATIONS, signal),
     enabled: needsLocations && user.role !== 'Patient',
     staleTime: 60_000,
   });
-  const [all, setAll] = useState(false);
 
-  if (visits.isPending) return <Loading label="Wait. The app gets the visits." />;
+  if (visits.isPending || firstPage.isPending) return <Loading label="Wait. The app gets the visits." />;
   if (visits.isError) return <ErrorPanel error={visits.error} onRetry={() => visits.refetch()} />;
+  if (firstPage.isError) return <ErrorPanel error={firstPage.error} onRetry={() => firstPage.refetch()} />;
 
-  const openVisit = visits.data.find((visit) => visit.isOpen) ?? null;
-  const others = visits.data.filter((visit) => visit !== openVisit);
-  const shown = all ? others : others.slice(0, VISITS_SHOWN);
+  // A patient has one open visit or none.
+  const findOpen = (items: Visit[]) => items.find((visit) => visit.isOpen);
+  const openVisit = findOpen(firstPage.data.items) ?? findOpen(visits.data.items) ?? null;
+  const others = visits.data.items.filter((visit) => visit.id !== openVisit?.id);
+  const otherCount = visits.data.total - (openVisit ? 1 : 0);
   const isMoa = user.role === 'MOA';
 
   return (
@@ -66,7 +81,7 @@ export function VisitTab({ patient, user, onRecord }: VisitTabProps) {
           <VisitDetails visit={openVisit} />
           <div className="visit-actions">
             {permissions.moveLocation && (
-              <MoveLocationForm visit={openVisit} patientId={patient.id} locations={locations.data ?? []} loading={locations.isPending} />
+              <MoveLocationForm visit={openVisit} patientId={patient.id} locations={locations.data?.items ?? []} loading={locations.isPending} />
             )}
             <div className="row">
               {isMoa && permissions.recordIntents.length > 0 && (
@@ -105,29 +120,27 @@ export function VisitTab({ patient, user, onRecord }: VisitTabProps) {
       )}
 
       {permissions.checkIn && (
-        <CheckInForm patient={patient} openVisit={openVisit} locations={locations.data ?? []} loading={locations.isPending} />
+        <CheckInForm patient={patient} openVisit={openVisit} locations={locations.data?.items ?? []} loading={locations.isPending} />
       )}
 
       <section aria-labelledby="visit-history-title">
         <h2 id="visit-history-title" className="section-title">
-          {openVisit ? 'Earlier visits' : 'Visits'} <span className="count">{others.length}</span>
+          {openVisit ? 'Earlier visits' : 'Visits'} <span className="count">{formatCount(Math.max(otherCount, 0))}</span>
         </h2>
-        {others.length === 0 ? (
+        {otherCount <= 0 ? (
           <EmptyState>No earlier visit.</EmptyState>
         ) : (
-          <ul className="visit-list">
-            {shown.map((visit) => (
-              <li key={visit.id} className="card card-flat">
-                <VisitDetails visit={visit} />
-              </li>
-            ))}
-          </ul>
+          others.length > 0 && (
+            <ul ref={listRef} className={visits.isPlaceholderData ? 'visit-list paged-busy' : 'visit-list'}>
+              {others.map((visit) => (
+                <li key={visit.id} className="card card-flat">
+                  <VisitDetails visit={visit} />
+                </li>
+              ))}
+            </ul>
+          )
         )}
-        {others.length > VISITS_SHOWN && (
-          <button type="button" className="link-button" onClick={() => setAll(!all)}>
-            {all ? 'Show fewer' : `Show all ${others.length} visits`}
-          </button>
-        )}
+        <Pager page={visits.data} state={page} label="the visits" busy={visits.isPlaceholderData} scrollTo={listRef} />
       </section>
     </div>
   );

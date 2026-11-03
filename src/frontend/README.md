@@ -104,7 +104,7 @@ Rules:
 ## How the app acts as a user
 
 - The top bar has the user type (Patient, Doctor, Nurse, MOA) and the user.
-  The user list comes from `GET /api/users?role=&q=`. The demo users show first.
+  The user list comes from `GET /api/users?role=&q=&limit=&offset=`, one page at a time. The demo users show first.
 - The app sends the user key in the header `X-Triad-User` with each request (`src/api/client.ts`).
 - The app keeps the last user in `localStorage`. Each browser tab also keeps its own user in `sessionStorage`.
 - The link parameter `?as=<user key>` sets the user for this tab only.
@@ -167,35 +167,39 @@ src/frontend/
       session.tsx          the acting user (localStorage, sessionStorage, ?as=)
       routes.json          the routes and their tabs (the app and check-demo.mjs read it)
       routes.ts            the path helpers and the home page of each role
-    components/            the top bar, the user picker, dialogs, tabs, fields, badges, error views
+    components/            the top bar, the user picker, dialogs, tabs, fields, badges, error views, the pager
     pages/                 Welcome, Home, Patients, Patient and Directory pages
     patient/               the tabs of the patient page, the record form and the chain view
     chat/                  the Care Assistant and its evidence card
     directory/             the four directory tabs
     demo/                  steps.json (the use cases) and the Demo guide panel
-    lib/                   pure helpers: dates, labels, debounce
+    lib/                   helpers: dates, labels, debounce, the page state (usePage)
 ```
 
 ## Pages and API endpoints
 
 | Page or tab | Who sees it | API endpoints |
 |---|---|---|
-| Top bar | all | `GET /api/health`, `GET /api/me`, `GET /api/users?role=&q=` |
+| Top bar | all | `GET /api/health`, `GET /api/me`, `GET /api/users?role=&q=&limit=&offset=` (the user picker) |
 | `/` (home) | all | (sends a patient to "My record", the MOA to the front desk, a nurse or doctor to "My patients") |
-| `/patients`: Front desk | MOA | `GET /api/patients?scope=open-visits`, `POST /api/patients` |
-| `/patients`: My patients | nurse, doctor | `GET /api/patients?scope=care-team` |
-| `/patients`: Find a patient | staff | `GET /api/patients?q=&dob=` |
+| `/patients`: Front desk | MOA | `GET /api/patients?scope=open-visits&limit=&offset=`, `POST /api/patients` |
+| `/patients`: My patients | nurse, doctor | `GET /api/patients?scope=care-team&limit=&offset=` |
+| `/patients`: Find a patient | staff | `GET /api/patients?q=&dob=&limit=&offset=` |
 | `/patients/:id`: header | all who can open the patient | `GET /api/patients/{id}`, `PATCH /api/patients/{id}` (MOA) |
-| Chart ("My record" for a patient) | patient, nurse, doctor | `GET /api/patients/{id}/chart?history=`, `GET /api/assertions/{id}/chain`, `GET /api/codes`, `GET /api/medications?q=`, `POST /api/messages` |
-| Visit | patient, MOA, care team | `GET /api/patients/{id}/visits`, `POST /api/patients/{id}/visits` (MOA), `POST /api/visits/{id}/locations`, `POST /api/visits/{id}/end`, `GET /api/locations`, `POST /api/messages` (MOA intake note) |
-| Care team | patient, MOA, care team | `GET /api/visits/{id}/care-team`, `PUT /api/visits/{id}/care-team` (MOA, a doctor on the team), `GET /api/staff?q=` |
-| Audit | patient (self), a doctor on the care team | `GET /api/patients/{id}/audit` |
-| Care Assistant (right pane) | patient, nurse, doctor (not the MOA) | `GET /api/patients/{id}/chat/sessions`, `POST /api/patients/{id}/chat/sessions`, `GET /api/chat/sessions/{id}`, `POST /api/chat/sessions/{id}/turns` |
-| `/directory`: Departments | staff (MOA can change) | `GET`, `POST /api/departments`, `PATCH`, `DELETE /api/departments/{id}` |
-| `/directory`: Locations | staff (MOA can change) | `GET`, `POST /api/locations`, `PATCH`, `DELETE /api/locations/{id}` |
-| `/directory`: Staff | staff (MOA can change) | `GET /api/staff?role=&q=`, `POST /api/staff`, `PATCH`, `DELETE /api/staff/{id}` |
-| `/directory`: Medications | staff (MOA can change) | `GET /api/medications?q=`, `POST /api/medications`, `PATCH`, `DELETE /api/medications/{id}` |
+| Chart ("My record" for a patient) | patient, nurse, doctor | `GET /api/patients/{id}/chart?history=&q=&category=&limit=&offset=`, `GET /api/assertions/{id}/chain?limit=&offset=`, `GET /api/codes`, `GET /api/medications?q=&limit=8`, `GET /api/patients/{id}/chart?q=&limit=10` (the item search of the record form), `POST /api/messages` |
+| Visit | patient, MOA, care team | `GET /api/patients/{id}/visits?limit=&offset=`, `POST /api/patients/{id}/visits` (MOA), `POST /api/visits/{id}/locations`, `POST /api/visits/{id}/end`, `GET /api/locations?limit=200`, `POST /api/messages` (MOA intake note) |
+| Care team | patient, MOA, care team | `GET /api/visits/{id}/care-team`, `PUT /api/visits/{id}/care-team` (MOA, a doctor on the team), `GET /api/staff?q=&limit=20` |
+| Audit | patient (self), a doctor on the care team | `GET /api/patients/{id}/audit?limit=&offset=` |
+| Care Assistant (right pane) | patient, nurse, doctor (not the MOA) | `GET /api/patients/{id}/chat/sessions?limit=&offset=`, `POST /api/patients/{id}/chat/sessions`, `GET /api/chat/sessions/{id}`, `POST /api/chat/sessions/{id}/turns` |
+| `/directory`: Departments | staff (MOA can change) | `GET /api/departments?q=&limit=&offset=`, `POST /api/departments`, `PATCH`, `DELETE /api/departments/{id}` |
+| `/directory`: Locations | staff (MOA can change) | `GET /api/locations?department=&q=&limit=&offset=`, `GET /api/departments?limit=200` (the department list), `POST /api/locations`, `PATCH`, `DELETE /api/locations/{id}` |
+| `/directory`: Staff | staff (MOA can change) | `GET /api/staff?role=&q=&limit=&offset=`, `GET /api/departments?limit=200` (MOA: the new staff form), `POST /api/staff`, `PATCH`, `DELETE /api/staff/{id}` |
+| `/directory`: Medications | staff (MOA can change) | `GET /api/medications?q=&limit=&offset=`, `POST /api/medications`, `PATCH`, `DELETE /api/medications/{id}` |
 | Demo guide | all | `GET /api/users/{key}` (the patient id of a step) |
+
+Pages: a list with `limit=&offset=` shows one page of 25 rows, and a pager under it ("1–25 of 1,148", Previous, Next).
+A change of a filter goes back to the first page. The past chats have "Show older chats" in place of a pager.
+The pager is `src/components/Pager.tsx`, and `src/lib/usePage.ts` keeps the offset.
 
 The tabs of the patient page follow the role and `Patient.permissions`:
 

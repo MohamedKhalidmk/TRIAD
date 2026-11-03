@@ -1,16 +1,19 @@
 // The user picker: select a user type, then a user (USER_FLOWS.md section 1).
 // The demo users show first. Patients show their date of birth. Staff show their department.
+// The server finds the text (q) and sends one page of users (GET /api/users?role=&q=&limit=&offset=).
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { api, queryKeys } from '../api/endpoints';
 import type { Role, UserView } from '../api/types';
 import { useActingUser } from '../app/session';
 import { ROLES, ROLE_LABELS } from '../lib/labels';
 import { useDebounced } from '../lib/useDebounced';
+import { usePage } from '../lib/usePage';
 import { Badge } from './Badges';
 import { Dialog } from './Dialog';
 import { ErrorBanner, Loading } from './ErrorView';
+import { Pager } from './Pager';
 
 export function initials(name: string): string {
   const words = name.replace(/^Dr\.?\s+/i, '').split(/\s+/).filter(Boolean);
@@ -23,12 +26,21 @@ export function UserPickerPanel({ initialRole, onPicked }: { initialRole?: Role;
   const [role, setRole] = useState<Role>(initialRole ?? 'Doctor');
   const [filter, setFilter] = useState('');
   const q = useDebounced(filter.trim(), 250);
+  const page = usePage([role, q]);
+  const listRef = useRef<HTMLUListElement>(null);
 
   const users = useQuery({
-    queryKey: queryKeys.users(role, q),
-    queryFn: ({ signal }) => api.users({ role, q, limit: 50 }, signal),
+    queryKey: queryKeys.users(role, q, page.params),
+    queryFn: ({ signal }) => api.users({ role, q, ...page.params }, signal),
     staleTime: 60_000,
+    placeholderData: keepPreviousData,
   });
+
+  // The list scrolls in its box. On a new page, show the top of the list.
+  const shownOffset = users.data?.offset;
+  useEffect(() => {
+    if (listRef.current) listRef.current.scrollTop = 0;
+  }, [shownOffset]);
 
   const pick = (user: UserView) => {
     onPicked?.();
@@ -69,11 +81,15 @@ export function UserPickerPanel({ initialRole, onPicked }: { initialRole?: Role;
       <ErrorBanner error={users.error} />
       {users.isPending ? (
         <Loading label="Wait. The app gets the users." />
-      ) : users.data && users.data.length === 0 ? (
+      ) : users.data && users.data.items.length === 0 ? (
         <p className="empty-state">No user has this name.</p>
       ) : (
-        <ul className="picker-list" aria-label={`${ROLE_LABELS[role]} users`}>
-          {users.data?.map((user) => (
+        <ul
+          ref={listRef}
+          className={users.isPlaceholderData ? 'picker-list paged-busy' : 'picker-list'}
+          aria-label={`${ROLE_LABELS[role]} users`}
+        >
+          {users.data?.items.map((user) => (
             <li key={user.key}>
               <button
                 type="button"
@@ -94,6 +110,7 @@ export function UserPickerPanel({ initialRole, onPicked }: { initialRole?: Role;
           ))}
         </ul>
       )}
+      <Pager page={users.data} state={page} label="the user list" busy={users.isPlaceholderData} />
     </div>
   );
 }

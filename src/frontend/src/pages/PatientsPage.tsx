@@ -1,7 +1,8 @@
 // /patients: Front desk (MOA), My patients (nurse and doctor) and Find a patient.
+// Each list is paged (GET /api/patients?limit=&offset=), with a pager under the table.
 
 import { useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { fieldError } from '../api/client';
 import { api, queryKeys, type NewPatientBody, type PatientScope } from '../api/endpoints';
@@ -13,9 +14,11 @@ import { Badge } from '../components/Badges';
 import { Dialog } from '../components/Dialog';
 import { EmptyState, ErrorBanner, ErrorPanel, FieldList, Loading } from '../components/ErrorView';
 import { formText, SelectField, TextField } from '../components/Field';
+import { Pager } from '../components/Pager';
 import { TabList, TabPanel, useTabParam, type TabItem } from '../components/Tabs';
 import { formatDate } from '../lib/dates';
 import { SEX_OPTIONS, sexLabel } from '../lib/labels';
+import { usePage } from '../lib/usePage';
 
 export function PatientsPage() {
   const user = useCurrentUser();
@@ -51,11 +54,14 @@ function PatientsTabs({ tabs, isMoa }: { tabs: TabItem<PatientsTab>[]; isMoa: bo
 }
 
 function usePatientList(scope: PatientScope, q = '', dob = '', enabled = true) {
-  return useQuery({
-    queryKey: queryKeys.patients(scope, q, dob),
-    queryFn: ({ signal }) => api.patients({ scope, q: q || undefined, dob: dob || undefined, limit: 50 }, signal),
+  const page = usePage([scope, q, dob]);
+  const query = useQuery({
+    queryKey: queryKeys.patients(scope, q, dob, page.params),
+    queryFn: ({ signal }) => api.patients({ scope, q: q || undefined, dob: dob || undefined, ...page.params }, signal),
     enabled,
+    placeholderData: keepPreviousData,
   });
+  return { query, page };
 }
 
 function FrontDesk({ canRegister }: { canRegister: boolean }) {
@@ -146,15 +152,20 @@ function FindPatient() {
 }
 
 function PatientListBody({ list, empty }: { list: ReturnType<typeof usePatientList>; empty: string }) {
-  if (list.isPending) return <Loading />;
-  if (list.isError) return <ErrorPanel error={list.error} onRetry={() => list.refetch()} />;
-  if (list.data.length === 0) return <EmptyState>{empty}</EmptyState>;
-  return <PatientTable patients={list.data} />;
+  const { query, page } = list;
+  if (query.isPending) return <Loading />;
+  if (query.isError) return <ErrorPanel error={query.error} onRetry={() => query.refetch()} />;
+  return (
+    <>
+      {query.data.items.length === 0 ? <EmptyState>{empty}</EmptyState> : <PatientTable patients={query.data.items} busy={query.isPlaceholderData} />}
+      <Pager page={query.data} state={page} label="the patient list" busy={query.isPlaceholderData} />
+    </>
+  );
 }
 
-export function PatientTable({ patients }: { patients: PatientSummary[] }) {
+export function PatientTable({ patients, busy = false }: { patients: PatientSummary[]; busy?: boolean }) {
   return (
-    <div className="table-wrap">
+    <div className={busy ? 'table-wrap paged-busy' : 'table-wrap'}>
       <table className="table">
         <thead>
           <tr>

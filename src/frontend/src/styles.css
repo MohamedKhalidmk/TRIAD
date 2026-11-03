@@ -2071,3 +2071,48 @@ s {
     flex-direction: row;
   }
 }
+
+/* ----- Pager ----- */
+
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-top: 10px;
+  font-size: 13.5px;
+}
+
+.stack > .pager,
+.chart > .pager,
+.picker > .pager {
+  margin-top: 0;
+}
+
+.pager-range {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pager-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+/* The previous page shows while the next page loads. */
+.paged-busy {
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+/* "Show older chats" under the chat select of the Care Assistant. */
+.pager-more {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 10px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+}

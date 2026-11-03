@@ -5,11 +5,11 @@
 // A nurse or a doctor always gets the Chart tab. If they are not on the care team, the chart call gives the 403 panel.
 
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { ApiRequestError } from '../api/client';
 import { api, queryKeys } from '../api/endpoints';
-import type { AssertionView, Chart, Patient, UserView } from '../api/types';
+import type { Patient, UserView } from '../api/types';
 import type { PatientTab } from '../app/routes';
 import { useCurrentUser } from '../app/session';
 import { CareAssistant } from '../chat/CareAssistant';
@@ -55,19 +55,10 @@ export function patientTabs(user: UserView, patient: Patient): TabItem<PatientTa
 }
 
 function PatientView({ patient, user }: { patient: Patient; user: UserView }) {
-  const queryClient = useQueryClient();
   const tabs = patientTabs(user, patient);
   const [tab, setTab] = useTabParam(tabs);
   const [recordSeed, setRecordSeed] = useState<RecordSeed | null>(null);
   const showChat = user.role !== 'MOA' && patient.permissions.chat;
-
-  // The record form lists the current items of the chart that is in the cache. It does not read the chart again.
-  const currentItems = (): AssertionView[] => {
-    const chart =
-      queryClient.getQueryData<Chart>(queryKeys.chart(patient.id, false)) ??
-      queryClient.getQueryData<Chart>(queryKeys.chart(patient.id, true));
-    return (chart?.items ?? []).filter((item) => item.isCurrent);
-  };
 
   return (
     <div className="page patient-page">
@@ -92,7 +83,6 @@ function PatientView({ patient, user }: { patient: Patient; user: UserView }) {
         patient={patient}
         user={user}
         seed={recordSeed}
-        currentItems={recordSeed ? currentItems() : []}
         onClose={() => setRecordSeed(null)}
       />
     </div>

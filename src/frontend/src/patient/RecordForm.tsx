@@ -2,20 +2,23 @@
 // Each row is a new entry, or an assertion about an item in the chart.
 // The Supersede, Confirm, Refute and Report buttons of the chart open this form with a row,
 // and the form shows a preview of the chain that the new assertion supersedes.
+// To select an item of the chart, the form finds it on the server (GET /api/patients/{id}/chart?q=&limit=10).
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fieldError, isApiError } from '../api/client';
 import { api, queryKeys } from '../api/endpoints';
 import type { AssertionView, Channel, CodePreset, Intent, Medication, NewMessage, Patient, UserView } from '../api/types';
 import { Dialog } from '../components/Dialog';
-import { ErrorBanner, FieldList, FieldMessage, Loading } from '../components/ErrorView';
+import { ErrorBanner, FieldList, FieldMessage } from '../components/ErrorView';
 import { SelectField, TextAreaField, TextField } from '../components/Field';
+import { formatCount } from '../components/Pager';
 import { formatDate } from '../lib/dates';
 import { CATEGORY_LABELS, CHANNEL_LABELS, STAFF_CHANNELS, VERIFICATION_LABELS, VERIFICATIONS } from '../lib/labels';
 import { useDebounced } from '../lib/useDebounced';
+import { keepPageOf } from '../lib/usePage';
 import { detailSummary, pickIntent } from './assertionText';
-import { ChainItem, ChainList, useChain } from './ChainView';
+import { ChainItem, ChainPages } from './ChainView';
 import {
   ACTION_LABELS,
   applyPreset,
@@ -40,8 +43,6 @@ interface RecordFormProps {
   patient: Patient;
   user: UserView;
   seed: RecordSeed | null;
-  /** The current items of the chart, for the item selector. */
-  currentItems: AssertionView[];
   onClose: () => void;
 }
 
@@ -59,7 +60,7 @@ export function RecordFormDialog(props: RecordFormProps) {
   );
 }
 
-function RecordForm({ patient, user, seed, currentItems, onClose }: RecordFormProps & { seed: RecordSeed }) {
+function RecordForm({ patient, user, seed, onClose }: RecordFormProps & { seed: RecordSeed }) {
   const queryClient = useQueryClient();
   const isPatient = user.role === 'Patient';
   const allowed = patient.permissions.recordIntents;
@@ -109,7 +110,8 @@ function RecordForm({ patient, user, seed, currentItems, onClose }: RecordFormPr
   const submit = useMutation({
     mutationFn: (body: NewMessage) => api.postMessage(body),
     onSuccess: () => {
-      for (const key of [queryKeys.charts, queryKeys.chains, queryKeys.patient(patient.id), queryKeys.visits(patient.id), queryKeys.audit(patient.id)]) {
+      // The prefixes: all pages and searches of the chart, all chains, all pages of the visits and of the audit log.
+      for (const key of [queryKeys.patientCharts(patient.id), queryKeys.chains, queryKeys.patient(patient.id), queryKeys.visits(patient.id), queryKeys.audit(patient.id)]) {
         queryClient.invalidateQueries({ queryKey: key });
       }
       onClose();
@@ -213,7 +215,7 @@ function RecordForm({ patient, user, seed, currentItems, onClose }: RecordFormPr
           allowed={allowed}
           presets={codes.data ?? []}
           presetsLoading={codes.isPending && !isPatient}
-          currentItems={currentItems}
+          patientId={patient.id}
           errorFor={errorFor}
           onChange={(change) => updateRow(row.key, change)}
           onRemove={() => removeRow(row.key)}
@@ -247,7 +249,7 @@ interface RowEditorProps {
   allowed: Intent[];
   presets: CodePreset[];
   presetsLoading: boolean;
-  currentItems: AssertionView[];
+  patientId: number;
   errorFor: (...names: string[]) => string | undefined;
   onChange: (change: Partial<RowDraft>) => void;
   onRemove: () => void;
@@ -258,18 +260,12 @@ function itemLabel(item: AssertionView): string {
   return `${CATEGORY_LABELS[item.category]}: ${item.display} — ${statement} (${item.author.label}, ${formatDate(item.assertedAt)})`;
 }
 
-function RowEditor({ row, index, count, isPatient, allowed, presets, presetsLoading, currentItems, errorFor, onChange, onRemove }: RowEditorProps) {
+function RowEditor({ row, index, count, isPatient, allowed, presets, presetsLoading, patientId, errorFor, onChange, onRemove }: RowEditorProps) {
   const at = `assertions.${index}`;
-  const selectable = useMemo(() => {
-    const items = currentItems.filter((item) => isEntryCategory(item.category));
-    if (row.target && !items.some((item) => item.id === row.target?.id)) items.unshift(row.target);
-    return items;
-  }, [currentItems, row.target]);
   const categoryPresets = presets.filter((preset) => preset.category === row.category);
   const selectedPreset = categoryPresets.find((preset) => preset.code === row.code && preset.codeSystem === row.codeSystem);
 
-  const selectTarget = (id: string) => {
-    const target = selectable.find((item) => String(item.id) === id) ?? null;
+  const selectTarget = (target: AssertionView | null) => {
     const change: Partial<RowDraft> = { target };
     if (target && row.kind === 'new' && isEntryCategory(target.category) && target.category !== row.category) {
       change.category = target.category;
@@ -324,24 +320,13 @@ function RowEditor({ row, index, count, isPatient, allowed, presets, presetsLoad
           <ChainItem item={row.target} struck={false} />
         </div>
       ) : (
-        <SelectField
-          label={row.kind === 'existing' ? 'Item' : 'Supersedes'}
-          value={row.target ? String(row.target.id) : ''}
-          onChange={(event) => selectTarget(event.target.value)}
+        <ItemFinder
+          patientId={patientId}
+          kind={row.kind}
+          target={row.target}
           error={errorFor(`${at}.entryId`, `${at}.supersedesId`)}
-          hint={
-            row.kind === 'existing'
-              ? 'The new assertion is about this item. It supersedes the current assertion of the item.'
-              : 'Optional. Select an item if the new entry replaces it (for example a revised diagnosis).'
-          }
-        >
-          <option value="">{row.kind === 'existing' ? 'Select an item' : 'Nothing (a new fact)'}</option>
-          {selectable.map((item) => (
-            <option key={item.id} value={item.id}>
-              {itemLabel(item)}
-            </option>
-          ))}
-        </SelectField>
+          onSelect={selectTarget}
+        />
       )}
 
       {row.kind === 'new' && (
@@ -473,7 +458,6 @@ function RowEditor({ row, index, count, isPatient, allowed, presets, presetsLoad
 
 /** Shows the chain that the new assertion will supersede. */
 function ChainPreview({ row }: { row: RowDraft }) {
-  const chain = useChain(row.target?.id ?? null);
   const summary = row.kind === 'existing' && row.target ? row.target.display : row.display || 'the new entry';
   return (
     <div className="chain-preview" aria-label="Chain preview">
@@ -490,13 +474,101 @@ function ChainPreview({ row }: { row: RowDraft }) {
       <span className="chain-arrow" aria-hidden="true">
         ↓ supersedes
       </span>
-      {chain.isPending ? (
-        <Loading label="Wait. The app gets the chain." />
-      ) : chain.isError ? (
-        <ErrorBanner error={chain.error} />
-      ) : (
-        <ChainList items={chain.data.items} strikeAll />
-      )}
+      {row.target && <ChainPages assertionId={row.target.id} strikeAll inline />}
+    </div>
+  );
+}
+
+const ITEM_RESULTS = 10;
+
+/**
+ * Finds the current item of the chart that a row is about, or that a new entry supersedes
+ * (GET /api/patients/{id}/chart?q=&limit=10). Each chart read writes an audit record,
+ * so the search waits 300 ms after the last key and needs 3 or more letters.
+ */
+function ItemFinder({
+  patientId,
+  kind,
+  target,
+  error,
+  onSelect,
+}: {
+  patientId: number;
+  kind: RowDraft['kind'];
+  target: AssertionView | null;
+  error?: string;
+  onSelect: (item: AssertionView | null) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const q = useDebounced(query.trim(), 300);
+  const params = { q, limit: ITEM_RESULTS };
+  const found = useQuery({
+    queryKey: queryKeys.chart(patientId, params),
+    queryFn: ({ signal }) => api.chart(patientId, params, signal),
+    enabled: target === null && q.length >= 3,
+    placeholderData: keepPageOf(queryKeys.patientCharts(patientId)),
+  });
+
+  if (target) {
+    return (
+      <div className="target-card">
+        <span className="eyebrow">{kind === 'existing' ? 'About this item' : 'Supersedes this item'}</span>
+        <div>{itemLabel(target)}</div>
+        <FieldMessage message={error} />
+        <div className="row">
+          <button type="button" className="button button-small" onClick={() => onSelect(null)}>
+            {kind === 'existing' ? 'Change the item' : 'Do not supersede it'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const results = (found.data?.items ?? []).filter((item) => item.isCurrent && isEntryCategory(item.category));
+  const more = (found.data?.total ?? 0) > ITEM_RESULTS;
+  return (
+    <div className="medication-finder">
+      <TextField
+        label={kind === 'existing' ? 'Find the item in the chart' : 'Supersedes (optional): find the item in the chart'}
+        type="search"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        error={error}
+        hint={
+          kind === 'existing'
+            ? 'The new assertion is about this item. It supersedes the current assertion of the item. Write 3 or more letters.'
+            : 'Select an item if the new entry replaces it (for example a revised diagnosis). Write 3 or more letters.'
+        }
+        autoComplete="off"
+      />
+      {q.length >= 3 &&
+        (found.isError ? (
+          <ErrorBanner error={found.error} />
+        ) : found.data ? (
+          <ul className="finder-results" aria-busy={found.isPlaceholderData || undefined}>
+            {results.length === 0 && <li className="muted">No current item matches.</li>}
+            {results.map((item) => (
+              <li key={item.id}>
+                <span>{itemLabel(item)}</span>
+                <button
+                  type="button"
+                  className="button button-small"
+                  onClick={() => {
+                    onSelect(item);
+                    setQuery('');
+                  }}
+                >
+                  Select
+                </button>
+              </li>
+            ))}
+            {more && (
+              <li className="muted small">
+                The first {ITEM_RESULTS} of {formatCount(found.data.total)} items. Write more letters to find fewer items.
+              </li>
+            )}
+          </ul>
+        ) : null)}
     </div>
   );
 }
@@ -505,10 +577,12 @@ function ChainPreview({ row }: { row: RowDraft }) {
 function MedicationFinder({ onPick }: { onPick: (medication: Medication) => void }) {
   const [query, setQuery] = useState('');
   const q = useDebounced(query.trim(), 300);
+  const page = { limit: 8, offset: 0 };
   const medications = useQuery({
-    queryKey: queryKeys.medications(q),
-    queryFn: ({ signal }) => api.medications({ q, limit: 8 }, signal),
+    queryKey: queryKeys.medications(q, page),
+    queryFn: ({ signal }) => api.medications({ q, ...page }, signal),
     enabled: q.length >= 3,
+    placeholderData: keepPreviousData,
   });
   return (
     <div className="span-2 medication-finder">
@@ -522,8 +596,8 @@ function MedicationFinder({ onPick }: { onPick: (medication: Medication) => void
       />
       {q.length >= 3 && medications.data && (
         <ul className="finder-results">
-          {medications.data.length === 0 && <li className="muted">No medication has this name.</li>}
-          {medications.data.map((medication) => (
+          {medications.data.items.length === 0 && <li className="muted">No medication has this name.</li>}
+          {medications.data.items.map((medication) => (
             <li key={medication.id}>
               <button
                 type="button"

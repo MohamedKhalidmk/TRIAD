@@ -3,13 +3,15 @@
 // A send uses a new clientTurnId. "Try again" sends the same clientTurnId, so the server does not add the turn twice.
 
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAbortError, newClientTurnId } from '../api/client';
 import { api, queryKeys } from '../api/endpoints';
 import type { ChatSession, ChatTurn, Patient, UserView } from '../api/types';
 import { Badge } from '../components/Badges';
 import { ErrorBanner, Loading } from '../components/ErrorView';
+import { formatCount } from '../components/Pager';
 import { formatDateTime, formatTime } from '../lib/dates';
+import { nextOffset, PAGE_SIZE } from '../lib/usePage';
 import { EvidenceCard } from './EvidenceCard';
 
 interface PendingTurn {
@@ -40,9 +42,12 @@ export function CareAssistant({ patient, user }: { patient: Patient; user: UserV
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const sessions = useQuery({
+  // The past chats, newest first: the first page, and one more page for each "Show older chats".
+  const sessions = useInfiniteQuery({
     queryKey: queryKeys.chatSessions(patient.id),
-    queryFn: ({ signal }) => api.chatSessions(patient.id, signal),
+    queryFn: ({ signal, pageParam }) => api.chatSessions(patient.id, { limit: PAGE_SIZE, offset: pageParam }, signal),
+    initialPageParam: 0,
+    getNextPageParam: nextOffset,
   });
   const session = useQuery({
     queryKey: queryKeys.chatSession(sessionId ?? 0),
@@ -113,7 +118,8 @@ export function CareAssistant({ patient, user }: { patient: Patient; user: UserV
   };
 
   const mode = session.data?.mode;
-  const pastChats = sessions.data ?? [];
+  const pastChats = sessions.data?.pages.flatMap((page) => page.items) ?? [];
+  const chatCount = sessions.data?.pages[0]?.total ?? 0;
 
   return (
     <section className="assistant" aria-labelledby="assistant-title">
@@ -154,6 +160,16 @@ export function CareAssistant({ patient, user }: { patient: Patient; user: UserV
           New chat
         </button>
       </div>
+      {sessions.hasNextPage && (
+        <div className="pager-more">
+          <span className="muted small" aria-live="polite">
+            {formatCount(pastChats.length)} of {formatCount(chatCount)} past chats in the list.
+          </span>
+          <button type="button" className="link-button" onClick={() => void sessions.fetchNextPage()} disabled={sessions.isFetchingNextPage}>
+            {sessions.isFetchingNextPage ? 'Wait…' : 'Show older chats'}
+          </button>
+        </div>
+      )}
       <ErrorBanner error={createSession.error} onDismiss={() => createSession.reset()} />
 
       <div className="assistant-messages" ref={listRef} aria-live="polite">

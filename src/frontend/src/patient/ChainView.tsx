@@ -1,14 +1,17 @@
 // The chain of an assertion: the current item first, then the items that it superseded,
-// with a line through them (GET /api/assertions/{id}/chain).
+// with a line through them (GET /api/assertions/{id}/chain?limit=&offset=). A long chain has pages.
 
+import { useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { api, queryKeys } from '../api/endpoints';
+import { api, queryKeys, type PageParams } from '../api/endpoints';
 import type { AssertionView } from '../api/types';
 import { IntentBadge, SourceBadge, VerificationBadge } from '../components/Badges';
 import { Dialog } from '../components/Dialog';
-import { ErrorPanel, Loading } from '../components/ErrorView';
+import { ErrorBanner, ErrorPanel, Loading } from '../components/ErrorView';
+import { Pager } from '../components/Pager';
 import { formatDateTime } from '../lib/dates';
 import { CATEGORY_LABELS } from '../lib/labels';
+import { keepPageOf, usePage } from '../lib/usePage';
 import { detailSummary } from './assertionText';
 
 export function ChainItem({ item, struck }: { item: AssertionView; struck: boolean }) {
@@ -44,10 +47,13 @@ export function ChainItem({ item, struck }: { item: AssertionView; struck: boole
   );
 }
 
-/** A chain, newest first. With strikeAll, the current item also gets a line (a new item will supersede it). */
-export function ChainList({ items, strikeAll = false }: { items: AssertionView[]; strikeAll?: boolean }) {
+/**
+ * One page of a chain, newest first. offset is the offset of the page: only the first item of the chain is current.
+ * With strikeAll, the current item also gets a line (a new item will supersede it).
+ */
+export function ChainList({ items, offset = 0, strikeAll = false }: { items: AssertionView[]; offset?: number; strikeAll?: boolean }) {
   return (
-    <ol className="chain-list">
+    <ol className="chain-list" start={offset + 1}>
       {items.map((item, index) => (
         <li key={item.id}>
           {index > 0 && (
@@ -55,23 +61,39 @@ export function ChainList({ items, strikeAll = false }: { items: AssertionView[]
               ↑ superseded by the item above
             </span>
           )}
-          <ChainItem item={item} struck={strikeAll || !item.isCurrent || index > 0} />
+          <ChainItem item={item} struck={strikeAll || !item.isCurrent || offset + index > 0} />
         </li>
       ))}
     </ol>
   );
 }
 
-export function useChain(assertionId: number | null) {
+/** One page of the chain of an assertion. Each page read writes an audit record. */
+export function useChain(assertionId: number | null, page: PageParams) {
   return useQuery({
-    queryKey: queryKeys.chain(assertionId ?? 0),
-    queryFn: ({ signal }) => api.chain(assertionId as number, signal),
+    queryKey: queryKeys.chain(assertionId ?? 0, page),
+    queryFn: ({ signal }) => api.chain(assertionId as number, page, signal),
     enabled: assertionId !== null,
+    placeholderData: keepPageOf(queryKeys.chainPages(assertionId ?? 0)),
   });
 }
 
+/** The chain of an assertion, with a pager. inline: a small error banner (in a form), not the full error panel. */
+export function ChainPages({ assertionId, strikeAll = false, inline = false }: { assertionId: number; strikeAll?: boolean; inline?: boolean }) {
+  const page = usePage([assertionId]);
+  const chain = useChain(assertionId, page.params);
+  const listRef = useRef<HTMLDivElement>(null);
+  if (chain.isPending) return <Loading label="Wait. The app gets the chain." />;
+  if (chain.isError) return inline ? <ErrorBanner error={chain.error} /> : <ErrorPanel error={chain.error} onRetry={() => chain.refetch()} />;
+  return (
+    <div ref={listRef} className={chain.isPlaceholderData ? 'paged-busy' : undefined}>
+      <ChainList items={chain.data.items} offset={chain.data.offset} strikeAll={strikeAll} />
+      <Pager page={chain.data} state={page} label="the chain" busy={chain.isPlaceholderData} scrollTo={listRef} />
+    </div>
+  );
+}
+
 export function ChainDialog({ assertionId, onClose }: { assertionId: number | null; onClose: () => void }) {
-  const chain = useChain(assertionId);
   return (
     <Dialog
       open={assertionId !== null}
@@ -80,13 +102,7 @@ export function ChainDialog({ assertionId, onClose }: { assertionId: number | nu
       onClose={onClose}
       size="large"
     >
-      {chain.isPending ? (
-        <Loading label="Wait. The app gets the chain." />
-      ) : chain.isError ? (
-        <ErrorPanel error={chain.error} onRetry={() => chain.refetch()} />
-      ) : (
-        <ChainList items={chain.data.items} />
-      )}
+      {assertionId !== null && <ChainPages assertionId={assertionId} />}
     </Dialog>
   );
 }

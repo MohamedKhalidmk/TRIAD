@@ -3,13 +3,16 @@
 // The MOA and a doctor on the team can add and remove members. "Save" sends the full member list.
 
 import { useMemo, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, queryKeys, type CareTeamBody, type CareTeamMemberInput } from '../api/endpoints';
 import type { CareTeamMember, CareTeamVersion, Patient, Staff } from '../api/types';
 import { Badge } from '../components/Badges';
 import { EmptyState, ErrorBanner, ErrorPanel, FieldList, Loading } from '../components/ErrorView';
 import { formatDateTime } from '../lib/dates';
 import { useDebounced } from '../lib/useDebounced';
+
+/** The staff finder shows the first page of matches only (GET /api/staff?q=&limit=20). */
+const STAFF_RESULTS = { limit: 20, offset: 0 };
 
 interface DraftMember {
   system: string;
@@ -190,11 +193,13 @@ function StaffFinder({ exclude, onAdd }: { exclude: Set<string>; onAdd: (staff: 
   const [query, setQuery] = useState('');
   const q = useDebounced(query.trim(), 250);
   const staff = useQuery({
-    queryKey: queryKeys.staff('', q),
-    queryFn: ({ signal }) => api.staff({ q, limit: 20 }, signal),
+    queryKey: queryKeys.staff('', q, STAFF_RESULTS),
+    queryFn: ({ signal }) => api.staff({ q, ...STAFF_RESULTS }, signal),
     enabled: q.length >= 2,
+    placeholderData: keepPreviousData,
   });
-  const results = (staff.data ?? []).filter((item) => item.active && !exclude.has(memberId(item.identifier)));
+  const results = (staff.data?.items ?? []).filter((item) => item.active && !exclude.has(memberId(item.identifier)));
+  const more = (staff.data?.total ?? 0) > STAFF_RESULTS.limit;
   return (
     <div className="staff-finder">
       <div className="field">
@@ -234,6 +239,11 @@ function StaffFinder({ exclude, onAdd }: { exclude: Set<string>; onAdd: (staff: 
                 </button>
               </li>
             ))}
+            {more && (
+              <li className="muted small">
+                The first {STAFF_RESULTS.limit} of {staff.data?.total} matches. Write more letters to find fewer staff.
+              </li>
+            )}
           </ul>
         ))}
     </div>

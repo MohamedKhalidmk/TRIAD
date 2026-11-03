@@ -1,9 +1,10 @@
 // Directory: staff (GET, POST, PATCH, DELETE /api/staff).
 // A change (PATCH) can set the contact data, the languages, the active flag and the fields of the role.
 // The name, the role and the departments do not change here.
+// The server finds the name (q), filters the role and sends one page.
 
 import { useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fieldError } from '../api/client';
 import { api, queryKeys, type StaffCreateBody, type StaffPatchBody } from '../api/endpoints';
 import type { Department, Staff, StaffRole } from '../api/types';
@@ -11,9 +12,21 @@ import { Badge } from '../components/Badges';
 import { Dialog } from '../components/Dialog';
 import { EmptyState, ErrorBanner, ErrorPanel, FieldList, Loading } from '../components/ErrorView';
 import { formText, SelectField, TextField } from '../components/Field';
+import { Pager } from '../components/Pager';
 import { SEX_OPTIONS, sexLabel } from '../lib/labels';
 import { useDebounced } from '../lib/useDebounced';
-import { DeleteDialog, DirectoryToolbar, IDENTIFIER_SYSTEMS, IdentifierField, readIdentifier, RowActions, useDelete } from './common';
+import { usePage } from '../lib/usePage';
+import {
+  DeleteDialog,
+  DirectoryToolbar,
+  FILTER_DELAY,
+  IDENTIFIER_SYSTEMS,
+  IdentifierField,
+  readIdentifier,
+  RowActions,
+  useDelete,
+  useDepartmentOptions,
+} from './common';
 
 const STAFF_ROLES: StaffRole[] = ['Doctor', 'Nurse', 'MOA'];
 const DESIGNATIONS = ['RN', 'LPN', 'RPN', 'NP'] as const;
@@ -21,16 +34,14 @@ const DESIGNATIONS = ['RN', 'LPN', 'RPN', 'NP'] as const;
 export function StaffTab({ canWrite }: { canWrite: boolean }) {
   const [filter, setFilter] = useState('');
   const [role, setRole] = useState<StaffRole | ''>('');
-  const q = useDebounced(filter.trim(), 250);
+  const q = useDebounced(filter.trim(), FILTER_DELAY);
+  const page = usePage([role, q]);
   const staff = useQuery({
-    queryKey: queryKeys.staff(role, q),
-    queryFn: ({ signal }) => api.staff({ role, q, limit: 200 }, signal),
+    queryKey: queryKeys.staff(role, q, page.params),
+    queryFn: ({ signal }) => api.staff({ role, q, ...page.params }, signal),
+    placeholderData: keepPreviousData,
   });
-  const departments = useQuery({
-    queryKey: queryKeys.departments,
-    queryFn: ({ signal }) => api.departments(signal),
-    enabled: canWrite,
-  });
+  const departments = useDepartmentOptions(canWrite);
   const [editing, setEditing] = useState<Staff | null>(null);
   const [creating, setCreating] = useState(false);
   const remove = useDelete<Staff>((item) => api.deleteStaff(item.id), [queryKeys.staffLists, queryKeys.departments]);
@@ -58,14 +69,11 @@ export function StaffTab({ canWrite }: { canWrite: boolean }) {
         <Loading />
       ) : staff.isError ? (
         <ErrorPanel error={staff.error} onRetry={() => staff.refetch()} />
-      ) : staff.data.length === 0 ? (
+      ) : staff.data.items.length === 0 ? (
         <EmptyState>No staff member matches.</EmptyState>
       ) : (
         <>
-          <p className="muted small">
-            {staff.data.length} staff members{staff.data.length >= 200 ? ' (the first 200; write a name to find others)' : ''}.
-          </p>
-          <div className="table-wrap">
+          <div className={staff.isPlaceholderData ? 'table-wrap paged-busy' : 'table-wrap'}>
             <table className="table">
               <thead>
                 <tr>
@@ -83,7 +91,7 @@ export function StaffTab({ canWrite }: { canWrite: boolean }) {
                 </tr>
               </thead>
               <tbody>
-                {staff.data.map((item) => (
+                {staff.data.items.map((item) => (
                   <tr key={item.id}>
                     <td>
                       <strong>{item.name}</strong>
@@ -109,8 +117,9 @@ export function StaffTab({ canWrite }: { canWrite: boolean }) {
           </div>
         </>
       )}
+      <Pager page={staff.data} state={page} label="the staff list" busy={staff.isPlaceholderData} />
       {canWrite && <StaffEditDialog staff={editing} onClose={() => setEditing(null)} />}
-      {canWrite && <StaffCreateDialog open={creating} departments={departments.data ?? []} onClose={() => setCreating(false)} />}
+      {canWrite && <StaffCreateDialog open={creating} departments={departments} onClose={() => setCreating(false)} />}
       <DeleteDialog
         state={remove}
         title="Delete a staff member"

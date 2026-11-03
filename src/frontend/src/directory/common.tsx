@@ -1,7 +1,8 @@
 // Parts that the four directory tabs share.
 
 import { useState, type ReactNode } from 'react';
-import { useMutation, useQueryClient, type QueryKey } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query';
+import { api, MAX_LIMIT, queryKeys } from '../api/endpoints';
 import type { Identifier } from '../api/types';
 import { ConfirmDialog } from '../components/Dialog';
 import { ErrorBanner } from '../components/ErrorView';
@@ -12,6 +13,21 @@ export const IDENTIFIER_SYSTEMS = {
   location: 'https://triad.example/fhir/sid/location',
   employee: 'https://triad.example/fhir/sid/employee',
 } as const;
+
+/** The filters of the tabs wait this time (in milliseconds) after the last key, then ask the server. */
+export const FILTER_DELAY = 300;
+
+const ALL_DEPARTMENTS = { limit: MAX_LIMIT, offset: 0 };
+
+/** All departments (8 rows), for the department selects of the filters and the forms. It asks for the largest page. */
+export function useDepartmentOptions(enabled = true) {
+  const departments = useQuery({
+    queryKey: queryKeys.departmentPage('', ALL_DEPARTMENTS),
+    queryFn: ({ signal }) => api.departments(ALL_DEPARTMENTS, signal),
+    enabled,
+  });
+  return departments.data?.items ?? [];
+}
 
 /** The optional identifier of a new row. If it is empty, the server makes one. */
 export function IdentifierField({ system, error }: { system: string; error?: string }) {

@@ -1,23 +1,28 @@
 // Directory: medications (GET, POST, PATCH, DELETE /api/medications).
+// The server finds the text (q) and sends one page.
 
 import { useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fieldError } from '../api/client';
 import { api, queryKeys, type MedicationBody } from '../api/endpoints';
 import type { Medication } from '../api/types';
 import { Dialog } from '../components/Dialog';
 import { EmptyState, ErrorBanner, ErrorPanel, FieldList, Loading } from '../components/ErrorView';
 import { formText, TextField } from '../components/Field';
+import { Pager } from '../components/Pager';
 import { useDebounced } from '../lib/useDebounced';
+import { usePage } from '../lib/usePage';
 import { RXNORM_SYSTEM } from '../patient/recordModel';
-import { DeleteDialog, DirectoryToolbar, RowActions, useDelete } from './common';
+import { DeleteDialog, DirectoryToolbar, FILTER_DELAY, RowActions, useDelete } from './common';
 
 export function MedicationsTab({ canWrite }: { canWrite: boolean }) {
   const [filter, setFilter] = useState('');
-  const q = useDebounced(filter.trim(), 250);
+  const q = useDebounced(filter.trim(), FILTER_DELAY);
+  const page = usePage([q]);
   const medications = useQuery({
-    queryKey: queryKeys.medications(q),
-    queryFn: ({ signal }) => api.medications({ q, limit: 200 }, signal),
+    queryKey: queryKeys.medications(q, page.params),
+    queryFn: ({ signal }) => api.medications({ q, ...page.params }, signal),
+    placeholderData: keepPreviousData,
   });
   const [editing, setEditing] = useState<Medication | 'new' | null>(null);
   const remove = useDelete<Medication>((item) => api.deleteMedication(item.id), [queryKeys.medicationLists]);
@@ -34,10 +39,10 @@ export function MedicationsTab({ canWrite }: { canWrite: boolean }) {
         <Loading />
       ) : medications.isError ? (
         <ErrorPanel error={medications.error} onRetry={() => medications.refetch()} />
-      ) : medications.data.length === 0 ? (
+      ) : medications.data.items.length === 0 ? (
         <EmptyState>No medication matches.</EmptyState>
       ) : (
-        <div className="table-wrap">
+        <div className={medications.isPlaceholderData ? 'table-wrap paged-busy' : 'table-wrap'}>
           <table className="table">
             <thead>
               <tr>
@@ -53,7 +58,7 @@ export function MedicationsTab({ canWrite }: { canWrite: boolean }) {
               </tr>
             </thead>
             <tbody>
-              {medications.data.map((item) => (
+              {medications.data.items.map((item) => (
                 <tr key={item.id}>
                   <td>
                     <strong>{item.name}</strong>
@@ -74,6 +79,7 @@ export function MedicationsTab({ canWrite }: { canWrite: boolean }) {
           </table>
         </div>
       )}
+      <Pager page={medications.data} state={page} label="the medications" busy={medications.isPlaceholderData} />
       {canWrite && <MedicationDialog editing={editing} onClose={() => setEditing(null)} />}
       <DeleteDialog
         state={remove}

@@ -1,8 +1,9 @@
 // Directory: locations (GET, POST, PATCH, DELETE /api/locations).
 // The department of a location is the department name.
+// The server filters the department, finds the text (q: the name or the identifier value) and sends one page.
 
 import { useState, type FormEvent } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fieldError } from '../api/client';
 import { api, queryKeys, type LocationBody } from '../api/endpoints';
 import type { Department, Location } from '../api/types';
@@ -11,22 +12,36 @@ import { Badge } from '../components/Badges';
 import { Dialog } from '../components/Dialog';
 import { EmptyState, ErrorBanner, ErrorPanel, FieldList, Loading } from '../components/ErrorView';
 import { formText, SelectField, TextField } from '../components/Field';
-import { DeleteDialog, DirectoryToolbar, IDENTIFIER_SYSTEMS, IdentifierField, readIdentifier, RowActions, useDelete } from './common';
+import { Pager } from '../components/Pager';
+import { useDebounced } from '../lib/useDebounced';
+import { usePage } from '../lib/usePage';
+import {
+  DeleteDialog,
+  DirectoryToolbar,
+  FILTER_DELAY,
+  IDENTIFIER_SYSTEMS,
+  IdentifierField,
+  readIdentifier,
+  RowActions,
+  useDelete,
+  useDepartmentOptions,
+} from './common';
 
 export function LocationsTab({ canWrite }: { canWrite: boolean }) {
-  const locations = useQuery({ queryKey: queryKeys.locations, queryFn: ({ signal }) => api.locations({}, signal) });
-  const departments = useQuery({ queryKey: queryKeys.departments, queryFn: ({ signal }) => api.departments(signal) });
   const [filter, setFilter] = useState('');
   const [department, setDepartment] = useState('');
+  const q = useDebounced(filter.trim(), FILTER_DELAY);
+  const page = usePage([department, q]);
+  const locations = useQuery({
+    queryKey: queryKeys.locationPage(department, q, page.params),
+    queryFn: ({ signal }) => api.locations({ department, q, ...page.params }, signal),
+    placeholderData: keepPreviousData,
+  });
+  const departments = useDepartmentOptions();
   const [editing, setEditing] = useState<Location | 'new' | null>(null);
   const remove = useDelete<Location>((item) => api.deleteLocation(item.id), [queryKeys.locations, queryKeys.departments]);
 
-  const needle = filter.trim().toLowerCase();
-  const rows = (locations.data ?? []).filter(
-    (item) =>
-      (!department || item.department === department) &&
-      (!needle || item.name.toLowerCase().includes(needle) || item.identifier.value.toLowerCase().includes(needle)),
-  );
+  const rows = locations.data?.items ?? [];
 
   return (
     <div className="stack">
@@ -39,7 +54,7 @@ export function LocationsTab({ canWrite }: { canWrite: boolean }) {
           <label htmlFor="location-department">Department</label>
           <select id="location-department" value={department} onChange={(event) => setDepartment(event.target.value)}>
             <option value="">All departments</option>
-            {(departments.data ?? []).map((item) => (
+            {departments.map((item) => (
               <option key={item.id} value={item.name}>
                 {item.name}
               </option>
@@ -54,7 +69,7 @@ export function LocationsTab({ canWrite }: { canWrite: boolean }) {
       ) : rows.length === 0 ? (
         <EmptyState>No location matches.</EmptyState>
       ) : (
-        <div className="table-wrap">
+        <div className={locations.isPlaceholderData ? 'table-wrap paged-busy' : 'table-wrap'}>
           <table className="table">
             <thead>
               <tr>
@@ -93,7 +108,8 @@ export function LocationsTab({ canWrite }: { canWrite: boolean }) {
           </table>
         </div>
       )}
-      {canWrite && <LocationDialog editing={editing} departments={departments.data ?? []} onClose={() => setEditing(null)} />}
+      <Pager page={locations.data} state={page} label="the locations" busy={locations.isPlaceholderData} />
+      {canWrite && <LocationDialog editing={editing} departments={departments} onClose={() => setEditing(null)} />}
       <DeleteDialog
         state={remove}
         title="Delete a location"
