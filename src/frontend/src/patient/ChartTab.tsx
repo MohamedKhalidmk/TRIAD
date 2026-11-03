@@ -36,7 +36,7 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
   const [chainOf, setChainOf] = useState<number | null>(null);
   const chart = useChart(patient.id, history && !isPatient);
   const intents = patient.permissions.recordIntents;
-  // No record buttons when the chart is not open to the user (for example the 403 panel of Step 7).
+  // No record buttons when the chart is not open to the user (for example the 403 panel of Use case 7).
   const canRecord = !isPatient && intents.length > 0 && patient.permissions.viewChart && !chart.isError;
 
   const items = chart.data?.items ?? [];

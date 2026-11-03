@@ -5,15 +5,15 @@
 
 PRAGMA foreign_keys = ON;
 
--- 1. UPDATE: a patient gives a new phone number (journey step 1). The key (Name, DateOfBirth) does not change.
+-- 1. UPDATE: a patient gives a new phone number (journey Use case 1). The key (Name, DateOfBirth) does not change.
 UPDATE Patient SET PhoneNumber = '+1-508-555-0199'
 WHERE Name = 'Elena Marsh' AND DateOfBirth = '1971-05-14';
 
--- 2. UPDATE: a staff member gets a new phone number (journey step 8).
+-- 2. UPDATE: a staff member gets a new phone number (journey Use case 8).
 UPDATE Staff SET PhoneNumber = '+1-508-555-2999'
 WHERE IdentifierSystem = 'https://triad.example/fhir/sid/employee' AND IdentifierValue = 'E1001';
 
--- 3. DELETE: remove a location that no visit uses (journey step 8).
+-- 3. DELETE: remove a location that no visit uses (journey Use case 8).
 DELETE FROM Location
 WHERE IdentifierSystem = 'https://triad.example/fhir/sid/location' AND IdentifierValue = 'STORE-OLD'
   AND NOT EXISTS (SELECT 1 FROM VisitLocation vl WHERE vl.LocationId = Location.Id);

@@ -1976,6 +1976,20 @@ s {
   font-weight: 650;
 }
 
+/* The step label of a use case: "Step 1", "Step 2", ... */
+.demo-act-step {
+  display: inline-block;
+  margin-right: 4px;
+  padding: 0 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--green-soft);
+  border: 1px solid #b9dcc8;
+  border-radius: 999px;
+  vertical-align: 1px;
+}
+
 .demo-actions {
   margin: 0;
   padding-left: 20px;

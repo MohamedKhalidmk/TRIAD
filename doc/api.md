@@ -318,8 +318,8 @@ These values come from the data. The frontend Demo guide and the backend journey
 | Item | Value |
 |---|---|
 | ER Waiting, ER Bed 2, Cardiology Room 401 | Location identifiers `ER-WAIT`, `ER-BED-2`, `CARD-401` |
-| Old Storage Room (delete step) | Location identifier `STORE-OLD` |
-| Emergency department (409 step) | Department identifier `TRIAD-GH-EMER` |
+| Old Storage Room (the DELETE of Use case 8) | Location identifier `STORE-OLD` |
+| Emergency department (the 409 of Use case 8) | Department identifier `TRIAD-GH-EMER` |
 | Metformin (Patient B) | RxNorm `860975` |
 | Salbutamol inhaler | RxNorm `745752` (albuterol 0.09 MG/ACTUAT inhaler) |
 | Furosemide | RxNorm `313988` (Furosemide 40 MG Oral Tablet) |

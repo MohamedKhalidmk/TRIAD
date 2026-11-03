@@ -30,8 +30,8 @@ npm --prefix src/frontend ci
 ```
 
 Open http://127.0.0.1:5173 and select **Demo guide** in the top bar. The guide follows the
-hospital-visit journey of [`USER_FLOWS.md`](USER_FLOWS.md). Each step has an **Act as** button that
-sets the user and opens the page. One Ctrl+C stops the two servers.
+hospital-visit journey of [`USER_FLOWS.md`](USER_FLOWS.md), Use case 0 to Use case 9. Each step of a
+use case has an **Act as** button that sets the user and opens the page. One Ctrl+C stops the two servers.
 To start again with a new database, run `./src/scripts/dev.sh --reset-db`.
 
 ### Settings and the LLM mode (optional)

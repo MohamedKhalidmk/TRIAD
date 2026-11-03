@@ -51,7 +51,7 @@ export function ErrorPanel({ error, onRetry }: { error: unknown; onRetry?: () =>
   );
 }
 
-/** The 403 panel (journey Step 7). */
+/** The 403 panel (journey Use case 7). */
 export function ForbiddenPanel({ message }: { message: string }) {
   return (
     <section className="forbidden-panel" role="alert">

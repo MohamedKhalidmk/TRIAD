@@ -185,6 +185,6 @@ UPDATE Patient SET Name = 'Elena M.' WHERE Name = 'Elena Marsh' AND DateOfBirth 
 -- EXPECT: FOREIGN KEY constraint failed
 DELETE FROM Patient WHERE Name = 'Elena Marsh' AND DateOfBirth = '1971-05-14';
 
--- CASE: delete a department that has staff (the app shows 409; journey step 8)
+-- CASE: delete a department that has staff (the app shows 409; journey Use case 8)
 -- EXPECT: FOREIGN KEY constraint failed
 DELETE FROM Department WHERE IdentifierValue = 'TRIAD-GH-EMER';

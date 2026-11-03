@@ -99,7 +99,7 @@ Rules:
 | `npm run build` | Checks the types (`tsc -b`), then builds `dist/`. |
 | `npm run typecheck` | Checks the types only. |
 | `npm run preview` | Serves `dist/` on port 4173 (with the same `/api` proxy). |
-| `npm run check:demo` | Checks the Demo guide steps (see below). |
+| `npm run check:demo` | Checks the use cases of the Demo guide (see below). |
 
 ## How the app acts as a user
 
@@ -118,7 +118,7 @@ Rules:
 | Status | What the app shows |
 |---|---|
 | 401 | The user picker, with the message of the server. |
-| 403 | A full panel with the message of the server. Example (journey Step 7): "You are not on this patient's care team. This attempt is in the audit log." |
+| 403 | A full panel with the message of the server. Example (journey Use case 7): "You are not on this patient's care team. This attempt is in the audit log." |
 | 409 | A banner with the message of the server. |
 | 422 | The message, and each message of `fields` under its field. |
 | No connection | A panel that tells you to start the backend (see the Quickstart in the root README). |
@@ -132,16 +132,17 @@ The helpers are in `src/lib/dates.ts`.
 
 ## Demo guide
 
-Select **Demo guide** in the top bar. The panel lists the steps of the hospital-visit journey (`USER_FLOWS.md`, section 3, Steps 0 to 9).
-Each part of a step has an **Act as ⟨user⟩** button. The button sets the user and opens the correct page and tab.
+Select **Demo guide** in the top bar. The panel lists the use cases of the hospital-visit journey (`USER_FLOWS.md`, section 3, Use cases 0 to 9).
+Each use case has one or more steps (Step 1, Step 2, and so on). Each step has one user, one page and an **Act as ⟨user⟩** button.
+The button sets the user and opens the correct page and tab.
 For a patient page, the app gets the patient id from `GET /api/users/{key}` (`patientId`).
 
-The steps are in `src/demo/steps.json`. `npm run check:demo` checks that:
+The use cases are in `src/demo/steps.json` (the list `useCases`; each use case has the list `steps`). `npm run check:demo` checks that:
 
 - each user key is a demo user of `doc/api.md`, section 1.1, with the same name;
 - each page is a route of `src/app/routes.json`, and each tab is a tab of that route;
 - each patient page has a demo patient key;
-- the file has Steps 0 to 9, in order, each with actions and an expected result.
+- the file has Use cases 0 to 9, in order. Each use case has one or more steps and an expected result. Each step has actions.
 
 ## Folder structure
 
@@ -151,7 +152,7 @@ src/frontend/
   vite.config.ts           the dev server (port 5173, /api proxy to TRIAD_API_URL) and the build (dist/)
   package.json             exact versions, scripts, engines (Node.js 20.19 or later)
   .env.example             the settings template (dev.sh copies it to .env; git ignores .env)
-  scripts/check-demo.mjs   the check of the Demo guide steps
+  scripts/check-demo.mjs   the check of the Demo guide use cases
   public/triad.svg         the icon
   src/
     main.tsx               the entry point
@@ -171,7 +172,7 @@ src/frontend/
     patient/               the tabs of the patient page, the record form and the chain view
     chat/                  the Care Assistant and its evidence card
     directory/             the four directory tabs
-    demo/                  steps.json and the Demo guide panel
+    demo/                  steps.json (the use cases) and the Demo guide panel
     lib/                   pure helpers: dates, labels, debounce
 ```
 
@@ -199,7 +200,7 @@ src/frontend/
 The tabs of the patient page follow the role and `Patient.permissions`:
 
 - A nurse or a doctor always gets the Chart tab. The app always calls the chart endpoint.
-  If the user is not on the care team, the server sends 403, and the tab shows the 403 panel (journey Step 7).
+  If the user is not on the care team, the server sends 403, and the tab shows the 403 panel (journey Use case 7).
 - The MOA gets the Visit and Care team tabs only. The app does not call the chart or the chat endpoints for the MOA.
 - The Audit tab shows when `permissions.viewAudit` is true.
 

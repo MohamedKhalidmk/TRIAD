@@ -1,5 +1,5 @@
 {
-  "description": "The steps of the hospital-visit journey (USER_FLOWS.md section 3). The Demo guide panel shows them. npm run check:demo checks the user keys and the pages.",
+  "description": "The use cases 0 to 9 of the hospital-visit journey (USER_FLOWS.md section 3). Each use case has one or more steps. Each step has one user and one page. The Demo guide panel shows them. npm run check:demo checks the user keys and the pages.",
   "users": {
     "Patient:MRN-000001": "Elena Marsh (Patient A)",
     "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b": "Marlin805 Reggie481 Nienow652 (Patient B)",
@@ -10,11 +10,11 @@
     "Doctor:E1005": "Amara Okafor",
     "Doctor:E1006": "Lucas Brennan"
   },
-  "steps": [
+  "useCases": [
     {
       "id": 0,
       "title": "The 3MT slide (Patient A)",
-      "acts": [
+      "steps": [
         {
           "user": "Doctor:E1005",
           "page": "/patients/:id",
@@ -35,7 +35,7 @@
     {
       "id": 1,
       "title": "Arrival (front desk)",
-      "acts": [
+      "steps": [
         {
           "user": "MOA:E1001",
           "page": "/patients",
@@ -84,7 +84,7 @@
     {
       "id": 2,
       "title": "Waiting room (Patient B)",
-      "acts": [
+      "steps": [
         {
           "user": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
           "page": "/patients/:id",
@@ -105,7 +105,7 @@
     {
       "id": 3,
       "title": "Triage (nurse)",
-      "acts": [
+      "steps": [
         {
           "user": "Nurse:E1002",
           "page": "/patients",
@@ -135,7 +135,7 @@
     {
       "id": 4,
       "title": "Physician (doctor)",
-      "acts": [
+      "steps": [
         {
           "user": "Doctor:E1005",
           "page": "/patients/:id",
@@ -166,7 +166,7 @@
     {
       "id": 5,
       "title": "Transfer (nurse and front desk)",
-      "acts": [
+      "steps": [
         {
           "user": "Nurse:E1002",
           "page": "/patients/:id",
@@ -197,7 +197,7 @@
     {
       "id": 6,
       "title": "Evening (Patient B)",
-      "acts": [
+      "steps": [
         {
           "user": "Patient:0c1b260c-7f32-fdd5-15dd-1160caf24c2b",
           "page": "/patients/:id",
@@ -215,7 +215,7 @@
     {
       "id": 7,
       "title": "Privacy check (nurse not on the care team)",
-      "acts": [
+      "steps": [
         {
           "user": "Nurse:E1004",
           "page": "/patients",
@@ -246,7 +246,7 @@
     {
       "id": 8,
       "title": "Directory (front desk)",
-      "acts": [
+      "steps": [
         {
           "user": "MOA:E1001",
           "page": "/directory",
@@ -267,7 +267,7 @@
     {
       "id": 9,
       "title": "Discharge (doctor)",
-      "acts": [
+      "steps": [
         {
           "user": "Doctor:E1005",
           "page": "/patients/:id",

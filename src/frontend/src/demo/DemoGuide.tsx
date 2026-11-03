@@ -1,5 +1,6 @@
-// The Demo guide panel: the steps of the hospital-visit journey (USER_FLOWS.md section 3).
-// "Act as <user>" sets the user and opens the page of the step.
+// The Demo guide panel: the use cases of the hospital-visit journey (USER_FLOWS.md section 3).
+// Each use case has one or more steps. Each step has one user and one page.
+// "Act as <user>" on a step sets the user and opens the page of the step.
 // A patient page needs the patient id: the guide gets it from GET /api/users/{key} (patientId).
 
 import { useEffect, useRef, useState } from 'react';
@@ -10,7 +11,7 @@ import { Dialog } from '../components/Dialog';
 import { errorMessage } from '../components/ErrorView';
 import guide from './steps.json';
 
-interface DemoAct {
+interface DemoStep {
   user: string;
   page: string;
   patient?: string;
@@ -19,20 +20,30 @@ interface DemoAct {
   actions: string[];
 }
 
-interface DemoStep {
+interface DemoUseCase {
   id: number;
   title: string;
-  acts: DemoAct[];
+  steps: DemoStep[];
   expected: string[];
 }
 
 const USERS = guide.users as Record<string, string>;
-const STEPS = guide.steps as DemoStep[];
+const USE_CASES = guide.useCases as DemoUseCase[];
+// The id of a step is "<use case id>.<step index>", for example "1.0" for Step 1 of Use case 1.
+// The storage keeps the id of the last step that you acted as.
 const LAST_STEP = 'triad.demo.step';
 
+function stepId(useCase: DemoUseCase, index: number): string {
+  return `${useCase.id}.${index}`;
+}
+
+const STEP_IDS = new Set(USE_CASES.flatMap((useCase) => useCase.steps.map((_, index) => stepId(useCase, index))));
+
+/** The last step from the storage. A value that is not a step of this guide gives null. */
 function readLastStep(): string | null {
   try {
-    return window.sessionStorage.getItem(LAST_STEP);
+    const value = window.sessionStorage.getItem(LAST_STEP);
+    return value !== null && STEP_IDS.has(value) ? value : null;
   } catch {
     return null;
   }
@@ -43,22 +54,22 @@ function roleWord(key: string): string {
   return role === 'MOA' ? 'MOA' : role;
 }
 
-function pageLabel(act: DemoAct): string {
-  const tab = act.tab ? ` (${act.tab.replace('-', ' ')})` : '';
-  if (act.page === ROUTES.patient.path && act.patient) return `${USERS[act.patient] ?? act.patient}: patient page${tab}`;
-  return `${act.page}${tab}`;
+function pageLabel(step: DemoStep): string {
+  const tab = step.tab ? ` (${step.tab.replace('-', ' ')})` : '';
+  if (step.page === ROUTES.patient.path && step.patient) return `${USERS[step.patient] ?? step.patient}: patient page${tab}`;
+  return `${step.page}${tab}`;
 }
 
-async function pathOf(act: DemoAct): Promise<string> {
+async function pathOf(step: DemoStep): Promise<string> {
   const params = new URLSearchParams();
-  if (act.tab) params.set('tab', act.tab);
-  if (act.search?.q) params.set('q', act.search.q);
-  if (act.search?.dob) params.set('dob', act.search.dob);
-  let path = act.page;
+  if (step.tab) params.set('tab', step.tab);
+  if (step.search?.q) params.set('q', step.search.q);
+  if (step.search?.dob) params.set('dob', step.search.dob);
+  let path = step.page;
   if (path.includes(':id')) {
-    if (!act.patient) throw new Error('The step has no patient.');
-    const patient = await api.user(act.patient);
-    if (patient.patientId === null) throw new Error(`The user ${act.patient} has no patient record.`);
+    if (!step.patient) throw new Error('The step has no patient.');
+    const patient = await api.user(step.patient);
+    if (patient.patientId === null) throw new Error(`The user ${step.patient} has no patient record.`);
     path = path.replace(':id', String(patient.patientId));
   }
   const search = params.toString();
@@ -68,31 +79,31 @@ async function pathOf(act: DemoAct): Promise<string> {
 export function DemoGuide({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { switchUser, userKey } = useActingUser();
   const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<{ act: string; message: string } | null>(null);
-  const [lastAct, setLastAct] = useState<string | null>(readLastStep);
+  const [error, setError] = useState<{ step: string; message: string } | null>(null);
+  const [lastStep, setLastStep] = useState<string | null>(readLastStep);
   const listRef = useRef<HTMLOListElement>(null);
 
   useEffect(() => {
-    if (!open || !lastAct) return;
-    const element = listRef.current?.querySelector(`[data-act="${lastAct}"]`);
+    if (!open || !lastStep) return;
+    const element = listRef.current?.querySelector(`[data-step="${lastStep}"]`);
     element?.scrollIntoView({ block: 'center' });
-  }, [open, lastAct]);
+  }, [open, lastStep]);
 
-  const actAs = async (act: DemoAct, actId: string) => {
-    setBusy(actId);
+  const actAs = async (step: DemoStep, id: string) => {
+    setBusy(id);
     setError(null);
     try {
-      const to = await pathOf(act);
+      const to = await pathOf(step);
       try {
-        window.sessionStorage.setItem(LAST_STEP, actId);
+        window.sessionStorage.setItem(LAST_STEP, id);
       } catch {
         // The guide still works without the storage.
       }
-      setLastAct(actId);
+      setLastStep(id);
       onClose();
-      switchUser(act.user, { to });
+      switchUser(step.user, { to });
     } catch (caught) {
-      setError({ act: actId, message: errorMessage(caught) });
+      setError({ step: id, message: errorMessage(caught) });
     } finally {
       setBusy(null);
     }
@@ -104,45 +115,45 @@ export function DemoGuide({ open, onClose }: { open: boolean; onClose: () => voi
       title="Demo guide"
       onClose={onClose}
       variant="drawer"
-      subtitle="The hospital-visit journey of USER_FLOWS.md, section 3. On each part of a step, select “Act as”. The app sets the user and opens the page."
+      subtitle="The use cases of the hospital-visit journey (USER_FLOWS.md, section 3). On each step of a use case, select “Act as”. The app sets the user and opens the page."
     >
       <p className="muted small">
-        Chat mode: if no API key is set, the app uses the fake LLM, and all steps work offline. To start again, run{' '}
+        Chat mode: if no API key is set, the app uses the fake LLM, and all use cases work offline. To start again, run{' '}
         <code>./src/scripts/quickstart.sh --reset-db</code>.
       </p>
       <ol className="demo-steps" ref={listRef}>
-        {STEPS.map((step) => (
-          <li key={step.id} className="demo-step">
+        {USE_CASES.map((useCase) => (
+          <li key={useCase.id} className="demo-step">
             <h3>
-              <span className="demo-step-number">Step {step.id}</span> {step.title}
+              <span className="demo-step-number">Use case {useCase.id}</span> {useCase.title}
             </h3>
-            {step.acts.map((act, index) => {
-              const actId = `${step.id}.${index}`;
-              const current = act.user === userKey;
+            {useCase.steps.map((step, index) => {
+              const id = stepId(useCase, index);
+              const current = step.user === userKey;
               return (
-                <div key={actId} className={lastAct === actId ? 'demo-act demo-act-last' : 'demo-act'} data-act={actId}>
+                <div key={id} className={lastStep === id ? 'demo-act demo-act-last' : 'demo-act'} data-step={id}>
                   <div className="demo-act-head">
                     <div>
                       <div className="demo-user">
-                        {USERS[act.user] ?? act.user} <span className="muted">({roleWord(act.user)})</span>
+                        <span className="demo-act-step">Step {index + 1}</span> {USERS[step.user] ?? step.user} <span className="muted">({roleWord(step.user)})</span>
                       </div>
-                      <div className="muted small">Page: {pageLabel(act)}</div>
+                      <div className="muted small">Page: {pageLabel(step)}</div>
                     </div>
                     <button
                       type="button"
                       className={current ? 'button button-small' : 'button button-small button-primary'}
-                      onClick={() => void actAs(act, actId)}
+                      onClick={() => void actAs(step, id)}
                       disabled={busy !== null}
                     >
-                      {busy === actId ? 'Wait…' : `Act as ${(USERS[act.user] ?? act.user).replace(/ \(Patient [AB]\)$/, '')}`}
+                      {busy === id ? 'Wait…' : `Act as ${(USERS[step.user] ?? step.user).replace(/ \(Patient [AB]\)$/, '')}`}
                     </button>
                   </div>
                   <ol className="demo-actions">
-                    {act.actions.map((action) => (
+                    {step.actions.map((action) => (
                       <li key={action}>{action}</li>
                     ))}
                   </ol>
-                  {error?.act === actId && (
+                  {error?.step === id && (
                     <div className="banner banner-error" role="alert">
                       {error.message}
                     </div>
@@ -153,7 +164,7 @@ export function DemoGuide({ open, onClose }: { open: boolean; onClose: () => voi
             <div className="demo-expected">
               <span className="eyebrow">Expected result</span>
               <ul>
-                {step.expected.map((item) => (
+                {useCase.expected.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
