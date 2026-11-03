@@ -7,7 +7,9 @@ from typing import Optional
 from domain.records import Address
 from domain.views import Identifier, PatientSummary, PatientView, VisitLocationView, VisitView
 
+from application.paging import Page, PageRequest
 from infrastructure import ids
+from infrastructure.sqlite.paging import each_row, fetch_page, where
 
 # The patients whose current care team has the member (query Q13: a care-team entry that nothing
 # supersedes and whose status is active).
@@ -49,7 +51,7 @@ class SqlitePatientRepository:
                            address=address_of(row), identifiers=idents)
 
     def search(self, q: Optional[str], dob: Optional[str], scope: str, member: Optional[tuple[str, str]],
-               limit: int) -> list[PatientSummary]:
+               page: PageRequest) -> Page[PatientSummary]:
         clauses, args = [], []
         if q:
             clauses.append("lower(p.Name) LIKE ?")
@@ -62,12 +64,11 @@ class SqlitePatientRepository:
         if scope == "care-team" and member:
             clauses.append(f"p.Id IN ({CARE_TEAM_PATIENTS_SQL})")
             args.extend(member)
-        where = " WHERE " + " AND ".join(clauses) if clauses else ""
-        rows = self.conn.execute(
-            f"SELECT p.Id, p.Name, p.DateOfBirth, p.Sex, p.PhoneNumber, {OPEN_VISIT_SQL} AS OpenVisitId "
-            f"FROM Patient p{where} ORDER BY p.Name, p.Id LIMIT ?", (*args, limit))
-        return [PatientSummary(r["Id"], r["Name"], r["DateOfBirth"], r["Sex"], r["PhoneNumber"], r["OpenVisitId"])
-                for r in rows]
+        return fetch_page(
+            self.conn, f"p.Id, p.Name, p.DateOfBirth, p.Sex, p.PhoneNumber, {OPEN_VISIT_SQL} AS OpenVisitId",
+            "FROM Patient p" + where(clauses), args, "p.Name, p.Id", page,
+            each_row(lambda r: PatientSummary(r["Id"], r["Name"], r["DateOfBirth"], r["Sex"], r["PhoneNumber"],
+                                              r["OpenVisitId"])))
 
     def key_exists(self, name: str, date_of_birth: str) -> bool:
         return self.conn.execute("SELECT 1 FROM Patient WHERE Name = ? AND DateOfBirth = ?",
@@ -106,8 +107,8 @@ class SqlitePatientRepository:
         return ids.next_identifier(self.conn, "PatientIdentifier", system, prefix, width)
 
 
-VISIT_SQL = ("SELECT Id, PatientId, IdentifierSystem, IdentifierValue, Class, Type, Reason, StartDate, EndDate "
-             "FROM Visit")
+VISIT_COLUMNS = "Id, PatientId, IdentifierSystem, IdentifierValue, Class, Type, Reason, StartDate, EndDate"
+VISIT_SQL = f"SELECT {VISIT_COLUMNS} FROM Visit"
 
 
 class SqliteVisitRepository:
@@ -139,6 +140,11 @@ class SqliteVisitRepository:
         rows = self.conn.execute(f"{VISIT_SQL} WHERE PatientId = ? ORDER BY julianday(StartDate) DESC, Id DESC",
                                  (patient_id,)).fetchall()
         return self._views(rows)
+
+    def for_patient_page(self, patient_id: int, page: PageRequest) -> Page[VisitView]:
+        """One page of the visits of the patient, newest first."""
+        return fetch_page(self.conn, VISIT_COLUMNS, "FROM Visit WHERE PatientId = ?", (patient_id,),
+                          "julianday(StartDate) DESC, Id DESC", page, self._views)
 
     def get(self, visit_id: int) -> Optional[VisitView]:
         views = self._views(self.conn.execute(f"{VISIT_SQL} WHERE Id = ?", (visit_id,)).fetchall())

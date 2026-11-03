@@ -11,6 +11,7 @@ from domain.views import PatientSummary, PatientView
 
 from application.context import AppContext
 from application.guard import load_patient, on_care_team, require, require_role, subject_of
+from application.paging import Page, PageRequest, page_of
 
 SEXES = ("female", "male", "other", "unknown")
 SCOPES = ("all", "care-team", "open-visits")
@@ -30,19 +31,20 @@ def with_permissions(ctx: AppContext, actor: Actor, patient: PatientView) -> Pat
 
 
 def search(ctx: AppContext, actor: Actor, q: Optional[str], dob: Optional[str], scope: str,
-           limit: int) -> list[PatientSummary]:
+           page: PageRequest = PageRequest()) -> Page[PatientSummary]:
+    """One page of the patients, by name. A patient gets self only."""
     if scope not in SCOPES:
         raise Invalid("The scope is not correct.", {"scope": "Use all, care-team or open-visits."})
     if actor.is_patient:
         own = ctx.patients.get(actor.patient_id)
-        return [PatientSummary(own.id, own.name, own.date_of_birth, own.sex, own.phone_number,
-                               own.open_visit_id)] if own else []
+        return page_of([PatientSummary(own.id, own.name, own.date_of_birth, own.sex, own.phone_number,
+                                       own.open_visit_id)] if own else [], page)
     if dob:
         dob = check_date(dob, "dob")
     member = (actor.system, actor.value) if scope == "care-team" else None
     if scope == "care-team" and actor.role not in ("Nurse", "Doctor"):
-        return []
-    return ctx.patients.search((q or "").strip() or None, dob or None, scope, member, max(1, min(limit, 500)))
+        return page_of([], page)
+    return ctx.patients.search((q or "").strip() or None, dob or None, scope, member, page)
 
 
 def get(ctx: AppContext, actor: Actor, patient_id: int) -> PatientView:

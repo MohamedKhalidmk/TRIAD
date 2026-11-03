@@ -15,6 +15,7 @@ from domain.views import DepartmentView, LocationView, MedicationView, StaffView
 
 from application.context import AppContext
 from application.guard import require_role
+from application.paging import Page, PageRequest
 
 ADDRESS_COLUMNS = {"street": "Street", "city": "City", "region": "Region", "postal_code": "PostalCode",
                    "country": "Country"}
@@ -62,9 +63,11 @@ def identifier_of(values: dict) -> Optional[tuple[str, str]]:
 
 # ----- departments -----
 
-def departments(ctx: AppContext, actor: Actor) -> list[DepartmentView]:
+def departments(ctx: AppContext, actor: Actor, q: Optional[str] = None,
+                page: PageRequest = PageRequest()) -> Page[DepartmentView]:
+    """One page of the departments, by name. `q` searches the name and the identifier value."""
     require_role(actor, "read_directory")
-    return ctx.directory.departments()
+    return ctx.directory.departments(blank(q), page)
 
 
 def load_department(ctx: AppContext, department_id: int) -> DepartmentView:
@@ -129,9 +132,11 @@ def delete_department(ctx: AppContext, actor: Actor, department_id: int) -> None
 
 # ----- locations -----
 
-def locations(ctx: AppContext, actor: Actor, department: Optional[str]) -> list[LocationView]:
+def locations(ctx: AppContext, actor: Actor, department: Optional[str], q: Optional[str] = None,
+              page: PageRequest = PageRequest()) -> Page[LocationView]:
+    """One page of the locations, by Id. `q` searches the name and the identifier value."""
     require_role(actor, "read_directory")
-    return ctx.directory.locations(blank(department))
+    return ctx.directory.locations(blank(department), blank(q), page)
 
 
 def load_location(ctx: AppContext, location_id: int) -> LocationView:
@@ -148,10 +153,10 @@ def location_values(ctx: AppContext, values: dict, partial: bool) -> dict:
     if "department" in values:
         name = blank(values["department"])
         if name is not None:
-            match = next((d.name for d in ctx.directory.departments() if d.name.lower() == name.lower()), None)
+            match = ctx.directory.department_by_name(name)
             if match is None:
                 raise Invalid("The department does not exist.", {"department": f"{name} is not a department."})
-            name = match
+            name = match.name
         out["Type"] = name
     for key, column in (("physical_type", "PhysicalType"), ("phone_number", "PhoneNumber")):
         if key in values:
@@ -198,11 +203,12 @@ def delete_location(ctx: AppContext, actor: Actor, location_id: int) -> None:
 # ----- staff -----
 
 def staff_list(ctx: AppContext, actor: Actor, role: Optional[str], department: Optional[str], q: Optional[str],
-               limit: int) -> list[StaffView]:
+               page: PageRequest = PageRequest()) -> Page[StaffView]:
+    """One page of the staff: the hospital staff first, then by name."""
     require_role(actor, "read_directory")
     if role and role not in STAFF_ROLES:
         raise Invalid("The role is not correct.", {"role": f"Use one of {', '.join(STAFF_ROLES)}."})
-    return ctx.directory.staff_list(role or None, blank(department), blank(q), max(1, min(limit, 1000)))
+    return ctx.directory.staff_list(role or None, blank(department), blank(q), page)
 
 
 def load_staff(ctx: AppContext, staff_id: int) -> StaffView:
@@ -316,9 +322,11 @@ def delete_staff(ctx: AppContext, actor: Actor, staff_id: int) -> None:
 
 # ----- medications -----
 
-def medications(ctx: AppContext, actor: Actor, q: Optional[str], limit: int) -> list[MedicationView]:
+def medications(ctx: AppContext, actor: Actor, q: Optional[str],
+                page: PageRequest = PageRequest()) -> Page[MedicationView]:
+    """One page of the medications, by name. `q` searches the name, or gives the exact code."""
     require_role(actor, "read_directory")
-    return ctx.directory.medications(blank(q), max(1, min(limit, 1000)))
+    return ctx.directory.medications(blank(q), page)
 
 
 def load_medication(ctx: AppContext, medication_id: int) -> MedicationView:

@@ -7,6 +7,7 @@ from domain.views import Card, ChatSessionSummary, ChatSessionView, ChatTurnView
 
 from application.context import AppContext
 from application.guard import deny, load_patient, require, subject_of
+from application.paging import Page, PageRequest
 from application.ports import ChatSessionRow, ChatTurnRow
 from application.records import supersedes_for
 
@@ -14,10 +15,12 @@ SESSIONS_PATH = "/api/patients/{patient}/chat/sessions"
 SESSION_PATH = "/api/chat/sessions/{session}"
 
 
-def list_sessions(ctx: AppContext, actor: Actor, patient_id: int) -> list[ChatSessionSummary]:
+def list_sessions(ctx: AppContext, actor: Actor, patient_id: int,
+                  page: PageRequest = PageRequest()) -> Page[ChatSessionSummary]:
+    """One page of the sessions of this user about this patient, newest first."""
     patient = load_patient(ctx, patient_id)
     require(ctx, actor, patient, "chat", "read", SESSIONS_PATH)
-    return ctx.chat.sessions(actor, subject_of(patient))
+    return ctx.chat.sessions(actor, subject_of(patient), page)
 
 
 def start_session(ctx: AppContext, actor: Actor, patient_id: int) -> ChatSessionView:

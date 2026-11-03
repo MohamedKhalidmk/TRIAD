@@ -121,18 +121,6 @@ class AssertionView:
 
 
 @dataclass
-class Chart:
-    patient_id: int
-    items: list[AssertionView]
-
-
-@dataclass
-class Chain:
-    head_id: int
-    items: list[AssertionView]
-
-
-@dataclass
 class CareTeamMemberView:
     system: str
     value: str

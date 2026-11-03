@@ -1,10 +1,11 @@
 """Pydantic models of the API (doc/api.md section 2). The JSON field names are camelCase.
 
 The response models read the read models of domain/views.py (snake_case). The request models check the input.
+A list endpoint gives a page: Page[T] (doc/api.md section 1.5), or Chart, Chain or AuditPage.
 """
 from __future__ import annotations
 
-from typing import Literal, Optional, Union
+from typing import Generic, Literal, Optional, TypeVar, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
@@ -17,6 +18,7 @@ Channel = Literal["InPerson", "Phone", "Video", "Email", "Fax", "Transfer", "Cha
 VisitClass = Literal["AMB", "EMER", "IMP", "HH", "VR"]
 NewCategory = Literal["Diagnosis", "Procedure", "Allergy", "Observation", "LabOrder", "LabReport", "Prescription"]
 Value = Union[str, int, float, None]
+T = TypeVar("T")
 
 
 class Model(BaseModel):
@@ -43,6 +45,14 @@ class ApiError(Model):
     code: str
     message: str
     fields: Optional[dict[str, str]] = None
+
+
+class Page(Model, Generic[T]):
+    """One page of a list. `total` is the number of rows that match the filters, on all pages."""
+    items: list[T]
+    total: int
+    limit: int
+    offset: int
 
 
 class Health(Model):
@@ -217,14 +227,13 @@ class AssertionView(Model):
     patient_visible: bool
 
 
-class Chart(Model):
+class Chart(Page[AssertionView]):
     patient_id: int
-    items: list[AssertionView]
+    counts: dict[str, int]
 
 
-class Chain(Model):
+class Chain(Page[AssertionView]):
     head_id: int
-    items: list[AssertionView]
 
 
 class NewEntry(Model):
@@ -327,6 +336,10 @@ class AuditEvent(Model):
     actor_name: Optional[str]
     path: str
     chat_turn_id: Optional[int]
+
+
+class AuditPage(Page[AuditEvent]):
+    denied: int
 
 
 # ----- directory -----

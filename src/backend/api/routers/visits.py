@@ -5,16 +5,19 @@ from fastapi import APIRouter, Depends
 
 from api import schemas as s
 from api.actor import get_actor, get_ctx
+from api.paging import page_request
 from application import visits
 from application.context import AppContext
+from application.paging import PageRequest
 from domain.access import Actor
 
 router = APIRouter(prefix="/api", tags=["visits"])
 
 
-@router.get("/patients/{patient_id}/visits", response_model=list[s.Visit])
-def list_visits(patient_id: int, ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
-    return visits.list_visits(ctx, actor, patient_id)
+@router.get("/patients/{patient_id}/visits", response_model=s.Page[s.Visit])
+def list_visits(patient_id: int, page: PageRequest = Depends(page_request), ctx: AppContext = Depends(get_ctx),
+                actor: Actor = Depends(get_actor)):
+    return visits.list_visits(ctx, actor, patient_id, page)
 
 
 @router.post("/patients/{patient_id}/visits", response_model=s.Visit, status_code=201)

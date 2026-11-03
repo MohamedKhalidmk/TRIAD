@@ -7,8 +7,10 @@ from fastapi import APIRouter, Depends, Query
 
 from api import schemas as s
 from api.actor import get_actor, get_ctx
+from api.paging import page_request
 from application import records
 from application.context import AppContext
+from application.paging import PageRequest
 from domain.access import Actor
 
 router = APIRouter(prefix="/api", tags=["records"])
@@ -16,14 +18,16 @@ router = APIRouter(prefix="/api", tags=["records"])
 
 @router.get("/patients/{patient_id}/chart", response_model=s.Chart)
 def chart(patient_id: int, visit_id: Optional[int] = Query(default=None, alias="visitId"),
-          category: Optional[str] = None, history: bool = False,
-          ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
-    return records.chart(ctx, actor, patient_id, visit_id, category, history)
+          category: Optional[str] = None, history: bool = False, q: Optional[str] = None,
+          page: PageRequest = Depends(page_request), ctx: AppContext = Depends(get_ctx),
+          actor: Actor = Depends(get_actor)):
+    return records.chart(ctx, actor, patient_id, visit_id, category, history, q, page)
 
 
 @router.get("/assertions/{assertion_id}/chain", response_model=s.Chain)
-def chain(assertion_id: int, ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
-    return records.chain(ctx, actor, assertion_id)
+def chain(assertion_id: int, page: PageRequest = Depends(page_request), ctx: AppContext = Depends(get_ctx),
+          actor: Actor = Depends(get_actor)):
+    return records.chain(ctx, actor, assertion_id, page)
 
 
 def to_command(body: s.NewMessage) -> records.NewMessageCmd:

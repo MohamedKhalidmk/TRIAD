@@ -7,17 +7,20 @@ from fastapi import APIRouter, Depends, Response
 
 from api import schemas as s
 from api.actor import get_actor, get_ctx
+from api.paging import page_request
 from application import patients
 from application.context import AppContext
+from application.paging import PageRequest
 from domain.access import Actor
 
 router = APIRouter(prefix="/api/patients", tags=["patients"])
 
 
-@router.get("", response_model=list[s.PatientSummary])
-def search(q: Optional[str] = None, dob: Optional[str] = None, scope: str = "all", limit: int = 50,
-           ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
-    return patients.search(ctx, actor, q, dob, scope, limit)
+@router.get("", response_model=s.Page[s.PatientSummary])
+def search(q: Optional[str] = None, dob: Optional[str] = None, scope: str = "all",
+           page: PageRequest = Depends(page_request), ctx: AppContext = Depends(get_ctx),
+           actor: Actor = Depends(get_actor)):
+    return patients.search(ctx, actor, q, dob, scope, page)
 
 
 @router.post("", response_model=s.Patient, status_code=201)

@@ -7,23 +7,38 @@ from typing import Optional, Sequence
 from domain.access import Actor
 from domain.views import UserView
 
+from application.paging import Page, PageRequest
+from infrastructure.sqlite.paging import each_row, fetch_page, where
+
 MRN_SYSTEM = "https://triad.example/fhir/sid/mrn"
 SYNTHEA_SYSTEM = "https://github.com/synthetichealth/synthea"
 
-# The key value of a patient: the first identifier in the order MRN, then Synthea.
-PATIENT_USERS_SQL = """
-SELECT p.Id, p.Name, p.DateOfBirth,
-       COALESCE((SELECT Value FROM PatientIdentifier WHERE PatientId = p.Id AND System = :mrn),
-                (SELECT Value FROM PatientIdentifier WHERE PatientId = p.Id AND System = :synthea)) AS KeyValue
+# All users in one relation: the patients, then the staff. The two parameters are MRN_SYSTEM and SYNTHEA_SYSTEM.
+# The key value of a patient is the first identifier in the order MRN, then Synthea (no identifier: no key).
+USERS_SQL = """
+SELECT 'Patient' AS Role, p.Id AS Id, p.Id AS PatientId, NULL AS StaffId, p.Name, 'born ' || p.DateOfBirth AS Detail,
+       'Patient:' || COALESCE((SELECT Value FROM PatientIdentifier WHERE PatientId = p.Id AND System = ?),
+                              (SELECT Value FROM PatientIdentifier WHERE PatientId = p.Id AND System = ?)) AS UserKey
 FROM Patient p
-"""
-
-STAFF_USERS_SQL = """
-SELECT s.Id, s.Name, s.Role, s.IdentifierValue AS KeyValue,
-       (SELECT group_concat(Name, ', ') FROM (SELECT DISTINCT d.Name FROM WorksIn w
-            JOIN Department d ON d.Id = w.DepartmentId WHERE w.StaffId = s.Id ORDER BY d.Name)) AS Departments
+UNION ALL
+SELECT s.Role, s.Id, NULL, s.Id, s.Name,
+       COALESCE((SELECT group_concat(Name, ', ') FROM (SELECT DISTINCT d.Name FROM WorksIn w
+                 JOIN Department d ON d.Id = w.DepartmentId WHERE w.StaffId = s.Id ORDER BY d.Name)), ''),
+       s.Role || ':' || s.IdentifierValue
 FROM Staff s
 """
+USERS_ARGS = (MRN_SYSTEM, SYNTHEA_SYSTEM)
+
+
+def pinned_first(pinned_keys: Sequence[str]) -> str:
+    """The ORDER BY key of the demo users: their place in `pinned_keys` (bound values), then all other users."""
+    whens = " ".join(f"WHEN ? THEN {i}" for i in range(len(pinned_keys)))
+    return f"CASE u.UserKey {whens} ELSE {len(pinned_keys)} END" if pinned_keys else "0"
+
+
+def user_view(r: sqlite3.Row, pinned_keys: Sequence[str]) -> UserView:
+    return UserView(key=r["UserKey"], role=r["Role"], name=r["Name"], detail=r["Detail"],
+                    pinned=r["UserKey"] in pinned_keys, patient_id=r["PatientId"], staff_id=r["StaffId"])
 
 
 class SqliteUserRepository:
@@ -47,47 +62,25 @@ class SqliteUserRepository:
         return Actor(role=role, key=f"{role}:{value}", name=row["Name"], system=row["IdentifierSystem"], value=value,
                      staff_id=row["Id"])
 
-    def _all(self, role: Optional[str], q: Optional[str], pinned_keys: Sequence[str]) -> list[UserView]:
-        out: list[UserView] = []
-        like = f"%{q.lower()}%" if q else None
-        if role in (None, "Patient"):
-            sql = PATIENT_USERS_SQL + (" WHERE lower(p.Name) LIKE :like" if like else "")
-            for r in self.conn.execute(sql, {"mrn": MRN_SYSTEM, "synthea": SYNTHEA_SYSTEM, "like": like}):
-                if r["KeyValue"]:
-                    key = f"Patient:{r['KeyValue']}"
-                    out.append(UserView(key=key, role="Patient", name=r["Name"], detail=f"born {r['DateOfBirth']}",
-                                        pinned=key in pinned_keys, patient_id=r["Id"], staff_id=None))
-        if role != "Patient":
-            clauses, args = [], {}
-            if role:
-                clauses.append("s.Role = :role")
-                args["role"] = role
-            if like:
-                clauses.append("lower(s.Name) LIKE :like")
-                args["like"] = like
-            sql = STAFF_USERS_SQL + (" WHERE " + " AND ".join(clauses) if clauses else "")
-            for r in self.conn.execute(sql, args):
-                key = f"{r['Role']}:{r['KeyValue']}"
-                out.append(UserView(key=key, role=r["Role"], name=r["Name"], detail=r["Departments"] or "",
-                                    pinned=key in pinned_keys, patient_id=None, staff_id=r["Id"]))
-        order = {key: i for i, key in enumerate(pinned_keys)}
-        out.sort(key=lambda u: (0, order[u.key], "") if u.pinned else (1, 0, u.name.lower()))
-        return out
-
-    def users(self, role: Optional[str], q: Optional[str], limit: int, pinned_keys: Sequence[str]) -> list[UserView]:
-        return self._all(role, q, pinned_keys)[:limit]
+    def users(self, role: Optional[str], q: Optional[str], pinned_keys: Sequence[str],
+              page: PageRequest) -> Page[UserView]:
+        """One page of the users: the demo users first (in the order of `pinned_keys`), then by name, then key."""
+        clauses, args = ["u.UserKey IS NOT NULL"], list(USERS_ARGS)
+        if role:
+            clauses.append("u.Role = ?")
+            args.append(role)
+        if q:
+            clauses.append("lower(u.Name) LIKE ?")
+            args.append(f"%{q.lower()}%")
+        return fetch_page(self.conn, "u.*", f"FROM ({USERS_SQL}) u{where(clauses)}", args,
+                          f"{pinned_first(pinned_keys)}, lower(u.Name), u.UserKey, u.Id", page,
+                          each_row(lambda r: user_view(r, pinned_keys)), order_args=pinned_keys)
 
     def user(self, role: str, value: str, pinned_keys: Sequence[str]) -> Optional[UserView]:
         actor = self.actor(role, value)
         if actor is None:
             return None
-        if actor.is_patient:
-            r = self.conn.execute(PATIENT_USERS_SQL + " WHERE p.Id = :id",
-                                  {"mrn": MRN_SYSTEM, "synthea": SYNTHEA_SYSTEM, "id": actor.patient_id}).fetchone()
-            key = f"Patient:{r['KeyValue'] or value}"
-            return UserView(key=key, role="Patient", name=r["Name"], detail=f"born {r['DateOfBirth']}",
-                            pinned=key in pinned_keys, patient_id=r["Id"], staff_id=None)
-        r = self.conn.execute(STAFF_USERS_SQL + " WHERE s.Id = :id", {"id": actor.staff_id}).fetchone()
-        key = f"{r['Role']}:{r['KeyValue']}"
-        return UserView(key=key, role=r["Role"], name=r["Name"], detail=r["Departments"] or "",
-                        pinned=key in pinned_keys, patient_id=None, staff_id=r["Id"])
+        row_id = actor.patient_id if actor.is_patient else actor.staff_id
+        r = self.conn.execute(f"SELECT u.* FROM ({USERS_SQL}) u WHERE u.Role = ? AND u.Id = ?",
+                              (*USERS_ARGS, role, row_id)).fetchone()
+        return user_view(r, pinned_keys) if r else None

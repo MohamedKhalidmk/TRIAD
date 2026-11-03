@@ -218,3 +218,35 @@ JOIN Staff s ON s.IdentifierSystem = ctm.MemberSystem AND s.IdentifierValue = ct
 WHERE p.Name = 'Elena Marsh' AND p.DateOfBirth = '1971-05-14'
   AND NOT EXISTS (SELECT 1 FROM Assertion n WHERE n.SupersedesId = a.Id)
 ORDER BY VisitDate, s.Name;
+
+-- Q14a. One page of the current chart of Patient B (Marlin805 Reggie481 Nienow652, born 1966-02-18):
+--       the second page of 25 items (items 26 to 50). The API gives each list in pages (doc/api.md section 1.5).
+--       The order is the order of the chart: the category, then the newest first, then the Id.
+--       The Id is the last key, so the order is stable: an item cannot show on two pages.
+--       Patient B is in the full database only (main.py ensure-db). On the scenario data (01 + 02), the page is empty.
+SELECT e.Category, e.Display, a.Verification, date(a.AssertedAt) AS Date,
+       CASE WHEN m.StaffId IS NULL THEN p.Name ELSE s.Name END AS Author
+FROM Patient p
+JOIN Visit v ON v.PatientId = p.Id
+JOIN ClinicalEntry e ON e.VisitId = v.Id
+JOIN Assertion a ON a.ClinicalEntryId = e.Id
+JOIN Message m ON m.Id = a.MessageId
+LEFT JOIN Staff s ON s.Id = m.StaffId
+WHERE p.Name = 'Marlin805 Reggie481 Nienow652' AND p.DateOfBirth = '1966-02-18'
+  AND NOT EXISTS (SELECT 1 FROM Assertion n WHERE n.SupersedesId = a.Id)
+ORDER BY CASE e.Category WHEN 'Allergy' THEN 0 WHEN 'Diagnosis' THEN 1 WHEN 'Prescription' THEN 2
+                         WHEN 'Observation' THEN 3 WHEN 'LabOrder' THEN 4 WHEN 'LabReport' THEN 5
+                         WHEN 'Procedure' THEN 6 WHEN 'CareTeam' THEN 7 ELSE 8 END,
+         julianday(a.AssertedAt) DESC, a.Id DESC
+LIMIT 25 OFFSET 25;
+
+-- Q14b. The number of items on all pages of Q14a: the same FROM and WHERE clauses, with COUNT(*).
+SELECT COUNT(*) AS Items
+FROM Patient p
+JOIN Visit v ON v.PatientId = p.Id
+JOIN ClinicalEntry e ON e.VisitId = v.Id
+JOIN Assertion a ON a.ClinicalEntryId = e.Id
+JOIN Message m ON m.Id = a.MessageId
+LEFT JOIN Staff s ON s.Id = m.StaffId
+WHERE p.Name = 'Marlin805 Reggie481 Nienow652' AND p.DateOfBirth = '1966-02-18'
+  AND NOT EXISTS (SELECT 1 FROM Assertion n WHERE n.SupersedesId = a.Id);

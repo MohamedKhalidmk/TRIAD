@@ -15,7 +15,7 @@ from infrastructure import config
 from infrastructure.clock import DemoClock
 from infrastructure.sqlite.connection import connect
 from infrastructure.sqlite.unit_of_work import SqliteUnitOfWork
-from tests.conftest import as_user, make_client
+from tests.conftest import all_items, as_user, make_client
 
 pytestmark = pytest.mark.slow
 
@@ -60,7 +60,7 @@ def ask(client, user, patient_id, text, client_turn_id=None):
 def test_the_patient_chart_is_the_q12_result(client, full_copy):
     for key, pid, name, dob in ((ELENA, 1, "Elena Marsh", "1971-05-14"),
                                 (PATIENT_B, B_ID, "Marlin805 Reggie481 Nienow652", "1966-02-18")):
-        items = client.get(f"/api/patients/{pid}/chart", headers=as_user(key)).json()["items"]
+        items = all_items(client, f"/api/patients/{pid}/chart", key)
         assert items and {a["id"] for a in items} == q12_ids(full_copy, name, dob)
     # A patient report (no open visit: the backend makes a virtual visit that ends at once) is visible too.
     report = client.post("/api/messages", headers=as_user(PATIENT_B), json={
@@ -70,10 +70,10 @@ def test_the_patient_chart_is_the_q12_result(client, full_copy):
             "intent": "Report", "verification": "Unconfirmed", "statement": "I get short of breath on stairs."}]})
     assert report.status_code == 201, report.text
     made = report.json()["assertions"][0]
-    visit = client.get(f"/api/patients/{B_ID}/visits", headers=as_user(PATIENT_B)).json()[0]
+    visit = client.get(f"/api/patients/{B_ID}/visits", headers=as_user(PATIENT_B)).json()["items"][0]
     assert visit["id"] == made["visitId"] and visit["class"] == "VR" and visit["endDate"] == visit["startDate"]
     assert client.get(f"/api/patients/{B_ID}", headers=as_user(PATIENT_B)).json()["openVisitId"] is None
-    items = client.get(f"/api/patients/{B_ID}/chart", headers=as_user(PATIENT_B)).json()["items"]
+    items = all_items(client, f"/api/patients/{B_ID}/chart", PATIENT_B)
     assert made["id"] in {a["id"] for a in items}
     assert {a["id"] for a in items} == q12_ids(full_copy, "Marlin805 Reggie481 Nienow652", "1966-02-18")
 
@@ -83,19 +83,20 @@ def test_the_staff_chart_is_the_current_state_and_history_adds_the_old_versions(
     history = client.get("/api/patients/1/chart?history=true", headers=as_user(OKAFOR)).json()["items"]
     assert all(a["isCurrent"] for a in current) and len(current) == 8
     assert len(history) == 10 and {a["id"] for a in current} < {a["id"] for a in history}
-    assert history[0]["assertedAt"] >= history[-1]["assertedAt"]          # newest first
+    allergy = [a["assertedAt"] for a in history if a["category"] == "Allergy"]
+    assert history[0]["category"] == "Allergy" and allergy == sorted(allergy, reverse=True)   # newest first
     allergies = client.get("/api/patients/1/chart?category=Allergy", headers=as_user(OKAFOR)).json()["items"]
     assert [a["details"]["substance"] for a in allergies] == ["Allergy to penicillin"]
 
 
 def test_the_chart_of_patient_b_is_fast(client):
-    """Patient B has more than 500 current items. The chart read (with its audit write) takes less than 300 ms."""
-    for params in ("", "?history=true"):
+    """Patient B has more than 500 current items. A chart page (with its audit write) takes less than 300 ms."""
+    for params in ("", "?history=true", "?offset=500", "?limit=200&q=e"):
         client.get(f"/api/patients/{B_ID}/chart{params}", headers=as_user(PATIENT_B))
         start = time.perf_counter()
         response = client.get(f"/api/patients/{B_ID}/chart{params}", headers=as_user(PATIENT_B))
         elapsed = time.perf_counter() - start
-        assert response.status_code == 200 and len(response.json()["items"]) > 500
+        assert response.status_code == 200 and response.json()["total"] > 500 and response.json()["items"]
         assert elapsed < 0.3, f"the chart took {elapsed:.3f} s"
 
 
@@ -115,9 +116,12 @@ def test_a_denied_chart_read_is_in_the_audit_log(client, full_copy):
     assert scalar(full_copy, "SELECT COUNT(*) FROM AuditEvent WHERE Outcome = 'Denied'") == before + 1
     assert scalar(full_copy, "SELECT ActorValue || '|' || SubjectName FROM AuditEvent ORDER BY Id DESC LIMIT 1") \
         == "E1004|Elena Marsh"
-    events = client.get("/api/patients/1/audit", headers=as_user(ELENA)).json()
+    page = client.get("/api/patients/1/audit", headers=as_user(ELENA)).json()
+    events = page["items"]
     assert events[0]["action"] == "read" and events[0]["actorKey"] == ELENA      # the audit read itself
     assert events[1]["outcome"] == "Denied" and events[1]["actorName"] == "Jun Park"
+    assert page["denied"] == scalar(full_copy, "SELECT COUNT(*) FROM AuditEvent WHERE Outcome = 'Denied' "
+                                               "AND SubjectName = 'Elena Marsh'")
 
 
 @pytest.mark.parametrize("user,method,url,status", [
@@ -144,9 +148,9 @@ def test_the_user_header(client):
     assert client.get("/api/me", headers=as_user("Nobody")).status_code == 401
     assert client.get("/api/me", headers=as_user(PATIENT_B)).json()["name"] == "Marlin805 Reggie481 Nienow652"
     assert client.get("/api/users/Doctor:E9999").status_code == 404
-    pinned = client.get("/api/users").json()[:8]
+    pinned = client.get("/api/users").json()["items"][:8]
     assert [u["key"] for u in pinned][:3] == [ELENA, PATIENT_B, SOFIA] and all(u["pinned"] for u in pinned)
-    nurses = client.get("/api/users?role=Nurse&q=park").json()
+    nurses = client.get("/api/users?role=Nurse&q=park").json()["items"]
     assert [(u["name"], u["detail"]) for u in nurses] == [("Jun Park", "Home Health")]
 
 
@@ -237,7 +241,7 @@ def test_the_same_client_turn_id_gives_the_saved_turns(client, full_copy):
     other = client.post(f"/api/chat/sessions/{session_id}/turns", headers=as_user(ELENA),
                         json={"clientTurnId": "turn-2", "text": "Any allergies?"})
     assert other.status_code == 403                          # the session belongs to another user
-    summaries = client.get("/api/patients/1/chat/sessions", headers=as_user(OKAFOR)).json()
+    summaries = client.get("/api/patients/1/chat/sessions", headers=as_user(OKAFOR)).json()["items"]
     assert summaries[0]["id"] == session_id and summaries[0]["turnCount"] == 2
     assert summaries[0]["firstQuestion"] == "Is she allergic to penicillin?"
 
@@ -346,7 +350,8 @@ def test_the_directory_rows(client):
     assert room["department"] == "Radiology" and room["identifier"]["value"] == "X-RAY-ROOM-1" and not room["inUse"]
     renamed = client.patch(f"/api/departments/{dept_id}", headers=h, json={"name": "Imaging"}).json()
     assert renamed["name"] == "Imaging"
-    assert [x["name"] for x in client.get("/api/locations?department=Imaging", headers=h).json()] == ["X-ray Room 1"]
+    imaging = client.get("/api/locations?department=Imaging", headers=h).json()["items"]
+    assert [x["name"] for x in imaging] == ["X-ray Room 1"]
     assert client.delete(f"/api/departments/{dept_id}", headers=h).status_code == 409   # it has a location
     nurse = client.post("/api/staff", headers=h, json={"name": "Test Nurse", "role": "Nurse", "departmentId": dept_id,
                                                        "designation": "RPN", "languages": ["en", "fr"]})
@@ -357,7 +362,7 @@ def test_the_directory_rows(client):
     assert client.patch(f"/api/staff/{staff['id']}", headers=h, json={"desk": "Desk 1"}).status_code == 422
     assert client.patch(f"/api/staff/{staff['id']}", headers=h, json={"active": False}).json()["active"] is False
     assert client.delete(f"/api/staff/{staff['id']}", headers=h).status_code == 409    # works in a department
-    used = next(x for x in client.get("/api/locations", headers=h).json() if x["inUse"])
+    used = next(x for x in client.get("/api/locations", headers=h).json()["items"] if x["inUse"])
     assert used["identifier"]["value"] == "ER-UNIT"                                      # the default ER location
     assert client.delete(f"/api/locations/{used['id']}", headers=h).status_code == 409   # a visit used it
     assert client.delete(f"/api/locations/{room['id']}", headers=h).status_code == 204
@@ -365,7 +370,7 @@ def test_the_directory_rows(client):
     assert med.status_code == 201
     assert client.post("/api/medications", headers=h,
                        json={"code": "T-1", "codeSystem": "urn:test", "name": "Again"}).status_code == 409
-    metformin = client.get("/api/medications?q=860975", headers=h).json()[0]
+    metformin = client.get("/api/medications?q=860975", headers=h).json()["items"][0]
     assert client.delete(f"/api/medications/{metformin['id']}", headers=h).status_code == 409
     assert client.delete(f"/api/medications/{med.json()['id']}", headers=h).status_code == 204
     presets = client.get("/api/codes?category=Prescription", headers=as_user(OKAFOR)).json()

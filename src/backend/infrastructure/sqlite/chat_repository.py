@@ -10,9 +10,11 @@ from typing import Optional, Sequence
 from domain.access import Actor
 from domain.views import AuditEventView, ChatSessionSummary
 
+from application.paging import Page, PageRequest
 from application.ports import ChatSessionRow, ChatTurnRow
 from infrastructure import ids
 from infrastructure.config import AUDIT_EVENT_SYSTEM
+from infrastructure.sqlite.paging import each_row, fetch_page
 
 SESSION_SQL = """
 SELECT cs.*, (SELECT p.Id FROM Patient p WHERE p.Name = cs.SubjectName AND p.DateOfBirth = cs.SubjectDateOfBirth)
@@ -27,6 +29,41 @@ SELECT t.Id, t.Seq, t.ClientTurnId, t.Speaker, t.Text, t.CreatedAt,
         ORDER BY ae.Id LIMIT 1) AS Kind
 FROM ChatTurn t
 """
+
+SESSION_SUMMARY_COLUMNS = """
+cs.Id, cs.IdentifierValue, cs.StartedAt, cs.Mode,
+       (SELECT COUNT(*) FROM ChatTurn t WHERE t.ChatSessionId = cs.Id) AS TurnCount,
+       (SELECT t.Text FROM ChatTurn t WHERE t.ChatSessionId = cs.Id AND t.Speaker = 'User'
+        ORDER BY t.Seq LIMIT 1) AS FirstQuestion"""
+
+# The sessions of one user (role, system, value) about one patient (name, date of birth).
+SESSION_SUMMARY_FROM = """
+FROM ChatSession cs
+WHERE cs.UserRole = ? AND cs.UserSystem = ? AND cs.UserValue = ?
+  AND cs.SubjectName = ? AND cs.SubjectDateOfBirth = ?"""
+
+AUDIT_COLUMNS = """
+ae.*, COALESCE(s.Name, (SELECT pp.Name FROM PatientIdentifier pi
+                        JOIN Patient pp ON pp.Id = pi.PatientId
+                        WHERE pi.System = ae.ActorSystem AND pi.Value = ae.ActorValue)) AS ActorName"""
+
+# The audit records of one patient (name, date of birth).
+AUDIT_FROM = """
+FROM AuditEvent ae
+LEFT JOIN Staff s ON s.IdentifierSystem = ae.ActorSystem AND s.IdentifierValue = ae.ActorValue
+WHERE ae.SubjectName = ? AND ae.SubjectDateOfBirth = ?"""
+
+
+def session_summary(r: sqlite3.Row) -> ChatSessionSummary:
+    return ChatSessionSummary(id=r["Id"], identifier=r["IdentifierValue"], started_at=r["StartedAt"], mode=r["Mode"],
+                              turn_count=r["TurnCount"], first_question=r["FirstQuestion"])
+
+
+def audit_event(r: sqlite3.Row) -> AuditEventView:
+    return AuditEventView(id=r["Id"], identifier=r["IdentifierValue"], at=r["At"], action=r["Action"],
+                          outcome=r["Outcome"], actor_role=r["ActorRole"],
+                          actor_key=f"{r['ActorRole']}:{r['ActorValue']}", actor_name=r["ActorName"], path=r["Path"],
+                          chat_turn_id=r["ChatTurnId"])
 
 
 class SqliteChatRepository:
@@ -49,20 +86,11 @@ class SqliteChatRepository:
                               subject_date_of_birth=r["SubjectDateOfBirth"], started_at=r["StartedAt"],
                               mode=r["Mode"], model=r["Model"], patient_id=r["PatientId"])
 
-    def sessions(self, actor: Actor, subject: tuple[str, str]) -> list[ChatSessionSummary]:
-        rows = self.conn.execute("""
-            SELECT cs.Id, cs.IdentifierValue, cs.StartedAt, cs.Mode,
-                   (SELECT COUNT(*) FROM ChatTurn t WHERE t.ChatSessionId = cs.Id) AS TurnCount,
-                   (SELECT t.Text FROM ChatTurn t WHERE t.ChatSessionId = cs.Id AND t.Speaker = 'User'
-                    ORDER BY t.Seq LIMIT 1) AS FirstQuestion
-            FROM ChatSession cs
-            WHERE cs.UserRole = ? AND cs.UserSystem = ? AND cs.UserValue = ?
-              AND cs.SubjectName = ? AND cs.SubjectDateOfBirth = ?
-            ORDER BY julianday(cs.StartedAt) DESC, cs.Id DESC""",
-                                 (actor.role, actor.system, actor.value, *subject))
-        return [ChatSessionSummary(id=r["Id"], identifier=r["IdentifierValue"], started_at=r["StartedAt"],
-                                   mode=r["Mode"], turn_count=r["TurnCount"], first_question=r["FirstQuestion"])
-                for r in rows]
+    def sessions(self, actor: Actor, subject: tuple[str, str], page: PageRequest) -> Page[ChatSessionSummary]:
+        """One page of the sessions of the user about the patient, newest first."""
+        return fetch_page(self.conn, SESSION_SUMMARY_COLUMNS, SESSION_SUMMARY_FROM,
+                          (actor.role, actor.system, actor.value, *subject), "julianday(cs.StartedAt) DESC, cs.Id DESC",
+                          page, each_row(session_summary))
 
     def _turns(self, where: str, args: tuple) -> list[ChatTurnRow]:
         rows = self.conn.execute(TURN_SQL + where + " ORDER BY t.Seq", args).fetchall()
@@ -112,16 +140,12 @@ class SqliteAuditRepository:
             (AUDIT_EVENT_SYSTEM, value, at, action, outcome, actor.role, actor.system, actor.value, *subject, path,
              chat_turn_id)).lastrowid
 
-    def for_subject(self, subject: tuple[str, str]) -> list[AuditEventView]:
-        rows = self.conn.execute("""
-            SELECT ae.*, COALESCE(s.Name, (SELECT pp.Name FROM PatientIdentifier pi
-                                           JOIN Patient pp ON pp.Id = pi.PatientId
-                                           WHERE pi.System = ae.ActorSystem AND pi.Value = ae.ActorValue)) AS ActorName
-            FROM AuditEvent ae
-            LEFT JOIN Staff s ON s.IdentifierSystem = ae.ActorSystem AND s.IdentifierValue = ae.ActorValue
-            WHERE ae.SubjectName = ? AND ae.SubjectDateOfBirth = ?
-            ORDER BY julianday(ae.At) DESC, ae.Id DESC""", subject)
-        return [AuditEventView(id=r["Id"], identifier=r["IdentifierValue"], at=r["At"], action=r["Action"],
-                               outcome=r["Outcome"], actor_role=r["ActorRole"],
-                               actor_key=f"{r['ActorRole']}:{r['ActorValue']}", actor_name=r["ActorName"],
-                               path=r["Path"], chat_turn_id=r["ChatTurnId"]) for r in rows]
+    def for_subject(self, subject: tuple[str, str], page: PageRequest) -> Page[AuditEventView]:
+        """One page of the audit records of the patient, newest first."""
+        return fetch_page(self.conn, AUDIT_COLUMNS, AUDIT_FROM, subject, "julianday(ae.At) DESC, ae.Id DESC", page,
+                          each_row(audit_event))
+
+    def denied_count(self, subject: tuple[str, str]) -> int:
+        """The number of Denied records of the patient (all pages)."""
+        return self.conn.execute("SELECT COUNT(*) FROM AuditEvent WHERE SubjectName = ? AND SubjectDateOfBirth = ? "
+                                 "AND Outcome = 'Denied'", subject).fetchone()[0]

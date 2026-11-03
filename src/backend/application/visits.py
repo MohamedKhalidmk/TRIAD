@@ -10,6 +10,7 @@ from domain.views import CareTeamView, VisitView
 
 from application.context import AppContext
 from application.guard import load_patient, require, subject_of
+from application.paging import Page, PageRequest
 from application.ports import NewEntryRow
 
 
@@ -25,10 +26,12 @@ def check_location(ctx: AppContext, location_id: int) -> None:
         raise Invalid("The location does not exist.", {"locationId": f"Location {location_id} does not exist."})
 
 
-def list_visits(ctx: AppContext, actor: Actor, patient_id: int) -> list[VisitView]:
+def list_visits(ctx: AppContext, actor: Actor, patient_id: int,
+                page: PageRequest = PageRequest()) -> Page[VisitView]:
+    """One page of the visits of the patient, newest first."""
     patient = load_patient(ctx, patient_id)
     require(ctx, actor, patient, "view_visits", "read", "/api/patients/{patient}/visits")
-    return ctx.visits.for_patient(patient_id)
+    return ctx.visits.for_patient_page(patient_id, page)
 
 
 def check_in(ctx: AppContext, actor: Actor, patient_id: int, visit_class: str, reason: Optional[str],

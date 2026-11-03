@@ -7,8 +7,10 @@ from fastapi import APIRouter, Depends, Response
 
 from api import schemas as s
 from api.actor import get_actor, get_ctx
+from api.paging import page_request
 from application import directory as d
 from application.context import AppContext
+from application.paging import PageRequest
 from domain.access import Actor
 
 router = APIRouter(prefix="/api", tags=["directory"])
@@ -21,9 +23,10 @@ def given(body) -> dict:
 
 # ----- departments -----
 
-@router.get("/departments", response_model=list[s.Department])
-def departments(ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
-    return d.departments(ctx, actor)
+@router.get("/departments", response_model=s.Page[s.Department])
+def departments(q: Optional[str] = None, page: PageRequest = Depends(page_request),
+                ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
+    return d.departments(ctx, actor, q, page)
 
 
 @router.post("/departments", response_model=s.Department, status_code=201)
@@ -45,10 +48,10 @@ def delete_department(department_id: int, ctx: AppContext = Depends(get_ctx), ac
 
 # ----- locations -----
 
-@router.get("/locations", response_model=list[s.Location])
-def locations(department: Optional[str] = None, ctx: AppContext = Depends(get_ctx),
-              actor: Actor = Depends(get_actor)):
-    return d.locations(ctx, actor, department)
+@router.get("/locations", response_model=s.Page[s.Location])
+def locations(department: Optional[str] = None, q: Optional[str] = None, page: PageRequest = Depends(page_request),
+              ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
+    return d.locations(ctx, actor, department, q, page)
 
 
 @router.post("/locations", response_model=s.Location, status_code=201)
@@ -70,10 +73,11 @@ def delete_location(location_id: int, ctx: AppContext = Depends(get_ctx), actor:
 
 # ----- staff -----
 
-@router.get("/staff", response_model=list[s.Staff])
+@router.get("/staff", response_model=s.Page[s.Staff])
 def staff_list(role: Optional[str] = None, department: Optional[str] = None, q: Optional[str] = None,
-               limit: int = 200, ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
-    return d.staff_list(ctx, actor, role, department, q, limit)
+               page: PageRequest = Depends(page_request), ctx: AppContext = Depends(get_ctx),
+               actor: Actor = Depends(get_actor)):
+    return d.staff_list(ctx, actor, role, department, q, page)
 
 
 @router.post("/staff", response_model=s.Staff, status_code=201)
@@ -95,10 +99,10 @@ def delete_staff(staff_id: int, ctx: AppContext = Depends(get_ctx), actor: Actor
 
 # ----- medications -----
 
-@router.get("/medications", response_model=list[s.Medication])
-def medications(q: Optional[str] = None, limit: int = 200, ctx: AppContext = Depends(get_ctx),
-                actor: Actor = Depends(get_actor)):
-    return d.medications(ctx, actor, q, limit)
+@router.get("/medications", response_model=s.Page[s.Medication])
+def medications(q: Optional[str] = None, page: PageRequest = Depends(page_request),
+                ctx: AppContext = Depends(get_ctx), actor: Actor = Depends(get_actor)):
+    return d.medications(ctx, actor, q, page)
 
 
 @router.post("/medications", response_model=s.Medication, status_code=201)

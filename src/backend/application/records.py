@@ -15,10 +15,11 @@ from domain.access import Actor, record_intents, supersede_denial
 from domain.enums import CHANNELS, ENTRY_CATEGORIES, INTENTS, VERIFICATIONS
 from domain.errors import Invalid, NotFound
 from domain.rules import check_head, parse_time
-from domain.views import AssertionView, Chain, Chart, PatientView, RecordResult
+from domain.views import AssertionView, PatientView, RecordResult
 
 from application.context import AppContext
 from application.guard import deny, load_patient, require, subject_of
+from application.paging import Page, PageRequest, page_of
 from application.ports import NewEntryRow
 
 PRIORITIES = ("routine", "urgent", "asap", "stat")
@@ -68,40 +69,57 @@ class PreparedAssertion:
 
 # ----- the chart and the chains -----
 
+@dataclass
+class Chart(Page[AssertionView]):
+    patient_id: int
+    counts: dict[str, int]       # the items of each category for the same filters, without the category filter
+
+
+@dataclass
+class Chain(Page[AssertionView]):
+    head_id: int                 # the current assertion of the chain
+
+
 def chart(ctx: AppContext, actor: Actor, patient_id: int, visit_id: Optional[int], category: Optional[str],
-          history: bool) -> Chart:
+          history: bool, text: Optional[str] = None, page: PageRequest = PageRequest()) -> Chart:
+    """One page of the chart, in the order of the chart. A patient gets the patient-visible items only.
+
+    `text` searches the display, the statement and the author name. Each page read writes one audit record.
+    """
     patient = load_patient(ctx, patient_id)
     path = "/api/patients/{patient}/chart"
     require(ctx, actor, patient, "view_chart", "read", path)
     if category and category not in ENTRY_CATEGORIES:
         raise Invalid("The category is not correct.", {"category": f"Use one of {', '.join(ENTRY_CATEGORIES)}."})
-    current_only = actor.is_patient or not history
-    items = ctx.records.assertions(patient.id, current_only, visit_id, category or None)
-    if actor.is_patient:
-        items = [a for a in items if a.patient_visible]
+    filters = dict(current_only=actor.is_patient or not history, visit_id=visit_id,
+                   text=(text or "").strip() or None, visible_only=actor.is_patient)
+    found = ctx.records.items_page(patient.id, category=category or None, page=page, **filters)
+    counts = ctx.records.category_counts(patient.id, **filters)
     with ctx.uow.write() as now:
         ctx.audit.add(now, "read", "Allowed", actor, subject_of(patient), path)
-    return Chart(patient_id=patient.id, items=items)
+    return Chart(items=found.items, total=found.total, limit=found.limit, offset=found.offset,
+                 patient_id=patient.id, counts=counts)
 
 
-def chain(ctx: AppContext, actor: Actor, assertion_id: int) -> Chain:
-    """The chain of an assertion, newest first. A patient gets the current item only."""
+def chain(ctx: AppContext, actor: Actor, assertion_id: int, page: PageRequest = PageRequest()) -> Chain:
+    """One page of the chain of an assertion, newest first. A patient gets the current item only."""
     found = ctx.records.assertion(assertion_id)
     if found is None:
         raise NotFound(f"Assertion {assertion_id} does not exist.")
     patient = load_patient(ctx, found.patient_id)
     path = "/api/assertions/{assertion}/chain"
     require(ctx, actor, patient, "view_chain", "read", path)
-    items = ctx.records.chain(assertion_id)
-    head = items[0]
+    head = found if found.is_current else ctx.records.chain_head(assertion_id)
     if actor.is_patient:
         if not head.patient_visible:
             deny(ctx, actor, patient, "read", path,
                  "This item is not in your record. This attempt is in the audit log.")
-        items = [head]
+        items = page_of([head], page)
+    else:
+        items = ctx.records.chain_page(assertion_id, page)
     with ctx.uow.write() as now:
         ctx.audit.add(now, "read", "Allowed", actor, subject_of(patient), path)
-    return Chain(head_id=head.id, items=items)
+    return Chain(items=items.items, total=items.total, limit=items.limit, offset=items.offset, head_id=head.id)
 
 
 def supersedes_for(ctx: AppContext, actor: Actor, assertion: AssertionView) -> list[AssertionView]:
@@ -262,8 +280,8 @@ def write(ctx: AppContext, actor: Actor, patient: PatientView, prepared: list[Pr
 
 def add_report_visit(ctx: AppContext, patient_id: int, now: str) -> int:
     """A virtual visit (class VR) for a patient report with no open visit. It ends at once."""
-    location = next((loc.id for loc in ctx.directory.locations(None) if loc.identifier.value == "VIRTUAL-VISIT"),
-                    None)
+    found = ctx.directory.location_by_identifier(ctx.identity.location, "VIRTUAL-VISIT")
+    location = found.id if found else None
     ident = (ctx.identity.encounter, ctx.visits.next_identifier(ctx.identity.encounter, "ENC-", 6))
     return ctx.visits.create(patient_id, ident, "VR", "Patient report", "Patient report", now, location, end=now)
 

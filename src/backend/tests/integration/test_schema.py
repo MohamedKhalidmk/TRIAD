@@ -66,11 +66,13 @@ def test_03_select_queries_run_and_answer_the_slide_question(scenario_db):
     conn = connect(scenario_db)
     results = [conn.execute(sql).fetchall() for sql in statements(
         (config.DML_DIR / "03_select_queries.sql").read_text(encoding="utf-8"))]
-    assert len(results) == 14  # Q1-Q13, with Q9 in two parts
+    assert len(results) == 16  # Q1-Q14, with Q9 and Q14 in two parts
     q3 = results[2]
     assert [tuple(r) for r in q3] == [("No", "Physician", "2026-10-02", "Not allergic. Allergy test negative.")]
     q2 = results[1]
     assert [r["Verification"] for r in q2] == ["Refuted", "Unconfirmed", "Unconfirmed"]
+    q14_page, q14_count = results[14], results[15]
+    assert q14_page == [] and q14_count[0]["Items"] == 0     # Patient B is in the full database only
 
 
 def test_04_update_delete_runs_on_a_copy(scenario_copy):

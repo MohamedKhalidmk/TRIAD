@@ -11,7 +11,9 @@ from typing import Optional
 from domain.records import Address
 from domain.views import (DepartmentView, Identifier, LocationView, MedicationView, StaffDepartment, StaffView)
 
+from application.paging import Page, PageRequest
 from infrastructure import ids
+from infrastructure.sqlite.paging import each_row, fetch_page, where
 
 EMPLOYEE_SYSTEM = "https://triad.example/fhir/sid/employee"
 ADDRESS = ("Street", "City", "Region", "PostalCode", "Country")
@@ -22,14 +24,26 @@ SUBTYPE_COLUMNS = {"Doctor": ("LicenseNumber", "Qualification"), "Nurse": ("Lice
                    "MOA": ("CertificationNumber", "Desk", "PhoneExtension")}
 MEDICATION_COLUMNS = ("Code", "CodeSystem", "Name", "Form", "Manufacturer")
 
-STAFF_SQL = """
-SELECT s.*, dr.LicenseNumber AS DoctorLicense, dr.Qualification, nu.LicenseNumber AS NurseLicense, nu.Designation,
-       mo.CertificationNumber, mo.Desk, mo.PhoneExtension
+STAFF_COLUMNS_SQL = """
+s.*, dr.LicenseNumber AS DoctorLicense, dr.Qualification, nu.LicenseNumber AS NurseLicense, nu.Designation,
+       mo.CertificationNumber, mo.Desk, mo.PhoneExtension"""
+STAFF_FROM = """
 FROM Staff s
 LEFT JOIN Doctor dr ON dr.StaffId = s.Id
 LEFT JOIN Nurse nu ON nu.StaffId = s.Id
 LEFT JOIN MOA mo ON mo.StaffId = s.Id
 """
+STAFF_SQL = "SELECT " + STAFF_COLUMNS_SQL + STAFF_FROM
+
+DEPARTMENT_COLUMNS_SQL = ("d.*, (SELECT COUNT(DISTINCT w.StaffId) FROM WorksIn w WHERE w.DepartmentId = d.Id) "
+                          "AS StaffCount")
+LOCATION_COLUMNS_SQL = "l.*, EXISTS (SELECT 1 FROM VisitLocation vl WHERE vl.LocationId = l.Id) AS InUse"
+
+
+def name_or_identifier(alias: str, q: str) -> tuple[str, list]:
+    """The search of a department or a location: part of the name or of the identifier value (any case)."""
+    like = f"%{q.lower()}%"
+    return f"(lower({alias}.Name) LIKE ? OR lower({alias}.IdentifierValue) LIKE ?)", [like, like]
 
 
 def address_of(r: sqlite3.Row) -> Address:
@@ -62,15 +76,24 @@ class SqliteDirectoryRepository:
                               name=r["Name"], type=r["Type"], phone_number=r["PhoneNumber"], email=r["Email"],
                               address=address_of(r), staff_count=r["StaffCount"])
 
-    def departments(self) -> list[DepartmentView]:
-        return [self._department(r) for r in self.conn.execute(
-            "SELECT d.*, (SELECT COUNT(DISTINCT w.StaffId) FROM WorksIn w WHERE w.DepartmentId = d.Id) AS StaffCount "
-            "FROM Department d ORDER BY d.Name")]
+    def departments(self, q: Optional[str], page: PageRequest) -> Page[DepartmentView]:
+        clauses, args = [], []
+        if q:
+            clause, values = name_or_identifier("d", q)
+            clauses.append(clause)
+            args += values
+        return fetch_page(self.conn, DEPARTMENT_COLUMNS_SQL, "FROM Department d" + where(clauses), args,
+                          "d.Name, d.Id", page, each_row(self._department))
 
     def department(self, department_id: int) -> Optional[DepartmentView]:
-        r = self.conn.execute(
-            "SELECT d.*, (SELECT COUNT(DISTINCT w.StaffId) FROM WorksIn w WHERE w.DepartmentId = d.Id) AS StaffCount "
-            "FROM Department d WHERE d.Id = ?", (department_id,)).fetchone()
+        r = self.conn.execute(f"SELECT {DEPARTMENT_COLUMNS_SQL} FROM Department d WHERE d.Id = ?",
+                              (department_id,)).fetchone()
+        return self._department(r) if r else None
+
+    def department_by_name(self, name: str) -> Optional[DepartmentView]:
+        """The department with this name (case is not important)."""
+        r = self.conn.execute(f"SELECT {DEPARTMENT_COLUMNS_SQL} FROM Department d WHERE lower(d.Name) = lower(?) "
+                              "ORDER BY d.Id LIMIT 1", (name,)).fetchone()
         return self._department(r) if r else None
 
     def department_name_exists(self, name: str, except_id: Optional[int] = None) -> bool:
@@ -104,20 +127,27 @@ class SqliteDirectoryRepository:
                             name=r["Name"], department=r["Type"], physical_type=r["PhysicalType"],
                             phone_number=r["PhoneNumber"], address=address_of(r), in_use=bool(r["InUse"]))
 
-    LOCATION_SQL = ("SELECT l.*, EXISTS (SELECT 1 FROM VisitLocation vl WHERE vl.LocationId = l.Id) AS InUse "
-                    "FROM Location l")
-
-    def locations(self, department: Optional[str]) -> list[LocationView]:
+    def locations(self, department: Optional[str], q: Optional[str], page: PageRequest) -> Page[LocationView]:
+        clauses, args = [], []
         if department:
-            sql = (self.LOCATION_SQL + " WHERE lower(l.Type) = lower(?) OR l.Type IN (SELECT Name FROM Department "
-                   "WHERE IdentifierValue = ? OR CAST(Id AS TEXT) = ?) ORDER BY l.Id")
-            rows = self.conn.execute(sql, (department, department, department))
-        else:
-            rows = self.conn.execute(self.LOCATION_SQL + " ORDER BY l.Id")
-        return [self._location(r) for r in rows]
+            clauses.append("(lower(l.Type) = lower(?) OR l.Type IN (SELECT Name FROM Department "
+                           "WHERE IdentifierValue = ? OR CAST(Id AS TEXT) = ?))")
+            args += [department] * 3
+        if q:
+            clause, values = name_or_identifier("l", q)
+            clauses.append(clause)
+            args += values
+        return fetch_page(self.conn, LOCATION_COLUMNS_SQL, "FROM Location l" + where(clauses), args, "l.Id", page,
+                          each_row(self._location))
 
     def location(self, location_id: int) -> Optional[LocationView]:
-        r = self.conn.execute(self.LOCATION_SQL + " WHERE l.Id = ?", (location_id,)).fetchone()
+        r = self.conn.execute(f"SELECT {LOCATION_COLUMNS_SQL} FROM Location l WHERE l.Id = ?",
+                              (location_id,)).fetchone()
+        return self._location(r) if r else None
+
+    def location_by_identifier(self, system: str, value: str) -> Optional[LocationView]:
+        r = self.conn.execute(f"SELECT {LOCATION_COLUMNS_SQL} FROM Location l "
+                              "WHERE l.IdentifierSystem = ? AND l.IdentifierValue = ?", (system, value)).fetchone()
         return self._location(r) if r else None
 
     def add_location(self, values: dict) -> int:
@@ -157,7 +187,7 @@ class SqliteDirectoryRepository:
             for r in rows]
 
     def staff_list(self, role: Optional[str], department: Optional[str], q: Optional[str],
-                   limit: int) -> list[StaffView]:
+                   page: PageRequest) -> Page[StaffView]:
         clauses, args = [], []
         if role:
             clauses.append("s.Role = ?")
@@ -170,10 +200,10 @@ class SqliteDirectoryRepository:
                            "WHERE w.StaffId = s.Id AND (lower(d.Name) = lower(?) OR d.IdentifierValue = ? "
                            "OR CAST(d.Id AS TEXT) = ?))")
             args += [department] * 3
-        where = " WHERE " + " AND ".join(clauses) if clauses else ""
-        rows = self.conn.execute(STAFF_SQL + where + " ORDER BY s.IdentifierSystem = ? DESC, s.Name, s.Id LIMIT ?",
-                                 (*args, EMPLOYEE_SYSTEM, limit)).fetchall()
-        return self._staff_views(rows)
+        # The staff of the hospital (employee identifiers) first, then the Synthea staff; by name in each group.
+        return fetch_page(self.conn, STAFF_COLUMNS_SQL, STAFF_FROM + where(clauses), args,
+                          "s.IdentifierSystem = ? DESC, s.Name, s.Id", page, self._staff_views,
+                          order_args=(EMPLOYEE_SYSTEM,))
 
     def staff(self, staff_id: int) -> Optional[StaffView]:
         views = self._staff_views(self.conn.execute(STAFF_SQL + " WHERE s.Id = ?", (staff_id,)).fetchall())
@@ -227,13 +257,13 @@ class SqliteDirectoryRepository:
         return MedicationView(id=r["Id"], code=r["Code"], code_system=r["CodeSystem"], name=r["Name"], form=r["Form"],
                               manufacturer=r["Manufacturer"])
 
-    def medications(self, q: Optional[str], limit: int) -> list[MedicationView]:
+    def medications(self, q: Optional[str], page: PageRequest) -> Page[MedicationView]:
+        clauses, args = [], []
         if q:
-            rows = self.conn.execute("SELECT * FROM Medication WHERE lower(Name) LIKE ? OR Code = ? "
-                                     "ORDER BY Name LIMIT ?", (f"%{q.lower()}%", q, limit))
-        else:
-            rows = self.conn.execute("SELECT * FROM Medication ORDER BY Name LIMIT ?", (limit,))
-        return [self._medication(r) for r in rows]
+            clauses.append("(lower(med.Name) LIKE ? OR med.Code = ?)")
+            args += [f"%{q.lower()}%", q]
+        return fetch_page(self.conn, "med.*", "FROM Medication med" + where(clauses), args, "med.Name, med.Id", page,
+                          each_row(self._medication))
 
     def medication(self, medication_id: int) -> Optional[MedicationView]:
         r = self.conn.execute("SELECT * FROM Medication WHERE Id = ?", (medication_id,)).fetchone()

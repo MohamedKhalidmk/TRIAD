@@ -3,8 +3,10 @@
 The read side uses the logic of the queries in dml/03_select_queries.sql:
 - Q1: the current record is each assertion that no assertion supersedes (NOT EXISTS ... SupersedesId = a.Id);
 - Q2: a chain follows Supersedes with WITH RECURSIVE;
-- Q13: the current care team is a CareTeam entry with Status = 'active' whose assertion nothing supersedes.
-The patient-visible rule (Q12) is domain.rules.is_patient_visible. A test shows that both give the same rows.
+- Q12: the patient-visible rule. PATIENT_VISIBLE is its WHERE predicate, and domain.rules.is_patient_visible
+  is the same rule in Python. A test shows that both give the same rows for each patient;
+- Q13: the current care team is a CareTeam entry with Status = 'active' whose assertion nothing supersedes;
+- Q14: one page of the chart (ORDER BY the category, the newest first, the Id; LIMIT ? OFFSET ?).
 """
 from __future__ import annotations
 
@@ -14,10 +16,29 @@ from typing import Optional, Sequence
 from domain.rules import author_label, is_patient_visible
 from domain.views import AssertionView, Author, CareTeamMemberView, CareTeamVersion
 
+from application.paging import Page, PageRequest
 from application.ports import EntryInfo, NewEntryRow
 from infrastructure import ids
+from infrastructure.sqlite.paging import each_row, fetch_page, where
 
 CURRENT = "NOT EXISTS (SELECT 1 FROM Assertion n2 WHERE n2.SupersedesId = a.Id)"
+
+# The predicate of query Q12 (the patient-visible rule of USER_FLOWS.md section 2.1). It includes CURRENT.
+PATIENT_VISIBLE = f"""({CURRENT}
+    AND a.Verification <> 'EnteredInError'
+    AND ((a.Intent = 'Decision' AND a.Source = 'Human' AND s.Role = 'Doctor')
+         OR (e.Category IN ('Observation', 'LabReport') AND a.Verification = 'Confirmed')
+         OR (m.StaffId IS NULL AND m.Origin = 'Patient')))"""
+
+# The author name of an assertion: the staff member, or the patient for a patient report (as in author_of).
+AUTHOR_NAME = "CASE WHEN m.StaffId IS NULL THEN p.Name ELSE s.Name END"
+
+# The order of the chart: the categories in the order of the UI, then the newest first, then the Id.
+CHART_CATEGORIES = ("Allergy", "Diagnosis", "Prescription", "Observation", "LabOrder", "LabReport", "Procedure",
+                    "CareTeam")
+CATEGORY_RANK = ("CASE e.Category " + " ".join(f"WHEN '{c}' THEN {i}" for i, c in enumerate(CHART_CATEGORIES))
+                 + f" ELSE {len(CHART_CATEGORIES)} END")
+CHART_ORDER = f"{CATEGORY_RANK}, julianday(a.AssertedAt) DESC, a.Id DESC"
 
 # The subtype columns of each category: (column alias, key in AssertionView.details).
 DETAIL_KEYS = {
@@ -45,8 +66,8 @@ SUBTYPE_COLUMNS = {
     "CareTeam": ("Name", "Status"),
 }
 
-ASSERTION_SELECT = """
-SELECT a.Id, a.ClinicalEntryId AS EntryId, a.MessageId, a.Seq, e.VisitId, v.PatientId, p.Name AS PatientName,
+ASSERTION_COLUMNS = """
+a.Id, a.ClinicalEntryId AS EntryId, a.MessageId, a.Seq, e.VisitId, v.PatientId, p.Name AS PatientName,
        e.Category, e.Code, e.CodeSystem, e.Display,
        a.Statement, a.Intent, a.Source, a.Verification, a.AssertedAt, a.SupersedesId, n.Id AS SupersededById,
        m.Channel, m.Origin, m.StaffId, s.Name AS StaffName, s.Role AS StaffRole,
@@ -65,6 +86,9 @@ SELECT a.Id, a.ClinicalEntryId AS EntryId, a.MessageId, a.Seq, e.VisitId, v.Pati
             FROM CareTeamMember ctm
             LEFT JOIN Staff ms ON ms.IdentifierSystem = ctm.MemberSystem AND ms.IdentifierValue = ctm.MemberValue
             WHERE ctm.CareTeamId = ct.Id) END AS ct_Members
+"""
+
+ASSERTION_FROM = """
 FROM Visit v
 JOIN Patient p ON p.Id = v.PatientId
 JOIN ClinicalEntry e ON e.VisitId = v.Id
@@ -83,23 +107,31 @@ LEFT JOIN Medication med ON med.Id = pr.MedicationId
 LEFT JOIN CareTeam ct ON ct.ClinicalEntryId = e.Id
 """
 
+ASSERTION_SELECT = "SELECT " + ASSERTION_COLUMNS + ASSERTION_FROM
+
 NEWEST_FIRST = " ORDER BY julianday(a.AssertedAt) DESC, a.Id DESC"
 
-# Q2: from any assertion, go forward to the current one, then back to the first one.
-CHAIN_SQL = """
+# Q2: from any assertion, go forward to the current one (the head of the chain).
+FORWARD_CTE = """
 WITH RECURSIVE forward (Id, Step) AS (
     SELECT ?, 0
     UNION ALL
     SELECT n.Id, f.Step + 1 FROM Assertion n JOIN forward f ON n.SupersedesId = f.Id
-),
+)"""
+
+HEAD_SQL = FORWARD_CTE + " SELECT Id FROM forward ORDER BY Step DESC LIMIT 1"
+
+# Q2: from the head, go back to the first assertion. Depth 0 is the head, so the order by Depth is newest first.
+CHAIN_IDS = FORWARD_CTE + """,
 chain (Id, SupersedesId, Depth) AS (
     SELECT a.Id, a.SupersedesId, 0 FROM Assertion a
     WHERE a.Id = (SELECT Id FROM forward ORDER BY Step DESC LIMIT 1)
     UNION ALL
     SELECT a.Id, a.SupersedesId, c.Depth + 1 FROM Assertion a JOIN chain c ON a.Id = c.SupersedesId
 )
-SELECT Id, Depth FROM chain ORDER BY Depth
-"""
+SELECT Id, Depth FROM chain"""
+
+CHAIN_SQL = CHAIN_IDS + " ORDER BY Depth"
 
 
 def author_of(source: str, origin: str, staff_id: Optional[int], staff_name: Optional[str],
@@ -134,17 +166,51 @@ class SqliteRecordRepository:
 
     def assertions(self, patient_id: int, current_only: bool, visit_id: Optional[int] = None,
                    category: Optional[str] = None) -> list[AssertionView]:
+        """All items of the patient, newest first (no page). The Care Assistant uses this list."""
+        clauses, args = self._item_filters(patient_id, current_only, visit_id, category, None, False)
+        return [to_view(r) for r in self.conn.execute(ASSERTION_SELECT + where(clauses) + NEWEST_FIRST, args)]
+
+    @staticmethod
+    def _item_filters(patient_id: int, current_only: bool, visit_id: Optional[int], category: Optional[str],
+                      text: Optional[str], visible_only: bool) -> tuple[list[str], list]:
+        """The WHERE conditions of the chart. A patient-visible item is always current (Q12)."""
         clauses, args = ["v.PatientId = ?"], [patient_id]
-        if current_only:
+        if visible_only:
+            clauses.append(PATIENT_VISIBLE)
+        elif current_only:
             clauses.append(CURRENT)
         if visit_id is not None:
             clauses.append("e.VisitId = ?")
             args.append(visit_id)
         if category:
-            clauses.append("e.Category = ?")
+            # The unary + stops the use of the index on Category. The path of the patient (Visit, then
+            # ClinicalEntry) is faster: the index finds the entries of all patients first.
+            clauses.append("+e.Category = ?")
             args.append(category)
-        sql = ASSERTION_SELECT + " WHERE " + " AND ".join(clauses) + NEWEST_FIRST
-        return [to_view(r) for r in self.conn.execute(sql, args)]
+        if text:
+            clauses.append(f"(lower(e.Display) LIKE ? OR lower(a.Statement) LIKE ? OR lower({AUTHOR_NAME}) LIKE ?)")
+            args += [f"%{text.lower()}%"] * 3
+        return clauses, args
+
+    def items_page(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
+                   category: Optional[str] = None, text: Optional[str] = None, visible_only: bool = False,
+                   page: PageRequest) -> Page[AssertionView]:
+        """One page of the chart (query Q14), in the order of the chart.
+
+        `text` searches the display, the statement and the author name (case is not important).
+        `visible_only` keeps only the items that the patient can see (the predicate of Q12).
+        """
+        clauses, args = self._item_filters(patient_id, current_only, visit_id, category, text, visible_only)
+        return fetch_page(self.conn, ASSERTION_COLUMNS, ASSERTION_FROM + where(clauses), args, CHART_ORDER, page,
+                          each_row(to_view))
+
+    def category_counts(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
+                        text: Optional[str] = None, visible_only: bool = False) -> dict[str, int]:
+        """The number of items of each category for the filters of the chart. A category with no item is not in it."""
+        clauses, args = self._item_filters(patient_id, current_only, visit_id, None, text, visible_only)
+        rows = self.conn.execute(f"SELECT e.Category, COUNT(*) {ASSERTION_FROM}{where(clauses)} "
+                                 f"GROUP BY e.Category ORDER BY {CATEGORY_RANK}", args)
+        return {r[0]: r[1] for r in rows}
 
     def assertions_by_id(self, ids_: Sequence[int]) -> dict[int, AssertionView]:
         out: dict[int, AssertionView] = {}
@@ -162,6 +228,17 @@ class SqliteRecordRepository:
         order = [r["Id"] for r in self.conn.execute(CHAIN_SQL, (assertion_id,))]
         found = self.assertions_by_id(order)
         return [found[i] for i in order if i in found]
+
+    def chain_page(self, assertion_id: int, page: PageRequest) -> Page[AssertionView]:
+        """One page of the chain of an assertion, newest first (the head first)."""
+        source = f"{ASSERTION_FROM} JOIN ({CHAIN_IDS}) c ON c.Id = a.Id"
+        return fetch_page(self.conn, ASSERTION_COLUMNS, source, (assertion_id,), "c.Depth, a.Id", page,
+                          each_row(to_view))
+
+    def chain_head(self, assertion_id: int) -> Optional[AssertionView]:
+        """The current assertion (the head) of the chain of an assertion."""
+        row = self.conn.execute(HEAD_SQL, (assertion_id,)).fetchone()
+        return self.assertion(row[0]) if row else None
 
     def entry(self, entry_id: int) -> Optional[EntryInfo]:
         r = self.conn.execute(

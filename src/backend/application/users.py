@@ -9,6 +9,7 @@ from domain.errors import Invalid, NoUser, NotFound
 from domain.views import UserView
 
 from application.context import AppContext
+from application.paging import Page, PageRequest
 
 # The demo users show first in the picker, in this order.
 PINNED_KEYS = (
@@ -41,10 +42,12 @@ def resolve_actor(ctx: AppContext, header: Optional[str]) -> Actor:
     return actor
 
 
-def list_users(ctx: AppContext, role: Optional[str], q: Optional[str], limit: int) -> list[UserView]:
+def list_users(ctx: AppContext, role: Optional[str], q: Optional[str],
+               page: PageRequest = PageRequest()) -> Page[UserView]:
+    """One page of the users: the demo users first (in the order of PINNED_KEYS), then by name."""
     if role and role not in USER_ROLES:
         raise Invalid("The role is not correct.", {"role": f"Use one of {', '.join(USER_ROLES)}."})
-    return ctx.users.users(role or None, (q or "").strip() or None, max(1, min(limit, 500)), PINNED_KEYS)
+    return ctx.users.users(role or None, (q or "").strip() or None, PINNED_KEYS, page)
 
 
 def get_user(ctx: AppContext, key: str) -> UserView:

@@ -13,7 +13,7 @@ import uuid
 import pytest
 
 from domain.access import CARE_TEAM_DENIED
-from tests.conftest import as_user, make_client
+from tests.conftest import all_items, as_user, make_client
 
 pytestmark = pytest.mark.slow
 
@@ -45,6 +45,10 @@ class Journey:
     def post(self, url, user, expect=200, **kwargs):
         return self.call("POST", url, user, expect, **kwargs)
 
+    def items(self, url: str, user: str, **params) -> list[dict]:
+        """All rows of a paged list (all pages)."""
+        return all_items(self.client, url, user, **params)
+
     def ask(self, user: str, patient_id: int, text: str) -> dict:
         key = (user, patient_id)
         if key not in self.sessions:
@@ -59,7 +63,7 @@ class Journey:
         return self.post("/api/messages", user, 201, json=body)
 
     def location(self, code: str) -> int:
-        return next(loc["id"] for loc in self.get("/api/locations", SOFIA) if loc["identifier"]["value"] == code)
+        return next(loc["id"] for loc in self.items("/api/locations", SOFIA) if loc["identifier"]["value"] == code)
 
     def chain(self, assertion_id: int, user: str = OKAFOR) -> list[dict]:
         return self.get(f"/api/assertions/{assertion_id}/chain", user)["items"]
@@ -108,7 +112,7 @@ def test_step0_the_3mt_slide(j):
 
 
 def test_step1_arrival_at_the_front_desk(j):
-    found = j.get("/api/patients", SOFIA, params={"q": "marlin", "dob": "1966-02-18", "scope": "all"})
+    found = j.get("/api/patients", SOFIA, params={"q": "marlin", "dob": "1966-02-18", "scope": "all"})["items"]
     assert [p["name"] for p in found] == ["Marlin805 Reggie481 Nienow652"]
     j.ids["B"] = b = found[0]["id"]
 
@@ -140,7 +144,7 @@ def test_step1_arrival_at_the_front_desk(j):
     note = intake["assertions"][0]
     assert (note["category"], note["code"], note["visitId"]) == ("Observation", "8661-1", j.ids["visit"])
     assert note["author"]["name"] == "Sofia Alvarez" and note["origin"] == "Staff"
-    latest = j.get(f"/api/patients/{b}/visits", SOFIA)[0]
+    latest = j.get(f"/api/patients/{b}/visits", SOFIA)["items"][0]
     assert latest["id"] == j.ids["visit"] and latest["isOpen"] and latest["locations"][-1]["name"] == "ER Waiting"
 
 
@@ -151,7 +155,7 @@ def test_step2_waiting_room_patient_report(j):
     assert any(c["assertion"]["code"] == "860975" for c in turn["cards"])
     assert all(c["supersedes"] == [] for c in turn["cards"])
 
-    items = j.get(f"/api/patients/{b}/chart", PATIENT_B)["items"]
+    items = j.items(f"/api/patients/{b}/chart", PATIENT_B)
     assert all(a["patientVisible"] and a["isCurrent"] for a in items)
     metformin = next(a for a in items if a["category"] == "Prescription" and a["code"] == "860975")
     j.ids["metformin"] = metformin["id"]
@@ -174,8 +178,8 @@ def test_step2_waiting_room_patient_report(j):
 
 def test_step3_triage_by_the_nurse(j):
     b = j.ids["B"]
-    assert b in [p["id"] for p in j.get("/api/patients", NAIR, params={"scope": "care-team"})]
-    assert len(j.get(f"/api/patients/{b}/visits", NAIR)) > 1
+    assert b in [p["id"] for p in j.get("/api/patients", NAIR, params={"scope": "care-team"})["items"]]
+    assert j.get(f"/api/patients/{b}/visits", NAIR)["total"] > 1
 
     vitals = j.record(NAIR, "Triage vital signs.",
                       new_entry("Observation", "8867-4", LOINC, "Heart rate", "Heart rate 112 /min.", "Report",
@@ -207,7 +211,7 @@ def test_step3_triage_by_the_nurse(j):
     assert "no allergy is recorded" in turn["text"].lower()
     assert turn["cards"] == []
 
-    chart = j.get(f"/api/patients/{b}/chart", NAIR, params={"visitId": j.ids["visit"]})["items"]
+    chart = j.items(f"/api/patients/{b}/chart", NAIR, visitId=j.ids["visit"])
     mine = [a for a in chart if a["author"]["name"] == "Priya Nair"]
     assert {a["id"] for a in mine} >= {asthma["id"], inhaler["id"]} | {a["id"] for a in vitals["assertions"]}
 
@@ -223,7 +227,7 @@ def test_step4_the_physician(j):
     result = j.record(OKAFOR, "The troponin result.", new_entry(
         "LabReport", "89579-7", LOINC, "Troponin I (high sensitivity)", "Troponin I is above the reference range.",
         "Report", "Confirmed", {"conclusion": "Troponin I 0.09 ng/mL (high)."}))["assertions"][0]
-    chart = {a["id"]: a for a in j.get(f"/api/patients/{b}/chart", OKAFOR)["items"]}
+    chart = {a["id"]: a for a in j.items(f"/api/patients/{b}/chart", OKAFOR)}
     assert chart[order["id"]]["category"] == "LabOrder" and chart[result["id"]]["category"] == "LabReport"
 
     failure = j.record(OKAFOR, "Revise the assessment.", new_entry(
@@ -293,33 +297,33 @@ def test_step7_privacy_check(j):
     response = j.client.get(f"/api/patients/{j.ids['B']}/chart", headers=as_user(PARK))
     assert response.status_code == 403
     assert response.json() == {"code": "forbidden", "message": CARE_TEAM_DENIED}
-    events = j.get(f"/api/patients/{j.ids['B']}/audit", PATIENT_B)
-    denied = [e for e in events if e["outcome"] == "Denied"]
+    audit = j.get(f"/api/patients/{j.ids['B']}/audit", PATIENT_B)
+    denied = [e for e in audit["items"] if e["outcome"] == "Denied"]
+    assert audit["denied"] >= len(denied) >= 1
     assert denied and denied[0]["actorKey"] == PARK and denied[0]["actorName"] == "Jun Park"
     assert denied[0]["path"] == "/api/patients/{patient}/chart" and denied[0]["action"] == "read"
 
 
 def test_step8_directory(j):
-    park = j.get("/api/staff", SOFIA, params={"q": "Jun Park"})[0]
+    park = j.get("/api/staff", SOFIA, params={"q": "Jun Park"})["items"][0]
     changed = j.call("PATCH", f"/api/staff/{park['id']}", SOFIA, json={"phoneNumber": "+1-508-555-2999"})
     assert changed["phoneNumber"] == "+1-508-555-2999"
-    assert j.get("/api/staff", SOFIA, params={"q": "Jun Park"})[0]["phoneNumber"] == "+1-508-555-2999"
+    assert j.get("/api/staff", SOFIA, params={"q": "Jun Park"})["items"][0]["phoneNumber"] == "+1-508-555-2999"
 
-    emergency = next(d for d in j.get("/api/departments", SOFIA) if d["identifier"]["value"] == "TRIAD-GH-EMER")
+    emergency = next(d for d in j.items("/api/departments", SOFIA) if d["identifier"]["value"] == "TRIAD-GH-EMER")
     error = j.call("DELETE", f"/api/departments/{emergency['id']}", SOFIA, 409)
     assert error["code"] == "conflict" and error["message"] == "The department has staff. You cannot delete it."
 
     store = j.location("STORE-OLD")
     j.call("DELETE", f"/api/locations/{store}", SOFIA, 204)
-    assert "STORE-OLD" not in [loc["identifier"]["value"] for loc in j.get("/api/locations", SOFIA)]
+    assert "STORE-OLD" not in [loc["identifier"]["value"] for loc in j.items("/api/locations", SOFIA)]
 
 
 def test_step9_discharge(j):
     visit = j.post(f"/api/visits/{j.ids['visit']}/end", OKAFOR)
     assert visit["endDate"] and not visit["isOpen"]
     assert visit["locations"][-1]["endDate"] == visit["endDate"]
-    history = {a["id"]: a for a in j.get(f"/api/patients/{j.ids['B']}/chart", OKAFOR,
-                                         params={"history": "true"})["items"]}
+    history = {a["id"]: a for a in j.items(f"/api/patients/{j.ids['B']}/chart", OKAFOR, history="true")}
     journey_ids = {v for k, v in j.ids.items() if k not in ("B", "visit")}
     assert journey_ids <= set(history)
     assert all(history[i]["author"]["name"] for i in journey_ids)

@@ -11,7 +11,7 @@ The number at the start of each file name gives the run order.
 |---|---|---|---|
 | 1 | `ddl/01_create_tables.sql` | DDL | Creates the 29 relations, their keys and checks, 14 indexes and 11 triggers. Sets `PRAGMA user_version`. |
 | 2 | `dml/02_insert_seed.sql` | DML | Inserts the scenario data into all 29 tables. `python src/backend/main.py export-sql` makes this file. Do not edit it by hand. |
-| 3 | `dml/03_select_queries.sql` | DML (query) | Q1–Q13: the SELECT queries of the report. |
+| 3 | `dml/03_select_queries.sql` | DML (query) | Q1–Q14: the SELECT queries of the report. Q14 is one page of a chart (`LIMIT 25 OFFSET 25`) and its `COUNT(*)`, as the API runs them. |
 | 4 | `dml/04_update_delete.sql` | DML | INSERT, UPDATE and DELETE examples. Each statement must succeed. |
 | 5 | `dml/05_constraint_violations.sql` | DML | Statements that must fail. Each case shows the error that a key, check or trigger gives. |
 

@@ -7,8 +7,10 @@ from fastapi import APIRouter, Depends
 
 from api import schemas as s
 from api.actor import get_actor, get_ctx
+from api.paging import page_request
 from application import codes, users
 from application.context import AppContext
+from application.paging import PageRequest
 from domain.access import Actor
 
 router = APIRouter(prefix="/api", tags=["system"])
@@ -20,10 +22,10 @@ def health(ctx: AppContext = Depends(get_ctx)):
                     clock=ctx.clock_mode)
 
 
-@router.get("/users", response_model=list[s.UserView])
-def list_users(role: Optional[str] = None, q: Optional[str] = None, limit: int = 50,
+@router.get("/users", response_model=s.Page[s.UserView])
+def list_users(role: Optional[str] = None, q: Optional[str] = None, page: PageRequest = Depends(page_request),
                ctx: AppContext = Depends(get_ctx)):
-    return users.list_users(ctx, role, q, limit)
+    return users.list_users(ctx, role, q, page)
 
 
 @router.get("/users/{key}", response_model=s.UserView)

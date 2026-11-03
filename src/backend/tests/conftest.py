@@ -81,3 +81,17 @@ def client(full_copy):
 def as_user(key: str) -> dict:
     """The header of the current user."""
     return {"X-Triad-User": key}
+
+
+def all_items(client, url: str, user: str | None = None, **params) -> list[dict]:
+    """All rows of a paged list endpoint: read the pages of 200 rows until the end (doc/api.md section 1.5)."""
+    items: list[dict] = []
+    while True:
+        response = client.get(url, headers=as_user(user) if user else {},
+                              params={**params, "limit": 200, "offset": len(items)})
+        assert response.status_code == 200, response.text
+        page = response.json()
+        items += page["items"]
+        if not page["items"] or len(items) >= page["total"]:
+            assert len(items) == page["total"]
+            return items
