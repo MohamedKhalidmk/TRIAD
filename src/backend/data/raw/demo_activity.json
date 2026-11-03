@@ -1,0 +1,119 @@
+{
+  "description": "Demo rows for the agent tables. Chat sessions and audit records are logs: they keep the user and the patient as values. Citations point to Provenance resources, which the loader maps to assertions.",
+  "chatSessions": [
+    {
+      "identifier": "CHAT-0001",
+      "user": {
+        "role": "Doctor",
+        "identifier": {
+          "system": "https://triad.example/fhir/sid/employee",
+          "value": "E1005"
+        }
+      },
+      "subject": {
+        "name": "Elena Marsh",
+        "birthDate": "1971-05-14"
+      },
+      "startedAt": "2026-10-29T15:00:00-04:00",
+      "mode": "rules",
+      "model": null,
+      "turns": [
+        {
+          "seq": 1,
+          "clientTurnId": "demo-0001-1",
+          "speaker": "User",
+          "text": "Is she allergic to penicillin?",
+          "createdAt": "2026-10-29T15:00:05-04:00"
+        },
+        {
+          "seq": 2,
+          "clientTurnId": "demo-0001-2",
+          "speaker": "Assistant",
+          "text": "No. A physician ruled it out with an allergy test on Oct 2, 2026.",
+          "createdAt": "2026-10-29T15:00:06-04:00",
+          "citations": [
+            {
+              "provenance": "Provenance/prov-elena-pen-3",
+              "rank": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auditEvents": [
+    {
+      "identifier": "AUDIT-0001",
+      "at": "2026-10-29T14:59:00-04:00",
+      "action": "read",
+      "outcome": "Allowed",
+      "actor": {
+        "role": "Doctor",
+        "identifier": {
+          "system": "https://triad.example/fhir/sid/employee",
+          "value": "E1005"
+        }
+      },
+      "subject": {
+        "name": "Elena Marsh",
+        "birthDate": "1971-05-14"
+      },
+      "path": "/api/patients/{patient}/chart"
+    },
+    {
+      "identifier": "AUDIT-0002",
+      "at": "2026-10-29T15:00:06-04:00",
+      "action": "ask",
+      "outcome": "Allowed",
+      "actor": {
+        "role": "Doctor",
+        "identifier": {
+          "system": "https://triad.example/fhir/sid/employee",
+          "value": "E1005"
+        }
+      },
+      "subject": {
+        "name": "Elena Marsh",
+        "birthDate": "1971-05-14"
+      },
+      "path": "/api/chat/sessions/{session}/turns",
+      "chatTurn": "CHAT-0001#2"
+    },
+    {
+      "identifier": "AUDIT-0003",
+      "at": "2026-10-29T16:20:00-04:00",
+      "action": "read",
+      "outcome": "Denied",
+      "actor": {
+        "role": "Nurse",
+        "identifier": {
+          "system": "https://triad.example/fhir/sid/employee",
+          "value": "E1004"
+        }
+      },
+      "subject": {
+        "name": "Elena Marsh",
+        "birthDate": "1971-05-14"
+      },
+      "path": "/api/patients/{patient}/chart"
+    },
+    {
+      "identifier": "AUDIT-0004",
+      "at": "2026-10-29T18:00:00-04:00",
+      "action": "read",
+      "outcome": "Allowed",
+      "actor": {
+        "role": "Patient",
+        "identifier": {
+          "system": "https://triad.example/fhir/sid/mrn",
+          "value": "MRN-000001"
+        }
+      },
+      "subject": {
+        "name": "Elena Marsh",
+        "birthDate": "1971-05-14"
+      },
+      "path": "/api/audit"
+    }
+  ]
+}

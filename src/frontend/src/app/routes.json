@@ -1,0 +1,6 @@
+{
+  "home": { "path": "/", "tabs": [] },
+  "patients": { "path": "/patients", "tabs": ["front-desk", "my-patients", "find"] },
+  "patient": { "path": "/patients/:id", "tabs": ["chart", "visit", "care-team", "audit"] },
+  "directory": { "path": "/directory", "tabs": ["departments", "locations", "staff", "medications"] }
+}
