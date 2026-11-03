@@ -58,6 +58,7 @@ uv pip install --python .venv/bin/python -r requirements.txt
 ```
 
 The LLM chat mode needs one more package. The default mode does not need it.
+See [The LLM mode](#the-llm-mode).
 
 ```sh
 uv pip install --python .venv/bin/python -r requirements-llm.txt
@@ -97,15 +98,44 @@ The other commands of `main.py`:
 | `onboard` | Loads the FHIR data into an empty schema. |
 | `export-sql` | Writes `dml/02_insert_seed.sql` (the scenario data). |
 
-## Environment variables
+## Settings and secrets (.env)
+
+The backend reads its settings from environment variables. The file `src/backend/.env` can hold them.
+`dev.sh` makes this file from [`.env.example`](.env.example) if it is missing (mode 600). Git ignores `.env`.
+
+- The commands of `main.py` and `create_app()` load `.env` at the start (python-dotenv).
+- The order is: a variable of the shell, then `.env`, then the default. So `TRIAD_LLM=fake ./src/scripts/dev.sh` works for one run.
+- An empty value in `.env` has no effect.
+- After you change `.env`, start `dev.sh` again. The hot reload watches only the Python files.
+- The tests do not read `.env`. They give their own settings.
+- Put the API keys only in `src/backend/.env`, never in `.env.example` and never in `src/frontend/`.
 
 | Variable | Default | What it sets |
 |---|---|---|
-| `TRIAD_DB_PATH` | `src/backend/data/triad.db` | The SQLite database. |
+| `TRIAD_DB_PATH` | `src/backend/data/triad.db` | The SQLite database. A relative path starts at the root folder of the repository. |
 | `TRIAD_NOW` | `2026-10-30T09:00:00-04:00` (from `data/raw/hospital_profile.json`) | The demo time. `system` uses the computer clock. |
 | `TRIAD_LLM` | `fake` | The chat mode. `fake` needs no network. `llm` uses LiteLLM. |
-| `TRIAD_LLM_MODEL` | `anthropic/claude-opus-5-5` | The LiteLLM model of the `llm` mode. The provider key comes from the usual variable (for example `ANTHROPIC_API_KEY`). |
-| `PORT` | `8000` | The port of `serve` and `dev.sh`. |
+| `TRIAD_LLM_MODEL` | `gemini/gemini-3.8-flash` | The LiteLLM model of the `llm` mode. |
+| `GEMINI_API_KEY` | — | The key for the Gemini models. Only LiteLLM reads it. For another provider, use the variable of that provider (for example `ANTHROPIC_API_KEY`). |
+| `PORT` | `8000` | The port of `serve` and `dev.sh`. Set it in the shell. `dev.sh` reads it before Python starts, so `.env` cannot set it for `dev.sh`. |
+
+## The LLM mode
+
+1. Install the package: `uv pip install --python .venv/bin/python -r requirements-llm.txt`.
+2. Get a Gemini API key at https://aistudio.google.com/apikey. The Gemini models have a free tier.
+3. In `src/backend/.env`, set `TRIAD_LLM=llm` and `GEMINI_API_KEY=<your key>`.
+4. Start `dev.sh` again. The chat shows "Mode: llm". A new chat session records the mode and the model.
+
+For Claude, set `TRIAD_LLM_MODEL=anthropic/claude-opus-5-5` and `ANTHROPIC_API_KEY`.
+For a model with a higher free-tier limit, use `gemini/gemini-3.5-flash-lite`.
+
+- At the start, the server checks that `litellm` is installed and that the key of the model is set. If not, it prints one line
+  that tells what is missing, and it runs in the fake mode. The new sessions then show "Mode: fake".
+- If one call fails (for example, the free-tier limit), that turn uses the fake model, and the log gets one warning line.
+  The line names only the error class, never the key.
+- On the free tier, Google can use the prompts to improve its products. The data of TRIAD is synthetic.
+  Do not put real patient data in the prototype.
+- The free tier has a limit of requests per minute and per day. See https://aistudio.google.com/rate-limit.
 
 ## The Care Assistant
 
@@ -113,7 +143,7 @@ The other commands of `main.py`:
 - Each card of an answer comes from one Citation row of the turn.
 - The rules know these questions: allergies, medications, the plan, lab results, vital signs, diagnoses, visits and recommendations (for example "What did the nurse recommend?").
 - A "tell" turn (a statement, not a question) goes to a fact extractor. Each fact becomes an assertion with Source = Agent and Verification = Unconfirmed, in one message with Channel = Chat. If the extractor finds no fact, the backend writes no message.
-- In the `llm` mode, one LiteLLM call words the answer from the cited statements. One more call extracts the facts of a "tell" turn (JSON that the code checks). If a call fails, the turn uses the fake mode.
+- In the `llm` mode, one LiteLLM call words the answer from the cited statements. One more call extracts the facts of a "tell" turn (JSON that the code checks). If a call fails, the turn uses the fake mode. See [The LLM mode](#the-llm-mode).
 - Only `infrastructure/llm/litellm_client.py` imports `litellm`.
 
 ## Tests
@@ -130,7 +160,8 @@ Run the tests from the root folder of the repository:
 | `tests/unit/test_rules.py` | The patient-visible rule, the author label, the head check, the plan visit and the clock. |
 | `tests/unit/test_assistant.py` | Ask or tell, the intents and the fake fact extractor. |
 | `tests/integration/test_hospital_visit.py` | The hospital-visit journey of `USER_FLOWS.md` section 3 (Steps 0 to 9) through the API. |
-| `tests/integration/test_api.py` | Q12 = the patient chart, cards = Citation rows, the denied audit records, the errors, the LLM fallback, the directory and the speed of the chart. |
+| `tests/unit/test_settings.py` | The `.env` loader (the shell wins, empty values set nothing), the database path, the `.env.example` files (no key values) and the start check of the LLM mode. |
+| `tests/integration/test_api.py` | Q12 = the patient chart, cards = Citation rows, the denied audit records, the errors, the LLM fallback and the start check, no key text in a response, the log or the database, the directory and the speed of the chart. |
 | `tests/integration/test_schema.py`, `test_onboard.py` | The SQL scripts 01 to 05 and the FHIR onboarding. |
 
 The tests do not need the network or `litellm`. The integration tests use a copy of the database, so they do not change `data/triad.db`.

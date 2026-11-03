@@ -26,7 +26,7 @@ The versions in `package.json` are exact. `package-lock.json` is in the reposito
 
 - Node.js 20.19 or later. We recommend Node.js 22 or later.
 - npm 10 or later.
-- For the full app: the TRIAD backend on port 8000. See the root [`README.md`](../../README.md).
+- For the full app: the TRIAD backend (port 8000 by default). See the root [`README.md`](../../README.md).
 
 ## Install
 
@@ -41,6 +41,9 @@ npm ci
 
 ### Development (with hot reload)
 
+The easy way is `./src/scripts/dev.sh` from the root folder. It starts the backend and the frontend together.
+To start the frontend alone:
+
 1. Start the backend on port 8000 (`python src/backend/main.py serve`).
 2. Start the frontend:
 
@@ -49,9 +52,10 @@ npm ci
    npm run dev
    ```
 
-3. Open http://localhost:5173.
+3. Open http://127.0.0.1:5173.
 
-Vite serves the frontend on port 5173. It sends each `/api` request to `http://127.0.0.1:8000`.
+Vite serves the frontend on port 5173. It sends each `/api` request to `TRIAD_API_URL` (default
+`http://127.0.0.1:8000`). See [Settings (.env)](#settings-env).
 If port 5173 is in use, Vite stops with an error (`strictPort`). It does not select a different port.
 
 ### Production build
@@ -64,6 +68,28 @@ npm run build
 The build goes to `src/frontend/dist/`. Git ignores this folder.
 `python src/backend/main.py serve` serves `dist/` on port 8000, together with the API.
 Each path that does not start with `/api` gets `index.html`, so deep links work.
+
+## Settings (.env)
+
+The frontend reads its settings from `src/frontend/.env`. `dev.sh` makes this file from
+[`.env.example`](.env.example) if it is missing. Git ignores `.env`. A variable of the shell wins over the file.
+
+| Variable | Default | Who reads it |
+|---|---|---|
+| `TRIAD_API_URL` | `http://127.0.0.1:8000` | Only the Vite dev server (`vite.config.ts`). It is the address for the `/api` requests. It does not go into the bundle. `dev.sh` sets it from `PORT`. |
+| `VITE_...` | — | The app (`import.meta.env.VITE_...`). The app uses no `VITE_` value yet. |
+
+Rules:
+
+- **Each `VITE_` value is public.** The build puts it into the JavaScript bundle, and each user of the app can read it.
+  Never put an API key or another secret in `src/frontend/`. The secrets go in `src/backend/.env`.
+  The browser calls the backend, and only the backend calls the LLM provider.
+- **The values are fixed when Vite starts or builds.** After a change, start `npm run dev` again or make a new build.
+  `main.py serve` serves the files of the last build. Vite also reads `.env.development` (for `npm run dev`) and
+  `.env.production` (for `npm run build`), if they exist. Git ignores them too.
+- **Declare each `VITE_` value** in [`src/vite-env.d.ts`](src/vite-env.d.ts). Then `tsc -b` stops on a name that is not declared.
+- The app always calls the relative path `/api`, so it needs no backend address. In production, the backend serves
+  the app and the API on one port. In development, the Vite proxy sends `/api` to `TRIAD_API_URL`.
 
 ## Scripts
 
@@ -95,7 +121,7 @@ Each path that does not start with `/api` gets `index.html`, so deep links work.
 | 403 | A full panel with the message of the server. Example (journey Step 7): "You are not on this patient's care team. This attempt is in the audit log." |
 | 409 | A banner with the message of the server. |
 | 422 | The message, and each message of `fields` under its field. |
-| No connection | A panel that tells you to start the backend on port 8000. |
+| No connection | A panel that tells you to start the backend (see the Quickstart in the root README). |
 
 ## Dates and times
 
@@ -122,12 +148,14 @@ The steps are in `src/demo/steps.json`. `npm run check:demo` checks that:
 ```
 src/frontend/
   index.html               the HTML page
-  vite.config.ts           the dev server (port 5173, /api proxy to port 8000) and the build (dist/)
+  vite.config.ts           the dev server (port 5173, /api proxy to TRIAD_API_URL) and the build (dist/)
   package.json             exact versions, scripts, engines (Node.js 20.19 or later)
+  .env.example             the settings template (dev.sh copies it to .env; git ignores .env)
   scripts/check-demo.mjs   the check of the Demo guide steps
   public/triad.svg         the icon
   src/
     main.tsx               the entry point
+    vite-env.d.ts          the types of the VITE_ values (import.meta.env)
     styles.css             all styles
     api/
       types.ts             the contract types (a copy of doc/api.md, section 2)

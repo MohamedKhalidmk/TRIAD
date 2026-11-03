@@ -13,7 +13,7 @@ The permission rules and the journey are in `USER_FLOWS.md`. This file does not 
   `GET /api/health`, `GET /api/users` and `GET /api/users/{key}` do not need the header. All other endpoints need it.
 - `python src/backend/main.py serve` serves the API on port 8000. If `src/frontend/dist/` exists, it also serves the
   built frontend, and each path that does not start with `/api` gets `index.html` (deep links work).
-- In development, Vite serves the frontend on port 5173 and sends `/api` to `http://127.0.0.1:8000`.
+- In development, Vite serves the frontend on port 5173 and sends `/api` to `TRIAD_API_URL` (default `http://127.0.0.1:8000`; `dev.sh` sets it from `PORT`). The frontend itself uses only the relative path `/api`.
 
 ### 1.1 User keys
 
@@ -60,7 +60,7 @@ The 403 for the chart of a patient whose care team does not include the user has
 ### 1.4 Chat mode
 
 - `TRIAD_LLM=fake` (the default): the rule-based lookups answer each question, and a fake extractor finds facts in a "tell" turn. No network is necessary.
-- `TRIAD_LLM=llm`: LiteLLM words the answer and extracts facts. `TRIAD_LLM_MODEL` sets the model (default `anthropic/claude-opus-5-5`). The provider key comes from the usual environment variable (for example `ANTHROPIC_API_KEY`). If the call fails, the backend uses the fake mode for that turn.
+- `TRIAD_LLM=llm`: LiteLLM words the answer and extracts facts. `TRIAD_LLM_MODEL` sets the model (default `gemini/gemini-3.8-flash`). The provider key comes from the usual environment variable (for example `GEMINI_API_KEY`), which `src/backend/.env` can set. If `litellm` or the key is missing at the start, the server runs in the fake mode, and `ChatSession.mode` is `fake`. If one call fails, the backend uses the fake mode for that turn.
 - The rules always select the evidence. The assistant cites only the assertions that the rules returned in that turn.
 
 ## 2. Types (TypeScript notation)

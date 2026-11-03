@@ -1,5 +1,6 @@
 # The optional LLM chat mode of TRIAD (TRIAD_LLM=llm). Install it after requirements.txt:
 #     uv pip install --python .venv/bin/python -r requirements-llm.txt
+# Then set TRIAD_LLM=llm and the API key of the provider in src/backend/.env (see src/backend/.env.example).
 # The default chat mode (TRIAD_LLM=fake) and the tests do not need this file or the network.
 # Only src/backend/infrastructure/llm/litellm_client.py imports litellm.
 litellm==1.106.6

@@ -141,7 +141,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     throw new ApiRequestError(
       0,
       'network',
-      'The app cannot connect to the server. Make sure that the backend runs on port 8000.',
+      'The app cannot connect to the backend. Make sure that the backend runs (see the Quickstart in README.md).',
     );
   }
 

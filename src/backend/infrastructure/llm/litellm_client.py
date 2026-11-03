@@ -1,21 +1,22 @@
 """The LiteLLM language model (TRIAD_LLM=llm). This module is the only place that imports litellm.
 
 Install it with `uv pip install -r requirements-llm.txt`. The provider key comes from the usual
-environment variable (for example ANTHROPIC_API_KEY).
+environment variable (for example GEMINI_API_KEY), which src/backend/.env can set. Only LiteLLM reads it.
 
 Two calls:
 - word_answer: one call words the answer. The prompt gives only the cited statements and the rule draft.
 - extract_facts: one call extracts the facts of a "tell" turn as JSON. The code checks the JSON.
 
 Each failure raises an error. The application then uses the fake model for that turn.
-Notes for Claude Opus 5.5: do not send temperature or a thinking setting (the API rejects them),
-and do not force a tool call. The prompt asks for JSON, and the code checks it.
+check_ready runs once at the start. If litellm or the key is missing, the app uses the fake mode.
+Notes for all models: do not send temperature or a thinking setting (some models reject them, for
+example Claude Opus 5.5), and do not force a tool call. The prompt asks for JSON, and the code checks it.
 """
 from __future__ import annotations
 
 import json
 import re
-from typing import Sequence
+from typing import Optional, Sequence
 
 from application.ports import ExtractedFact
 from domain.views import AssertionView
@@ -43,6 +44,22 @@ EXTRACT_PROMPT = (
 
 class LlmError(RuntimeError):
     pass
+
+
+def check_ready(model: str) -> Optional[str]:
+    """Why the llm mode cannot run with `model`, or None if it can. The text never holds a key value."""
+    try:
+        import litellm
+    except ImportError:
+        return "litellm is not installed. Run: uv pip install --python .venv/bin/python -r requirements-llm.txt."
+    try:
+        found = litellm.validate_environment(model=model)
+    except Exception:  # noqa: BLE001 - LiteLLM does not know the model; the first call shows the error
+        return None
+    if not found.get("keys_in_environment"):
+        names = ", ".join(found.get("missing_keys") or []) or "the key of the provider"
+        return f"no API key for {model} is set (LiteLLM looks for {names}). Put the key in src/backend/.env."
+    return None
 
 
 class LiteLlmLanguageModel:

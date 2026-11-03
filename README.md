@@ -34,12 +34,31 @@ hospital-visit journey of [`USER_FLOWS.md`](USER_FLOWS.md). Each step has an **A
 sets the user and opens the page. One Ctrl+C stops the two servers.
 To start again with a new database, run `./src/scripts/dev.sh --reset-db`.
 
+### Settings and the LLM mode (optional)
+
+The first run of `dev.sh` makes two settings files from their `.env.example` files. Git ignores them.
+
+- `src/backend/.env`: the backend settings and the API keys.
+- `src/frontend/.env`: the frontend settings. Each `VITE_` value in it is public, so never put a key there.
+
 The Care Assistant uses a fake language model by default. It needs no API key and no network.
+To use a real model (Gemini has a free tier):
+
+```sh
+uv pip install --python .venv/bin/python -r requirements-llm.txt
+# Get a key at https://aistudio.google.com/apikey. Then, in src/backend/.env, set:
+#     TRIAD_LLM=llm
+#     GEMINI_API_KEY=<your key>
+./src/scripts/dev.sh                                        # start it again after each change to a .env file
+```
+
+If the key is missing, the server prints what is missing and uses the fake model.
+See [`src/backend/README.md`](src/backend/README.md#settings-and-secrets-env) for all settings.
 
 ### Other commands
 
 ```sh
-.venv/bin/python -m pytest -q                               # the 282 backend tests (about 6 s)
+.venv/bin/python -m pytest -q                               # the 292 backend tests (about 6 s)
 npm --prefix src/frontend run build                         # type-check and build the frontend into src/frontend/dist/
 npm --prefix src/frontend run check:demo                    # check the users and the pages of the Demo guide
 .venv/bin/python src/backend/main.py serve                  # serve the built app and the API on http://127.0.0.1:8000

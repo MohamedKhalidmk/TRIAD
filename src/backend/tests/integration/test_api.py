@@ -1,6 +1,7 @@
 """The API on a copy of the full database: the read side, the records, the chat, the errors and the directory."""
 from __future__ import annotations
 
+import json
 import re
 import sqlite3
 import time
@@ -259,7 +260,14 @@ def test_a_patient_tell_is_a_patient_report_in_the_chat(client, full_copy):
     assert scalar(full_copy, "SELECT StaffId IS NULL FROM Message WHERE Id = ?", fact["messageId"]) == 1
 
 
-def test_the_llm_mode_falls_back_to_the_fake_model(full_copy):
+def llm_check_passes(monkeypatch):
+    """Make the start check of the llm mode pass, with no litellm and no key."""
+    from infrastructure.llm import litellm_client
+    monkeypatch.setattr(litellm_client, "check_ready", lambda model: None)
+
+
+def test_the_llm_mode_falls_back_to_the_fake_model(full_copy, monkeypatch, caplog):
+    llm_check_passes(monkeypatch)                             # then each model call fails
     client = make_client(full_copy, llm_mode="llm", llm_model="triad-test/no-such-model")
     assert client.get("/api/health").json()["mode"] == "llm"
     session_id, turn = ask(client, OKAFOR, 1, "Is she allergic to penicillin?")
@@ -269,6 +277,40 @@ def test_the_llm_mode_falls_back_to_the_fake_model(full_copy):
     _, tell = ask(client, OKAFOR, 1, "Her father died of a heart attack.")
     assert tell["assistantTurn"]["kind"] == "tell"            # no open visit: nothing is saved, and no error
     assert tell["assistantTurn"]["recordedIds"] == []
+    assert "This turn uses the fake model." in caplog.text
+
+
+def test_the_llm_mode_with_no_api_key_runs_the_fake_mode(full_copy, monkeypatch, capsys):
+    from infrastructure.llm import litellm_client
+    monkeypatch.setattr(litellm_client, "check_ready", lambda model: f"no API key for {model} is set.")
+    client = make_client(full_copy, llm_mode="llm", llm_model="gemini/gemini-3.8-flash")
+    assert client.get("/api/health").json()["mode"] == "fake"
+    session_id, _ = ask(client, OKAFOR, 1, "Is she allergic to penicillin?")
+    saved = client.get(f"/api/chat/sessions/{session_id}", headers=as_user(OKAFOR)).json()
+    assert (saved["mode"], saved["model"]) == ("fake", None)   # the badge shows the mode that really runs
+    assert "TRIAD_LLM=llm, but no API key for gemini/gemini-3.8-flash is set." in capsys.readouterr().err
+
+
+def test_no_api_key_text_goes_to_a_response_the_log_or_the_database(full_copy, monkeypatch, caplog):
+    secret = "triad-test-secret-0123456789"
+    monkeypatch.setenv("GEMINI_API_KEY", secret)
+    llm_check_passes(monkeypatch)
+    from infrastructure.llm import litellm_client
+
+    def fail(self, system, user):
+        raise RuntimeError(f"The provider does not accept the API key {secret}.")
+    monkeypatch.setattr(litellm_client.LiteLlmLanguageModel, "_complete", fail)
+    client = make_client(full_copy, llm_mode="llm", llm_model="gemini/gemini-3.8-flash")
+    texts = [client.get("/api/health").text]
+    session_id, turn = ask(client, OKAFOR, 1, "Is she allergic to penicillin?")
+    _, tell = ask(client, OKAFOR, 1, "Her father died of a heart attack.")
+    texts += [json.dumps(turn), json.dumps(tell),
+              client.get(f"/api/chat/sessions/{session_id}", headers=as_user(OKAFOR)).text]
+    assert "RuntimeError" in caplog.text                     # the model call failed, and the log says so
+    assert all(secret not in text for text in texts + [caplog.text])
+    for path in (full_copy, full_copy.with_name(full_copy.name + "-wal")):
+        if path.exists():
+            assert secret.encode() not in path.read_bytes()
 
 
 # ----- patients and the directory -----

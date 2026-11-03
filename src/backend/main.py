@@ -9,6 +9,8 @@ Commands:
 
 The API server can also start with uvicorn (the dev.sh script does this):
     .venv/bin/uvicorn main:create_app --factory --app-dir src/backend
+
+The commands and create_app() first load src/backend/.env (see .env.example). A variable of the shell wins.
 """
 from __future__ import annotations
 
@@ -57,11 +59,14 @@ def context_factory(settings: config.Settings) -> Callable:
 
     clock = DemoClock(settings.now)
     fake = FakeLanguageModel()
+    llm, mode, model = fake, "fake", None
     if settings.llm_mode == "llm":
-        from infrastructure.llm.litellm_client import LiteLlmLanguageModel
-        llm, model = LiteLlmLanguageModel(settings.llm_model), settings.llm_model
-    else:
-        llm, model = fake, None
+        from infrastructure.llm import litellm_client
+        problem = litellm_client.check_ready(settings.llm_model)
+        if problem:   # the sessions then record the mode that really runs
+            print(f"TRIAD_LLM=llm, but {problem} The chat uses the fake model.", file=sys.stderr, flush=True)
+        else:
+            llm, mode, model = litellm_client.LiteLlmLanguageModel(settings.llm_model), "llm", settings.llm_model
     identity = Identity()
 
     def open_context() -> AppContext:
@@ -71,7 +76,7 @@ def context_factory(settings: config.Settings) -> Callable:
             patients=SqlitePatientRepository(conn), visits=SqliteVisitRepository(conn),
             records=SqliteRecordRepository(conn), chat=SqliteChatRepository(conn),
             audit=SqliteAuditRepository(conn), directory=SqliteDirectoryRepository(conn),
-            llm=llm, fallback_llm=fake, chat_mode=settings.llm_mode, chat_model=model,
+            llm=llm, fallback_llm=fake, chat_mode=mode, chat_model=model,
             schema_version=config.SCHEMA_VERSION, identity=identity, close=conn.close)
 
     return open_context
@@ -81,7 +86,9 @@ def create_app(settings: Optional[config.Settings] = None):
     """The FastAPI application (uvicorn main:create_app --factory). The database must exist (ensure-db)."""
     from api.app import build_app
 
-    settings = settings or config.Settings.from_env()
+    if settings is None:   # uvicorn --factory (dev.sh). The tests give their own settings.
+        config.load_env_file()
+        settings = config.Settings.from_env()
     if not settings.db_path.exists():
         raise SystemExit(f"The database {settings.db_path} does not exist. Run: python src/backend/main.py ensure-db")
     version = schema_version(settings.db_path)
@@ -104,13 +111,16 @@ def build_database(conn: sqlite3.Connection) -> None:
 
 
 def main(argv: list[str] | None = None) -> None:
+    config.load_env_file()
     parser = argparse.ArgumentParser(description="TRIAD backend commands")
     parser.add_argument("command", choices=["init-db", "ensure-db", "onboard", "export-sql", "serve"])
-    parser.add_argument("--db", type=Path, default=config.DB_PATH, help="Path of the SQLite database.")
+    parser.add_argument("--db", type=Path, default=None,
+                        help="Path of the SQLite database (default: TRIAD_DB_PATH or src/backend/data/triad.db).")
     parser.add_argument("--reset-db", action="store_true", help="Build the database again (ensure-db).")
     parser.add_argument("--out", type=Path, default=config.DML_DIR / "02_insert_seed.sql",
                         help="Output file of export-sql.")
     args = parser.parse_args(argv)
+    args.db = args.db or config.env_db_path()
 
     if args.command == "init-db":
         conn = connect(args.db)
