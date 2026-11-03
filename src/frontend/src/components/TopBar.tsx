@@ -1,13 +1,16 @@
-// The top bar: the hospital name, the links of the role, the demo time, the Demo guide button
+// The top bar: the hospital name, the links of the role, the clock, the Demo guide button
 // and the acting-as bar (the user type and the user).
+// The clock: if GET /api/health gives clock "system", it shows the local time of the browser.
+// If it gives "fixed" or no clock (an old backend), it shows the demo time of the server.
 
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
-import { api, queryKeys } from '../api/endpoints';
+import { api, queryKeys, type Health } from '../api/endpoints';
 import type { Role } from '../api/types';
 import { directoryPath, patientPath, patientsPath, ROUTES } from '../app/routes';
 import { useActingUser } from '../app/session';
-import { formatDateTime } from '../lib/dates';
+import { formatDateTime, formatTime } from '../lib/dates';
 import { ROLES, ROLE_LABELS } from '../lib/labels';
 import { initials } from './UserPicker';
 
@@ -37,6 +40,49 @@ function useNavItems(): NavItem[] {
     { label: 'Find a patient', to: patientsPath('find'), active: onPatients && tab === 'find' },
     { label: 'Directory', to: directoryPath(), active: location.pathname === ROUTES.directory.path },
   ];
+}
+
+const CLOCK_INTERVAL_MS = 30_000;
+
+function pad2(value: number): string {
+  return value < 10 ? `0${value}` : String(value);
+}
+
+/** The local time of the browser as "YYYY-MM-DDTHH:MM". It changes each 30 s while "enabled" is true. */
+function useLocalTime(enabled: boolean): string {
+  // new Date() is correct here: it is the clock of this computer, not a date-only string of the API.
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    if (!enabled) return;
+    setNow(new Date());
+    const timer = window.setInterval(() => setNow(new Date()), CLOCK_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [enabled]);
+  return `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}T${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+}
+
+/** The long form shows above 1180 px, the short form below (styles.css). */
+function Clock({ health }: { health: Health }) {
+  const system = health.clock === 'system';
+  const localTime = useLocalTime(system);
+  if (system) {
+    return (
+      <span className="clock" title="The local time of this computer">
+        <span className="clock-long">
+          {formatDateTime(localTime)} · Chat: {health.mode}
+        </span>
+        <span className="clock-short">{formatTime(localTime)}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="clock" title="The demo time of the server (TRIAD_NOW) and the chat mode">
+      <span className="clock-long">
+        Demo time: {formatDateTime(health.now)} · Chat: {health.mode}
+      </span>
+      <span className="clock-short">Demo {formatTime(health.now)}</span>
+    </span>
+  );
 }
 
 export function TopBar({ onOpenDemoGuide }: { onOpenDemoGuide: () => void }) {
@@ -72,9 +118,7 @@ export function TopBar({ onOpenDemoGuide }: { onOpenDemoGuide: () => void }) {
 
         <div className="topbar-tools">
           {health.data ? (
-            <span className="clock" title="The demo time of the server (TRIAD_NOW) and the chat mode">
-              {formatDateTime(health.data.now)} · Chat: {health.data.mode}
-            </span>
+            <Clock health={health.data} />
           ) : health.isError ? (
             <span className="clock clock-offline" title="GET /api/health failed">
               Server offline

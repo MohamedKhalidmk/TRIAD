@@ -130,6 +130,12 @@ The app shows the time as it is written in the string ("Oct 30, 2026 09:01"). Th
 The app does not give a date-only string (`YYYY-MM-DD`) to `new Date()`, because the browser can show the day before.
 The helpers are in `src/lib/dates.ts`.
 
+The clock in the top bar follows the value `clock` of `GET /api/health`:
+
+- `system` (`TRIAD_NOW=system`): the local time of the computer, for example "Nov 3, 2026 15:52". It changes each 30 s.
+- `fixed`, or no value (an old backend): the demo time of the server, for example "Demo time: Oct 30, 2026 09:19".
+- Below 1180 px, the clock shows the short form: "15:52" or "Demo 09:19".
+
 ## Demo guide
 
 Select **Demo guide** in the top bar. The panel lists the use cases of the hospital-visit journey (`USER_FLOWS.md`, section 3, Use cases 0 to 9).

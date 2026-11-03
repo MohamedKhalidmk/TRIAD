@@ -372,6 +372,11 @@ s {
   font-weight: 600;
 }
 
+/* The short form of the clock ("15:52", "Demo 09:19") shows below 1180 px. */
+.clock-short {
+  display: none;
+}
+
 .acting-as {
   display: flex;
   align-items: center;
@@ -2005,8 +2010,12 @@ s {
 /* ----- Narrow screens ----- */
 
 @media (max-width: 1180px) {
-  .clock {
+  .clock-long {
     display: none;
+  }
+
+  .clock-short {
+    display: inline;
   }
 }
 

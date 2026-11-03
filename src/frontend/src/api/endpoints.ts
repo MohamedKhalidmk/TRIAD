@@ -34,7 +34,7 @@ import type {
 
 // ----- Request bodies (doc/api.md, section 3) -----
 
-export interface Health { status: 'ok'; schemaVersion: number; mode: ChatMode; now: string; }
+export interface Health { status: 'ok'; schemaVersion: number; mode: ChatMode; now: string; clock?: 'system' | 'fixed'; }
 
 export type PatientScope = 'all' | 'care-team' | 'open-visits';
 
