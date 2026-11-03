@@ -6,7 +6,8 @@ import type { Role, UserView } from '../api/types';
 export const ROUTES = routeTable;
 
 export type PatientsTab = 'front-desk' | 'my-patients' | 'find';
-export type PatientTab = 'chart' | 'visit' | 'care-team' | 'audit';
+// 'assistant' is the Care Assistant tab. It shows only on narrow screens; on wide screens the chat is in the right pane.
+export type PatientTab = 'chart' | 'visit' | 'care-team' | 'audit' | 'assistant';
 export type DirectoryTab = 'departments' | 'locations' | 'staff' | 'medications';
 
 export function patientPath(id: number, tab?: PatientTab): string {

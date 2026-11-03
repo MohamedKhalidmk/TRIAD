@@ -2,8 +2,9 @@
 // and the acting-as bar (the user type and the user).
 // The clock: if GET /api/health gives clock "system", it shows the local time of the browser.
 // If it gives "fixed" or no clock (an old backend), it shows the demo time of the server.
+// The top bar writes its height to the CSS variable --topbar-height. The chat pane uses it (styles.css).
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
 import { api, queryKeys, type Health } from '../api/endpoints';
@@ -12,6 +13,7 @@ import { directoryPath, patientPath, patientsPath, ROUTES } from '../app/routes'
 import { useActingUser } from '../app/session';
 import { formatDateTime, formatTime } from '../lib/dates';
 import { ROLES, ROLE_LABELS } from '../lib/labels';
+import { useScrollFade } from './Tabs';
 import { initials } from './UserPicker';
 
 interface NavItem {
@@ -61,7 +63,7 @@ function useLocalTime(enabled: boolean): string {
   return `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}T${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
 }
 
-/** The long form shows above 1180 px, the short form below (styles.css). */
+/** The long form shows above 1180 px (in two lines up to 1300 px), the short form below (styles.css). */
 function Clock({ health }: { health: Health }) {
   const system = health.clock === 'system';
   const localTime = useLocalTime(system);
@@ -69,7 +71,8 @@ function Clock({ health }: { health: Health }) {
     return (
       <span className="clock" title="The local time of this computer">
         <span className="clock-long">
-          {formatDateTime(localTime)} · Chat: {health.mode}
+          <span>{formatDateTime(localTime)}</span>
+          <span className="clock-mode">Chat: {health.mode}</span>
         </span>
         <span className="clock-short">{formatTime(localTime)}</span>
       </span>
@@ -78,16 +81,39 @@ function Clock({ health }: { health: Health }) {
   return (
     <span className="clock" title="The demo time of the server (TRIAD_NOW) and the chat mode">
       <span className="clock-long">
-        Demo time: {formatDateTime(health.now)} · Chat: {health.mode}
+        <span>Demo time: {formatDateTime(health.now)}</span>
+        <span className="clock-mode">Chat: {health.mode}</span>
       </span>
       <span className="clock-short">Demo {formatTime(health.now)}</span>
     </span>
   );
 }
 
+/** Keeps the CSS variable --topbar-height equal to the height of the top bar. The height changes with the width. */
+function useTopBarHeight() {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const header = ref.current;
+    if (!header) return;
+    const root = document.documentElement;
+    const update = () => root.style.setProperty('--topbar-height', `${Math.ceil(header.getBoundingClientRect().height)}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty('--topbar-height');
+    };
+  }, []);
+  return ref;
+}
+
 export function TopBar({ onOpenDemoGuide }: { onOpenDemoGuide: () => void }) {
   const { user, userKey, status, openPicker } = useActingUser();
   const navItems = useNavItems();
+  const headerRef = useTopBarHeight();
+  const navRef = useRef<HTMLElement>(null);
+  const navFade = useScrollFade(navRef, navItems.length);
   const health = useQuery({
     queryKey: queryKeys.health,
     queryFn: ({ signal }) => api.health(signal),
@@ -98,7 +124,7 @@ export function TopBar({ onOpenDemoGuide }: { onOpenDemoGuide: () => void }) {
   const roleValue: Role | '' = user?.role ?? '';
 
   return (
-    <header className="topbar">
+    <header className="topbar" ref={headerRef}>
       <div className="topbar-inner">
         <Link to={ROUTES.home.path} className="brand" aria-label="TRIAD General Hospital, home page">
           <img src="/triad-icon.png" alt="" width="28" height="28" />
@@ -108,7 +134,7 @@ export function TopBar({ onOpenDemoGuide }: { onOpenDemoGuide: () => void }) {
           </span>
         </Link>
 
-        <nav className="topnav" aria-label="Main">
+        <nav className={`topnav${navFade}`} aria-label="Main" ref={navRef}>
           {navItems.map((item) => (
             <Link key={item.label} to={item.to} className={item.active ? 'topnav-link topnav-active' : 'topnav-link'} aria-current={item.active ? 'page' : undefined}>
               {item.label}

@@ -308,6 +308,7 @@ s {
 
 .brand {
   display: flex;
+  flex: none;
   align-items: center;
   gap: 8px;
   color: var(--text);
@@ -332,6 +333,7 @@ s {
 
 .topnav {
   display: flex;
+  flex: none;
   gap: 2px;
 }
 
@@ -341,6 +343,7 @@ s {
   font-size: 14px;
   color: var(--muted);
   text-decoration: none;
+  white-space: nowrap;
   border-radius: 8px;
 }
 
@@ -356,6 +359,7 @@ s {
 
 .topbar-tools {
   display: flex;
+  flex: none;
   align-items: center;
   gap: 10px;
   margin-left: auto;
@@ -372,15 +376,21 @@ s {
   font-weight: 600;
 }
 
+.clock-mode::before {
+  content: ' · ';
+}
+
 /* The short form of the clock ("15:52", "Demo 09:19") shows below 1180 px. */
 .clock-short {
   display: none;
 }
 
+/* When the top bar is full, the user button gets smaller first. The name and the detail then end with "…". */
 .acting-as {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   padding-left: 14px;
   border-left: 1px solid var(--border);
 }
@@ -413,6 +423,7 @@ s {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
   max-width: 300px;
   padding: 4px 10px 4px 4px;
   font: inherit;
@@ -634,6 +645,19 @@ s {
 
 .tab-panel {
   padding-top: 16px;
+}
+
+/* A box that scrolls sideways (the tab lists, the top bar links) fades at an edge with more content (useScrollFade). */
+.scroll-fade-right {
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+
+.scroll-fade-left {
+  mask-image: linear-gradient(to left, #000 calc(100% - 24px), transparent);
+}
+
+.scroll-fade-left.scroll-fade-right {
+  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
 }
 
 /* ----- Badges and chips ----- */
@@ -1070,7 +1094,11 @@ s {
 
 /* ----- Tables ----- */
 
+/* position: relative keeps the absolute .visually-hidden text of a header cell in the scroll box.
+   Then a wide table scrolls in its box, and the page does not scroll sideways. */
 .table-wrap {
+  position: relative;
+  max-width: 100%;
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1279,9 +1307,11 @@ s {
   box-shadow: var(--shadow);
 }
 
+/* --topbar-height comes from TopBar.tsx. 61px is the height of the top bar on a wide screen. */
 .pane-chat {
   position: sticky;
-  top: 76px;
+  top: calc(var(--topbar-height, 61px) + 15px);
+  scroll-margin-top: calc(var(--topbar-height, 61px) + 12px);
 }
 
 /* ----- Chart ----- */
@@ -1699,7 +1729,7 @@ s {
 .assistant {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px);
+  height: calc(100vh - var(--topbar-height, 61px) - 39px);
   min-height: 520px;
   overflow: hidden;
   background: var(--surface);
@@ -2009,6 +2039,20 @@ s {
 
 /* ----- Narrow screens ----- */
 
+/* 1300 px or less: the long clock uses two lines (the time, then the chat mode). */
+@media (max-width: 1300px) {
+  .clock-long {
+    display: inline-flex;
+    flex-direction: column;
+    line-height: 1.25;
+    text-align: right;
+  }
+
+  .clock-mode::before {
+    content: none;
+  }
+}
+
 @media (max-width: 1180px) {
   .clock-long {
     display: none;
@@ -2019,7 +2063,8 @@ s {
   }
 }
 
-@media (max-width: 1000px) {
+/* 1100 px or less: a smaller top bar. */
+@media (max-width: 1100px) {
   .brand-sub {
     display: none;
   }
@@ -2038,6 +2083,7 @@ s {
   }
 }
 
+/* 1100 px or less: one column. The Care Assistant is a tab of the patient page (PatientPage.tsx, NARROW_LAYOUT). */
 @media (max-width: 1100px) {
   .patient-layout-two {
     grid-template-columns: minmax(0, 1fr);
@@ -2047,8 +2093,20 @@ s {
     position: static;
   }
 
+  /* The chat fills the screen under the top bar. */
   .assistant {
-    height: 640px;
+    height: calc(100vh - var(--topbar-height, 61px) - 24px);
+    height: calc(100dvh - var(--topbar-height, 61px) - 24px);
+    min-height: 420px;
+  }
+
+  /* The Care Assistant tab is selected: the left pane shows only the tab list. */
+  .pane-main-tabs-only {
+    padding-bottom: 0;
+  }
+
+  .pane-main-tabs-only .tabs {
+    border-bottom-color: transparent;
   }
 
   .welcome {
@@ -2056,16 +2114,179 @@ s {
   }
 }
 
-@media (max-width: 860px) {
+/* 1000 px or less: the top bar has two rows.
+   Row 1: the brand and the user. Row 2: the links (they scroll sideways), the clock and the Demo guide button. */
+@media (max-width: 1000px) {
   .topbar-inner {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'brand acting acting'
+      'nav nav tools';
+    gap: 4px 10px;
+    min-height: 0;
+    padding: 6px 16px;
+  }
+
+  .brand {
+    grid-area: brand;
   }
 
   .acting-as {
+    grid-area: acting;
+    justify-self: end;
+    min-width: 0;
     padding-left: 0;
     border-left: 0;
   }
 
+  .topnav {
+    grid-area: nav;
+    min-width: 0;
+    padding: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .topbar-tools {
+    grid-area: tools;
+    margin-left: 0;
+  }
+}
+
+/* 600 px or less (a phone): a small top bar, tab lists that scroll sideways, and full-screen dialogs. */
+@media (max-width: 600px) {
+  .main {
+    padding: 12px 12px 40px;
+  }
+
+  .topbar-inner {
+    padding: 6px 12px;
+    gap: 4px 8px;
+  }
+
+  /* The user button shows the avatar and the name only. The select keeps its aria-label "User type". */
+  .acting-as-label,
+  .acting-as-detail {
+    display: none;
+  }
+
+  .acting-as-type select {
+    margin-top: 0;
+    padding: 4px;
+  }
+
+  .acting-as-user {
+    max-width: none;
+    padding: 3px 8px 3px 3px;
+  }
+
+  .acting-as-user .avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 11.5px;
+  }
+
+  .topbar-tools {
+    gap: 8px;
+  }
+
+  .topbar-tools .button {
+    min-height: 30px;
+    padding: 4px 10px;
+    font-size: 13.5px;
+  }
+
+  /* One row that scrolls sideways. The line under the tabs is a shadow, because the scroll box cuts a negative margin. */
+  .tabs {
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 0;
+    box-shadow: inset 0 -1px 0 var(--border);
+  }
+
+  .tab {
+    flex: none;
+    margin-bottom: 0;
+    padding: 10px 7px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .pane-main {
+    padding: 4px 12px 12px;
+  }
+
+  /* The patient tabs use the full width of the pane. The text of the first tab stays in line with the pane content. */
+  .pane-main > .tabs {
+    margin: 0 -12px;
+    padding: 0 5px;
+  }
+
+  .pane-main-tabs-only {
+    padding-bottom: 0;
+  }
+
+  .pane-main-tabs-only .tabs {
+    box-shadow: none;
+  }
+
+  .patient-header,
+  .card {
+    padding: 14px;
+  }
+
+  .card-header,
+  .card-header > .row {
+    flex-wrap: wrap;
+  }
+
+  .field-inline input,
+  .field-inline select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* The record form, the edit forms, the user picker and the Demo guide use the full screen.
+     A small dialog (a question with Cancel and OK) stays small. */
+  .dialog-medium,
+  .dialog-large,
+  .dialog-drawer {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .dialog-medium .dialog-frame,
+  .dialog-large .dialog-frame,
+  .dialog-drawer .dialog-frame {
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .dialog-header {
+    padding: 12px 14px 10px;
+  }
+
+  .dialog-body {
+    flex: 1;
+    padding: 14px;
+  }
+}
+
+/* 440 px or less: the brand shows only the logo (the link keeps its aria-label). */
+@media (max-width: 440px) {
+  .brand-text {
+    display: none;
+  }
+}
+
+/* 860 px or less: the forms and the chart items use one column. */
+@media (max-width: 860px) {
   .grid-2,
   .grid-message,
   .search-form {

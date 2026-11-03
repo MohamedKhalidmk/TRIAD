@@ -180,7 +180,7 @@ src/frontend/
     chat/                  the Care Assistant and its evidence card
     directory/             the four directory tabs
     demo/                  steps.json (the use cases) and the Demo guide panel
-    lib/                   helpers: dates, labels, debounce, the page state (usePage)
+    lib/                   helpers: dates, labels, debounce, the page state (usePage), the media query hook (useMediaQuery)
 ```
 
 ## Pages and API endpoints
@@ -214,6 +214,17 @@ The tabs of the patient page follow the role and `Patient.permissions`:
   If the user is not on the care team, the server sends 403, and the tab shows the 403 panel (journey Use case 7).
 - The MOA gets the Visit and Care team tabs only. The app does not call the chart or the chat endpoints for the MOA.
 - The Audit tab shows when `permissions.viewAudit` is true.
+
+## Narrow screens
+
+- **1100 px or less:** the patient page has one column. The Care Assistant is the last tab ("Care Assistant", `?tab=assistant`).
+  The chat stays open when you select a different tab, so the open chat and the text in the box stay.
+  The chat fills the screen under the top bar. When the screen becomes wide again, the chat goes back to the right pane,
+  and the app selects the first tab.
+- **1000 px or less:** the top bar has two rows. The links scroll sideways if they do not fit.
+- **600 px or less:** the user button shows only the avatar and the name. The tab lists scroll sideways.
+  The forms, the user picker and the Demo guide use the full screen.
+- A wide table scrolls in its box. The page itself does not scroll sideways.
 
 ## The Care Assistant
 
