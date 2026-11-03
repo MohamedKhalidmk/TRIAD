@@ -77,7 +77,7 @@ def context_factory(settings: config.Settings) -> Callable:
             records=SqliteRecordRepository(conn), chat=SqliteChatRepository(conn),
             audit=SqliteAuditRepository(conn), directory=SqliteDirectoryRepository(conn),
             llm=llm, fallback_llm=fake, chat_mode=mode, chat_model=model,
-            schema_version=config.SCHEMA_VERSION, identity=identity, close=conn.close)
+            schema_version=config.SCHEMA_VERSION, identity=identity, close=conn.close, clock_mode=clock.mode)
 
     return open_context
 

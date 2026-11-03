@@ -54,8 +54,11 @@ The 403 for the chart of a patient whose care team does not include the user has
 
 ### 1.3 Clock
 
-- The environment variable `TRIAD_NOW` sets the demo time. The default is `2026-10-30T09:00:00-04:00` (from `hospital_profile.json`). `TRIAD_NOW=system` uses the computer clock.
-- Each write gets the time max(`TRIAD_NOW`, the latest time in the database) + 1 minute. So the times always increase, also after a restart of the server.
+- The environment variable `TRIAD_NOW` sets the clock. It has two modes:
+  - `system` (the default): the clock of the computer, in its local time zone. Each write gets the time max(now, the latest time in the database + 1 second). So the times stay near the real time. The seed data is older than today, so the new rows come after it.
+  - A fixed ISO 8601 time, for example `TRIAD_NOW=2026-10-30T09:00:00-04:00` (`triadNow` in `hospital_profile.json`): the fixed demo time. Each write gets the time max(`TRIAD_NOW`, the latest time in the database) + 1 minute. The tests, the screenshots and the report use this mode, so their results do not change.
+- In the two modes, the times always increase, also after a restart of the server. So after writes with the system clock, a fixed `TRIAD_NOW` gives the latest time in the database. To get the fixed demo time again, build the database again (`--reset-db`).
+- `GET /api/health` gives `now`: max(the clock, the latest time in the database). It also gives `clock`: `'system'` or `'fixed'`.
 
 ### 1.4 Chat mode
 
@@ -203,7 +206,7 @@ interface Medication { id: number; code: string; codeSystem: string; name: strin
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string }` | all, no header |
+| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed' }` | all, no header |
 | `GET /api/users?role=&q=&limit=50` | — | `UserView[]` (demo users first, then by name) | all, no header |
 | `GET /api/users/{key}` | — | `UserView` | all, no header |
 | `GET /api/me` | — | `UserView` | any user |

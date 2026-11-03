@@ -44,3 +44,4 @@ class AppContext:
     schema_version: int
     identity: Identity
     close: Callable[[], None] = lambda: None
+    clock_mode: str = "fixed"          # 'system' (the computer clock) or 'fixed' (a fixed TRIAD_NOW)

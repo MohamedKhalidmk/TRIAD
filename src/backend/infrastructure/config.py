@@ -2,7 +2,8 @@
 
 Environment variables:
     TRIAD_DB_PATH    the SQLite database (default: src/backend/data/triad.db); a relative path starts at the repo root
-    TRIAD_NOW        the demo time (default: triadNow in hospital_profile.json); "system" uses the computer clock
+    TRIAD_NOW        the clock: "system" (default, the computer clock) or a fixed ISO 8601 time,
+                     for example 2026-10-30T09:00:00-04:00 (triadNow in hospital_profile.json)
     TRIAD_LLM        the chat mode: "fake" (default, no network) or "llm" (LiteLLM)
     TRIAD_LLM_MODEL  the LiteLLM model (default: gemini/gemini-3.8-flash)
     PORT             the port of "main.py serve" (default: 8000)
@@ -14,7 +15,6 @@ at the start. A variable of the shell wins over the file.
 """
 from __future__ import annotations
 
-import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
@@ -79,11 +79,6 @@ def env_db_path() -> Path:
     return path if path.is_absolute() else ROOT_DIR / path
 
 
-def profile_now() -> str:
-    """The demo time of the hospital profile (triadNow)."""
-    return json.loads(PROFILE_PATH.read_text(encoding="utf-8"))["triadNow"]
-
-
 @dataclass(frozen=True)
 class Settings:
     db_path: Path
@@ -97,7 +92,7 @@ class Settings:
         mode = os.environ.get("TRIAD_LLM", "fake").strip().lower() or "fake"
         values = dict(
             db_path=env_db_path(),
-            now=os.environ.get("TRIAD_NOW", "").strip() or profile_now(),
+            now=os.environ.get("TRIAD_NOW", "").strip() or "system",
             llm_mode=mode if mode in ("fake", "llm") else "fake",
             llm_model=os.environ.get("TRIAD_LLM_MODEL", "").strip() or DEFAULT_LLM_MODEL,
             frontend_dist=FRONTEND_DIST,

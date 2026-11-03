@@ -16,7 +16,8 @@ router = APIRouter(prefix="/api", tags=["system"])
 
 @router.get("/health", response_model=s.Health)
 def health(ctx: AppContext = Depends(get_ctx)):
-    return s.Health(status="ok", schema_version=ctx.schema_version, mode=ctx.chat_mode, now=ctx.uow.now())
+    return s.Health(status="ok", schema_version=ctx.schema_version, mode=ctx.chat_mode, now=ctx.uow.now(),
+                    clock=ctx.clock_mode)
 
 
 @router.get("/users", response_model=list[s.UserView])

@@ -92,4 +92,4 @@ def test_the_demo_clock():
     assert clock.current(latest) == "2026-10-30T09:01:00-04:00"
     system = DemoClock("system")
     written = parse_time(system.write_time(None))
-    assert abs(written - datetime.now(timezone.utc) - timedelta(minutes=1)) < timedelta(seconds=5)
+    assert abs(written - datetime.now(timezone.utc)) < timedelta(seconds=5)          # the system mode: near now

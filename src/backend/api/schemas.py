@@ -50,6 +50,7 @@ class Health(Model):
     schema_version: int
     mode: str
     now: str
+    clock: Literal["system", "fixed"]
 
 
 # ----- users and patients -----

@@ -46,7 +46,9 @@ The frontend (`src/frontend/`) is also part of the ui layer.
 - Each request opens one connection (`foreign_keys = ON`, `busy_timeout`). The database uses WAL mode.
 - Each write starts with `BEGIN IMMEDIATE`. The access check runs before the write.
 - When the rules stop an action about one patient, the backend writes an audit record (Outcome = Denied). Then it sends the 403.
-- Each write gets the time max(`TRIAD_NOW`, the latest time in the database) + 1 minute. Thus the times always increase.
+- Each write gets a time that is after the latest time in the database. Thus the times always increase.
+  With the computer clock (the default), the time is max(now, the latest time + 1 second).
+  With a fixed `TRIAD_NOW`, the time is max(`TRIAD_NOW`, the latest time) + 1 minute (doc/api.md section 1.3).
 
 ## Install
 
@@ -113,7 +115,7 @@ The backend reads its settings from environment variables. The file `src/backend
 | Variable | Default | What it sets |
 |---|---|---|
 | `TRIAD_DB_PATH` | `src/backend/data/triad.db` | The SQLite database. A relative path starts at the root folder of the repository. |
-| `TRIAD_NOW` | `2026-10-30T09:00:00-04:00` (from `data/raw/hospital_profile.json`) | The demo time. `system` uses the computer clock. |
+| `TRIAD_NOW` | `system` | The clock. `system` uses the clock of the computer, in its local time zone. A fixed ISO 8601 time, for example `2026-10-30T09:00:00-04:00` (`triadNow` in `data/raw/hospital_profile.json`), gives the fixed demo time. The tests, the screenshots and the report use a fixed time. |
 | `TRIAD_LLM` | `fake` | The chat mode. `fake` needs no network. `llm` uses LiteLLM. |
 | `TRIAD_LLM_MODEL` | `gemini/gemini-3.8-flash` | The LiteLLM model of the `llm` mode. |
 | `GEMINI_API_KEY` | — | The key for the Gemini models. Only LiteLLM reads it. For another provider, use the variable of that provider (for example `ANTHROPIC_API_KEY`). |

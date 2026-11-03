@@ -4,7 +4,7 @@
 - the patient-visible rule (USER_FLOWS.md section 2.1; the same rule as query Q12 in dml/03),
 - the entry and version rule (doc/api.md section 3.4),
 - the visit of "What is my plan?",
-- the clock rule: each write is one minute after the latest time (doc/api.md section 1.3).
+- the clock rule: each write is one step (1 minute or 1 second) after the latest time (doc/api.md section 1.3).
 """
 from __future__ import annotations
 
@@ -98,10 +98,10 @@ def parse_time(value: str) -> datetime:
     return moment if moment.tzinfo else moment.replace(tzinfo=timezone.utc)
 
 
-def next_write_time(base: datetime, latest: Optional[datetime]) -> datetime:
-    """The time of a new write: max(base, latest) + 1 minute, in the offset of `base`."""
+def next_write_time(base: datetime, latest: Optional[datetime], step: timedelta = ONE_MINUTE) -> datetime:
+    """The time of a new write: max(base, latest) + step (default 1 minute), in the offset of `base`."""
     start = base if latest is None or base >= latest else latest
-    return (start + ONE_MINUTE).astimezone(base.tzinfo)
+    return (start + step).astimezone(base.tzinfo)
 
 
 def format_time(moment: datetime) -> str:
