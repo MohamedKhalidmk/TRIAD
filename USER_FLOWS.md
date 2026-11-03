@@ -85,6 +85,7 @@ All names are fictional.
 ## 1. The user picker (no login)
 
 - The app has no login. This is a prototype. Do not put real patient data in it.
+  Why: see [Design choice: user switching instead of a login](README.md#design-choice-user-switching-instead-of-a-login).
 - In the top bar, select a **user type**: Patient, Doctor, Nurse or MOA.
 - Then select a **user**. Patients show their name and date of birth. Staff show their department.
 - The demo users show at the top of the list.

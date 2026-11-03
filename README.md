@@ -81,6 +81,25 @@ More information: [`src/backend/README.md`](src/backend/README.md) (the layers, 
 variables and the LLM mode), [`src/frontend/README.md`](src/frontend/README.md) and the API contract
 [`doc/api.md`](doc/api.md).
 
+## Design choice: user switching instead of a login
+
+The prototype has no login. This is a design choice, so that the demo and the tests are fast.
+
+- **User switching.** The top bar selects the user type and the user. The frontend sends the user key
+  in the header `X-Triad-User` with each request. Each step of the Demo guide has an **Act as** button.
+  So one person can test all the use cases of all the user groups in a few minutes.
+- **Authorization is real.** The backend checks each request against the permission rules of
+  [`USER_FLOWS.md`](USER_FLOWS.md#2-permissions) section 2: the care-team rule, the role matrix and the
+  patient-visible rule. A denied request gets 403. When the request is about a patient, the backend also
+  writes an audit record (outcome "Denied"). A request with no user or an unknown user gets 401.
+- **Authentication is not real.** The backend trusts the header, so any client can act as any user.
+  Authorization is decoupled from authentication: the access rules need only an `Actor`, and one
+  function makes the `Actor` (`get_actor` in [`src/backend/api/actor.py`](src/backend/api/actor.py)).
+- **A real system adds a login.** For example, the single sign-on of the hospital with OpenID Connect,
+  or SMART on FHIR. The server then takes the user from the verified token, not from a header that the
+  client sets. Only `get_actor` changes. The user switcher is then removed, or kept only in a test build.
+- **Synthetic data only.** For this reason, the prototype must hold only synthetic data.
+
 ## Data model (Milestone 4)
 
 TRIAD records each clinical fact as an **Assertion**. A staff member issues a
