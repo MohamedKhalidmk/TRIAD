@@ -62,9 +62,9 @@ The 403 for the chart of a patient whose care team does not include the user has
 
 ### 1.4 Chat mode
 
-- `TRIAD_LLM=fake` (the default): the rule-based lookups answer each question, and a fake extractor finds facts in a "tell" turn. No network is necessary.
-- `TRIAD_LLM=llm`: LiteLLM words the answer and extracts facts. `TRIAD_LLM_MODEL` sets the model (default `gemini/gemini-3.8-flash`). The provider key comes from the usual environment variable (for example `GEMINI_API_KEY`), which `src/backend/.env` can set. If `litellm` or the key is missing at the start, the server runs in the fake mode, and `ChatSession.mode` is `fake`. If one call fails, the backend uses the fake mode for that turn.
-- The rules always select the evidence. The assistant cites only the assertions that the rules returned in that turn.
+- `TRIAD_LLM=fake` (the default): the keywords of a question select one tool, and a template writes the answer from the result of the tool. A fake extractor finds facts in a "tell" turn. No network is necessary.
+- `TRIAD_LLM=llm`: the model selects the tools of a question (tool calls through LiteLLM) and writes the answer. It also extracts the facts of a "tell" turn. `TRIAD_LLM_MODEL` sets the model (default `gemini/gemini-3.8-flash`). The provider key comes from the usual environment variable (for example `GEMINI_API_KEY`), which `src/backend/.env` can set. If `litellm` or the key is missing at the start, or the model cannot call tools, the server runs in the fake mode, and `ChatSession.mode` is `fake`. If one turn fails, the backend uses the fake mode for that turn.
+- The two modes use the same tools and the same SQL (section 3.5). The assistant cites only the assertions that the tools returned in that turn.
 
 ### 1.5 Pagination
 
@@ -313,6 +313,38 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 - `clientTurnId` is a random id that the frontend makes. If the same `clientTurnId` comes again, the backend sends the turns that it saved, and does not add new turns.
 - The backend sorts each turn into "ask" or "tell". A tell makes one message (Channel = Chat) with one or more assertions (Source = Agent, Verification = Unconfirmed). If it finds no fact, it makes no message and says so.
 - An MOA cannot use the chat (403).
+
+**An "ask" turn uses tools.** A loop of tool calls answers the question (`application/assistant/agent.py`). The fake mode and the llm mode use the same loop, the same tools and the same SQL.
+1. The model gets the question and the tool definitions: the name, the description and the JSON Schema of the parameters.
+2. The model gives tool calls (a name and JSON arguments) or the final text. The backend checks each call against the schema, runs the tool and gives back the result. A call that is not correct (an unknown tool, an extra parameter, a wrong type, a bad enum value) gets an error text, and no query runs.
+3. At most 4 rounds. If the model fails, or it gives no final text in 4 rounds, the fake model does the turn.
+
+Each tool is one targeted query of the record, with `ORDER BY` and `LIMIT 12` (`application/assistant/tools.py`). No tool reads the full chart.
+
+| Tool | Parameters | The lookup |
+|---|---|---|
+| `get_allergies` | `substance?` | The current allergy items, newest first. Each word of `substance` (3 letters or more) must be in the display or the substance. |
+| `get_medications` | `status?`: `current` (default) or `all` | The current prescriptions, newest first. `current`: the status is active or draft, and nobody refuted it. |
+| `get_diagnoses` | `status?`: `current` (default) or `all` | The current diagnoses, newest first. `current`: the clinical status is empty, active, recurrence or relapse, and nobody refuted it. |
+| `get_plan` | — | The plan visit (the open visit, else the latest visit that is not VR), and its diagnoses, lab orders, lab results, prescriptions and procedures, in this order. |
+| `get_lab_results` | `test?` | The current lab orders and lab results, newest first. |
+| `get_vital_signs` | — | The newest current value of each vital-sign code (`ROW_NUMBER() OVER (PARTITION BY e.Code ...)`). |
+| `get_visits` | — | The latest 5 visits. A visit has no reference, so the model cannot cite it. |
+| `get_recommendations` | `role?`: `Nurse` or `Doctor` | The recommendations of the plan visit, current and superseded, oldest first. |
+| `search_record` | `text`, `category?` | The current items with the text in the display, the statement or the author name, in the order of the chart. |
+
+**The model never gives or gets an id.**
+- The tools are bound to the user of the request (`X-Triad-User`) and to the patient of the chat session. No tool has a parameter for a patient, a user or an id, and each schema has `additionalProperties: false`. So a call with `patientId` gets an error text.
+- A patient gets only the patient-visible items (the rule of query Q12, in SQL).
+- Each item of a tool result gets a reference (`E1`, `E2`, ...) for this turn only. The backend keeps the map from the reference to `Assertion.Id`.
+- For each item, the model sees only the reference, the category, the display, the statement, the verification, the author label (and the name and role of a staff author), the date and the subtype details (for example the dosage, the value or the status). It does not see an id, the patient name, the date of birth or an identifier. The backend writes "the patient" in place of the patient name in a text of the record (for example the name of a care team).
+- The prompt names "the patient of this chat". The question goes to the model as the user wrote it.
+- The access check of the turn runs once, before the tools. The tools write no audit record. The turn writes one audit record (`ask`, with `chatTurnId`).
+
+**Citations.**
+- The model writes the reference after each fact, for example `[E1]`. The backend keeps only the references of this turn, removes them from the text, and cites their assertions in the order of the first mention (rank 1, 2, ...).
+- The backend drops an unknown reference. If the text names no reference of this turn, the turn cites the items that the tools gave (at most 12).
+- The fake model writes no reference, so the turn cites all items of its one tool call. The cards of the turn come from these Citation rows.
 
 ### 3.6 Audit
 

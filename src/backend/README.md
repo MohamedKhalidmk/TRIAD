@@ -154,21 +154,55 @@ The lines go to stderr (logger `triad.sql`). `dev.sh` shows them with the prefix
 For Claude, set `TRIAD_LLM_MODEL=anthropic/claude-opus-5-5` and `ANTHROPIC_API_KEY`.
 For a model with a higher free-tier limit, use `gemini/gemini-3.5-flash-lite`.
 
-- At the start, the server checks that `litellm` is installed and that the key of the model is set. If not, it prints one line
-  that tells what is missing, and it runs in the fake mode. The new sessions then show "Mode: fake".
-- If one call fails (for example, the free-tier limit), that turn uses the fake model, and the log gets one warning line.
+- At the start, the server checks that `litellm` is installed, that the key of the model is set, and that the model can call tools
+  (`litellm.supports_function_calling`). If not, it prints one line that tells what is missing, and it runs in the fake mode.
+  The new sessions then show "Mode: fake". If the tool check itself fails, the server does not stop the llm mode.
+- If a turn fails (for example, the free-tier limit), that turn uses the fake model, and the log gets one warning line.
   The line names only the error class, never the key.
 - On the free tier, Google can use the prompts to improve its products. The data of TRIAD is synthetic.
   Do not put real patient data in the prototype.
 - The free tier has a limit of requests per minute and per day. See https://aistudio.google.com/rate-limit.
 
+**How the model selects a tool.** Each tool of `application/assistant/tools.py` has a name, a description and a JSON Schema
+of its parameters (for example `get_allergies` with `substance`). LiteLLM sends them to the model with
+`tools=[{"type": "function", "function": {...}}]` and `tool_choice="auto"`. The model reads the question and the descriptions,
+and it gives tool calls: a name and JSON arguments (`message.tool_calls`). The backend checks each call against the schema,
+runs the tool, and sends the result back as a message with `role: "tool"`. Then the model writes the answer.
+The loop has at most 4 rounds (`application/assistant/agent.py`).
+
+**The user and the patient are bound, not parameters.** The tools are closures over the user of the request (`X-Triad-User`)
+and the patient of the chat session. The model cannot give a patient, a user or an id:
+
+```python
+def make_tools(ctx, actor, patient):        # actor: from the X-Triad-User header; patient: from the chat session
+    def get_allergies(substance=None):      # the model calls this tool with words only
+        return ctx.records.allergies(patient.id, words=words_of(substance), visible_only=actor.is_patient,
+                                     limit=12)
+```
+
+- Each schema has `additionalProperties: false`. A call with an extra parameter (for example `patientId`), a wrong type or
+  a bad enum value gets an error text, and no query runs.
+- The tools call the repositories in the process (no HTTP call to the server). A patient gets only the patient-visible items.
+
+**References in place of ids.** Each item of a tool result gets a reference (`E1`, `E2`, ...) for this turn only.
+The backend keeps the map from the reference to `Assertion.Id`. The model sees the reference, the category, the display,
+the statement, the verification, the author, the date and the subtype details. It never sees an id, the patient name,
+the date of birth or an identifier. The model writes `[E1]` after each fact. The backend removes the references from the text
+and cites their assertions. It drops an unknown reference. If the text has no reference, the turn cites all items of the tools.
+
+**The fallback.** If the model fails, or it gives no final text in 4 rounds, the fake model does the turn again with the same
+tools. The fake model selects one tool from the keywords of the question (`application/assistant/rule_model.py`), and the
+templates of `application/assistant/answers.py` write the answer from the tool result.
+
 ## The Care Assistant
 
-- The rules always select the evidence. The assistant cites only the assertions that the rules returned in that turn.
-- Each card of an answer comes from one Citation row of the turn.
-- The rules know these questions: allergies, medications, the plan, lab results, vital signs, diagnoses, visits and recommendations (for example "What did the nurse recommend?").
+- An "ask" turn runs the loop of `application/assistant/agent.py`. The model selects the tools, and each tool is one targeted
+  query (a WHERE clause on the patient and the filters, `ORDER BY`, `LIMIT 12`). No tool reads the full chart.
+  The fake model and the LLM use the same tools and the same SQL. See [The LLM mode](#the-llm-mode) and `doc/api.md` section 3.5.
+- The assistant cites only the assertions that the tools returned in that turn. Each card of an answer comes from one Citation row of the turn.
+- The fake model knows these questions: allergies, medications, the plan, lab results, vital signs, diagnoses, visits and recommendations (for example "What did the nurse recommend?").
 - A "tell" turn (a statement, not a question) goes to a fact extractor. Each fact becomes an assertion with Source = Agent and Verification = Unconfirmed, in one message with Channel = Chat. If the extractor finds no fact, the backend writes no message.
-- In the `llm` mode, one LiteLLM call words the answer from the cited statements. One more call extracts the facts of a "tell" turn (JSON that the code checks). If a call fails, the turn uses the fake mode. See [The LLM mode](#the-llm-mode).
+- In the `llm` mode, one more LiteLLM call extracts the facts of a "tell" turn (JSON that the code checks). If the call fails, the turn uses the fake extractor.
 - Only `infrastructure/llm/litellm_client.py` imports `litellm`.
 
 ## Tests
@@ -183,7 +217,8 @@ Run the tests from the root folder of the repository:
 |---|---|
 | `tests/unit/test_access.py` | The permission matrix of `USER_FLOWS.md` section 2 (parametrized) and the supersede rules. |
 | `tests/unit/test_rules.py` | The patient-visible rule, the author label, the head check, the plan visit and the clock. |
-| `tests/unit/test_assistant.py` | Ask or tell, the intents and the fake fact extractor. |
+| `tests/unit/test_assistant.py` | Ask or tell, the intents, the tool call of the fake model and the fake fact extractor. |
+| `tests/integration/test_assistant_tools.py` | Each assistant tool = the old Python selection on the full chart (Patient A, Patient B, the largest patient), no tool parameter is a patient, a user or an id, a call that is not correct runs no query, and a scripted fake `litellm`: the references and the citations, no id or patient data to the model, the patient-visible rule, the fallback and no full-chart query in a turn. |
 | `tests/integration/test_hospital_visit.py` | The hospital-visit journey of `USER_FLOWS.md` section 3 (Use cases 0 to 9) through the API. |
 | `tests/unit/test_settings.py` | The `.env` loader (the shell wins, empty values set nothing), the database path, the `.env.example` files (no key values) and the start check of the LLM mode. |
 | `tests/integration/test_pages.py` | The pages of each list endpoint: the slices, `total`, the order, the 422 for a bad `limit` or `offset`, the chart `counts` and search, the SQL patient-visible rule = `rules.py` = Q12 for each patient, and Q14. |
