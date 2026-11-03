@@ -55,10 +55,11 @@ DEMO_NOW = "2026-10-30T09:00:00-04:00"
 
 
 def make_client(db_path: Path, **settings):
-    """A FastAPI TestClient on `db_path` (fake chat mode, fixed demo time, no frontend)."""
+    """A FastAPI TestClient on `db_path` (fake chat mode, fixed demo time, no SQL log, no frontend)."""
     import main
     from fastapi.testclient import TestClient
-    values = dict(db_path=db_path, now=DEMO_NOW, llm_mode="fake", frontend_dist=db_path.parent / "no-frontend")
+    values = dict(db_path=db_path, now=DEMO_NOW, llm_mode="fake", frontend_dist=db_path.parent / "no-frontend",
+                  sql_log="off")
     values.update(settings)
     return TestClient(main.create_app(config.Settings.from_env(**values)))
 

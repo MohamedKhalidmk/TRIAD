@@ -4,6 +4,7 @@ from __future__ import annotations
 import sys
 import types
 
+import pytest
 from dotenv import dotenv_values
 
 from infrastructure import config
@@ -43,6 +44,7 @@ def test_the_backend_example_gives_the_defaults():
     assert values["TRIAD_LLM_MODEL"] == config.DEFAULT_LLM_MODEL
     assert "GEMINI_API_KEY" in values
     assert "TRIAD_NOW" not in values                  # a comment only, so the default (system) stays
+    assert values["TRIAD_SQL_LOG"] == "on"
 
 
 def test_the_clock_is_the_system_clock_by_default(monkeypatch):
@@ -53,6 +55,20 @@ def test_the_clock_is_the_system_clock_by_default(monkeypatch):
     monkeypatch.setenv("TRIAD_NOW", "2026-10-30T09:00:00-04:00")
     assert config.Settings.from_env().now == "2026-10-30T09:00:00-04:00"
     assert config.Settings.from_env(now="2026-01-01T08:00:00-05:00").now == "2026-01-01T08:00:00-05:00"
+
+
+def test_the_sql_log_setting(monkeypatch, tmp_path):
+    monkeypatch.delenv("TRIAD_SQL_LOG", raising=False)
+    assert config.Settings.from_env().sql_log == "on"
+    monkeypatch.setenv("TRIAD_SQL_LOG", " Params ")
+    assert config.Settings.from_env().sql_log == "params"
+    assert config.Settings.from_env(sql_log="off").sql_log == "off"
+    monkeypatch.setenv("TRIAD_SQL_LOG", "yes")
+    with pytest.raises(SystemExit, match='TRIAD_SQL_LOG is "yes". Use off, on or params.'):
+        config.Settings.from_env()
+    direct = config.Settings(db_path=tmp_path / "a.db", now="system", llm_mode="fake", llm_model="m",
+                             frontend_dist=None)
+    assert direct.sql_log == "off"                     # code that makes its own Settings logs nothing
 
 
 def test_a_relative_db_path_starts_at_the_repo_root(monkeypatch, tmp_path):

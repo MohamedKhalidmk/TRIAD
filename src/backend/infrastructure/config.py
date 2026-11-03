@@ -6,6 +6,8 @@ Environment variables:
                      for example 2026-10-30T09:00:00-04:00 (triadNow in hospital_profile.json)
     TRIAD_LLM        the chat mode: "fake" (default, no network) or "llm" (LiteLLM)
     TRIAD_LLM_MODEL  the LiteLLM model (default: gemini/gemini-3.8-flash)
+    TRIAD_SQL_LOG    the SQL log of the API: "off", "on" (default: the SQL, the time and the rows) or
+                     "params" (also the bound values; they can be patient names and dates of birth)
     PORT             the port of "main.py serve" (default: 8000)
 The API key of the LLM provider (for example GEMINI_API_KEY) is also an environment variable.
 Only LiteLLM reads it. TRIAD does not keep it in the settings.
@@ -46,6 +48,7 @@ CHAT_SESSION_SYSTEM = "https://triad.example/fhir/sid/chat-session"
 AUDIT_EVENT_SYSTEM = "https://triad.example/fhir/sid/audit-event"
 
 DEFAULT_LLM_MODEL = "gemini/gemini-3.8-flash"   # Gemini has a free tier
+SQL_LOG_MODES = ("off", "on", "params")          # TRIAD_SQL_LOG (infrastructure/sqlite/sql_log.py)
 
 
 def load_env_file(path: Path = ENV_FILE, environ: MutableMapping[str, str] = os.environ) -> list[str]:
@@ -86,6 +89,7 @@ class Settings:
     llm_mode: str                 # "fake" or "llm"
     llm_model: str
     frontend_dist: Optional[Path]
+    sql_log: str = "off"          # "off", "on" or "params". from_env gives "on" if TRIAD_SQL_LOG is not set.
 
     @staticmethod
     def from_env(**overrides) -> "Settings":
@@ -96,7 +100,10 @@ class Settings:
             llm_mode=mode if mode in ("fake", "llm") else "fake",
             llm_model=os.environ.get("TRIAD_LLM_MODEL", "").strip() or DEFAULT_LLM_MODEL,
             frontend_dist=FRONTEND_DIST,
+            sql_log=os.environ.get("TRIAD_SQL_LOG", "").strip().lower() or "on",
         )
         values.update({k: v for k, v in overrides.items() if v is not None})
         values["db_path"] = Path(values["db_path"])
+        if values["sql_log"] not in SQL_LOG_MODES:
+            raise SystemExit(f'TRIAD_SQL_LOG is "{values["sql_log"]}". Use off, on or params.')
         return Settings(**values)

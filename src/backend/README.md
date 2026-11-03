@@ -118,8 +118,28 @@ The backend reads its settings from environment variables. The file `src/backend
 | `TRIAD_NOW` | `system` | The clock. `system` uses the clock of the computer, in its local time zone. A fixed ISO 8601 time, for example `2026-10-30T09:00:00-04:00` (`triadNow` in `data/raw/hospital_profile.json`), gives the fixed demo time. The tests, the screenshots and the report use a fixed time. |
 | `TRIAD_LLM` | `fake` | The chat mode. `fake` needs no network. `llm` uses LiteLLM. |
 | `TRIAD_LLM_MODEL` | `gemini/gemini-3.8-flash` | The LiteLLM model of the `llm` mode. |
+| `TRIAD_SQL_LOG` | `on` | The SQL log of the API: `off`, `on` or `params`. See [The SQL log](#the-sql-log). |
 | `GEMINI_API_KEY` | — | The key for the Gemini models. Only LiteLLM reads it. For another provider, use the variable of that provider (for example `ANTHROPIC_API_KEY`). |
 | `PORT` | `8000` | The port of `serve` and `dev.sh`. Set it in the shell. `dev.sh` reads it before Python starts, so `.env` cannot set it for `dev.sh`. |
+
+## The SQL log
+
+The API logs each SQL statement of a request, with its time. `TRIAD_SQL_LOG` sets the mode: `off`, `on` (the default) or `params`.
+The lines go to stderr (logger `triad.sql`). `dev.sh` shows them with the prefix `[api]`:
+
+```text
+[api] [sql] GET /api/patients/1/chart  2.28 ms  8 rows  SELECT a.Id, a.ClinicalEntryId AS EntryId, a.MessageId, ...
+[api] [sql] GET /api/patients/1/chart  0.19 ms  0 rows  COMMIT
+[api] [sql] GET /api/patients/1/chart 200: 10 statements, 7.0 ms in SQL, 14.4 ms in all.
+```
+
+- Each statement gets one line: the request, the time, the number of rows (read or changed) and the SQL on one line.
+- The time includes all the work of the statement. The wrapper reads all the rows before it stops the timer.
+- At the end of each `/api` request, one line gives the status, the number of statements, the time in SQL and the time in all.
+- Only the API connections use the log (`infrastructure/sqlite/sql_log.py`). The commands of `main.py` (for example `ensure-db`) do not.
+- Privacy: `on` does not show the bound values and the query string, because they can be patient names and dates of birth.
+  `params` shows them. The data of TRIAD is synthetic, but a real system must not log them.
+- The tests use `off`. A test that checks the log sets the mode itself.
 
 ## The LLM mode
 

@@ -54,6 +54,7 @@ def context_factory(settings: config.Settings) -> Callable:
     from infrastructure.sqlite.directory_repository import SqliteDirectoryRepository
     from infrastructure.sqlite.patients_repository import SqlitePatientRepository, SqliteVisitRepository
     from infrastructure.sqlite.records_repository import SqliteRecordRepository
+    from infrastructure.sqlite.sql_log import LoggedConnection
     from infrastructure.sqlite.unit_of_work import SqliteUnitOfWork
     from infrastructure.sqlite.users_repository import SqliteUserRepository
 
@@ -68,9 +69,12 @@ def context_factory(settings: config.Settings) -> Callable:
         else:
             llm, mode, model = litellm_client.LiteLlmLanguageModel(settings.llm_model), "llm", settings.llm_model
     identity = Identity()
+    show_params = settings.sql_log == "params"
 
     def open_context() -> AppContext:
         conn = connect(settings.db_path)
+        if settings.sql_log != "off":   # TRIAD_SQL_LOG: log each statement with its time
+            conn = LoggedConnection(conn, show_params)
         return AppContext(
             uow=SqliteUnitOfWork(conn, clock), users=SqliteUserRepository(conn),
             patients=SqlitePatientRepository(conn), visits=SqliteVisitRepository(conn),
@@ -100,7 +104,12 @@ def create_app(settings: Optional[config.Settings] = None):
         conn.execute("PRAGMA journal_mode = WAL")   # readers do not wait for a writer
     finally:
         conn.close()
-    return build_app(context_factory(settings), settings.frontend_dist)
+    app = build_app(context_factory(settings), settings.frontend_dist)
+    if settings.sql_log != "off":
+        from infrastructure.sqlite import sql_log
+        sql_log.configure_logger()
+        app.add_middleware(sql_log.SqlLogMiddleware, show_query=settings.sql_log == "params")
+    return app
 
 
 def build_database(conn: sqlite3.Connection) -> None:
