@@ -2,6 +2,8 @@
 
 1. Store the user turn and commit. The clientTurnId makes the request idempotent.
 2. Sort the turn into "ask" or "tell". Find the evidence and the text outside a transaction.
+   An "ask" runs the loop of the assistant (application/assistant/agent.py): the model selects the tools,
+   and each tool is a targeted lookup bound to this user and this patient.
 3. In one transaction: the assistant turn, its citations and its audit record.
    A "tell" also writes one message (Channel = Chat) with the new assertions (Source = Agent,
    Verification = Unconfirmed). The reply cites the new assertions: that is the trace from the turn to the record.
@@ -14,9 +16,8 @@ from domain.access import Actor, record_intents
 from domain.errors import Invalid
 from domain.views import PatientView, TurnResult
 
-from application.assistant.answers import answer_question
 from application.assistant.intents import kind_of
-from application.assistant.service import extract_facts, word_answer
+from application.assistant.service import answer as answer_question, extract_facts
 from application.chat.sessions import load_session, require_session_user, session_patient, turn_views
 from application.context import AppContext
 from application.guard import require, subject_of
@@ -74,12 +75,10 @@ def save_reply(ctx: AppContext, actor: Actor, patient: PatientView, session_id: 
 
 def answer(ctx: AppContext, actor: Actor, patient: PatientView, session_id: int, client_turn_id: str,
            question: str) -> int:
-    found = answer_question(ctx, actor, patient, question)
-    audience = "patient" if actor.is_patient else "clinician"
-    text = word_answer(ctx, question, found, audience)
+    reply = answer_question(ctx, actor, patient, question)
     with ctx.uow.write() as now:
-        return save_reply(ctx, actor, patient, session_id, client_turn_id, "ask", text,
-                          [a.id for a in found.evidence], now)
+        return save_reply(ctx, actor, patient, session_id, client_turn_id, "ask", reply.text,
+                          [a.id for a in reply.cited], now)
 
 
 def tell(ctx: AppContext, actor: Actor, patient: PatientView, session_id: int, client_turn_id: str, text: str,

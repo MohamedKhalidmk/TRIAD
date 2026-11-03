@@ -7,6 +7,9 @@ The read side uses the logic of the queries in dml/03_select_queries.sql:
   is the same rule in Python. A test shows that both give the same rows for each patient;
 - Q13: the current care team is a CareTeam entry with Status = 'active' whose assertion nothing supersedes;
 - Q14: one page of the chart (ORDER BY the category, the newest first, the Id; LIMIT ? OFFSET ?).
+
+The lookups of the Care Assistant tools (allergies, prescriptions, ...) use the same FROM clause and the same
+filters as the chart, with more conditions, an ORDER BY and LIMIT ?. They never read the full chart.
 """
 from __future__ import annotations
 
@@ -111,6 +114,14 @@ ASSERTION_SELECT = "SELECT " + ASSERTION_COLUMNS + ASSERTION_FROM
 
 NEWEST_FIRST = " ORDER BY julianday(a.AssertedAt) DESC, a.Id DESC"
 
+# An assertion that a clinician did not refute and that is not entered in error.
+NOT_REFUTED = "a.Verification NOT IN ('Refuted', 'EnteredInError')"
+
+
+def contains_words(text_sql: str, words: Sequence[str]) -> tuple[list[str], list[str]]:
+    """One condition for each word: the word is in the text (case is not important). instr() has no wildcards."""
+    return [f"instr(lower({text_sql}), ?) > 0" for _ in words], [w.lower() for w in words]
+
 # Q2: from any assertion, go forward to the current one (the head of the chain).
 FORWARD_CTE = """
 WITH RECURSIVE forward (Id, Step) AS (
@@ -166,7 +177,8 @@ class SqliteRecordRepository:
 
     def assertions(self, patient_id: int, current_only: bool, visit_id: Optional[int] = None,
                    category: Optional[str] = None) -> list[AssertionView]:
-        """All items of the patient, newest first (no page). The Care Assistant uses this list."""
+        """All items of the patient, newest first (no page). It is not in the port: no use case reads the full
+        chart. The tests use it as the reference of the lookups of the Care Assistant."""
         clauses, args = self._item_filters(patient_id, current_only, visit_id, category, None, False)
         return [to_view(r) for r in self.conn.execute(ASSERTION_SELECT + where(clauses) + NEWEST_FIRST, args)]
 
@@ -211,6 +223,68 @@ class SqliteRecordRepository:
         rows = self.conn.execute(f"SELECT e.Category, COUNT(*) {ASSERTION_FROM}{where(clauses)} "
                                  f"GROUP BY e.Category ORDER BY {CATEGORY_RANK}", args)
         return {r[0]: r[1] for r in rows}
+
+    # ----- the lookups of the Care Assistant tools (one query each, with LIMIT ?) -----
+
+    def _lookup(self, patient_id: int, conditions: Sequence[str], args: Sequence, *, visible_only: bool,
+                limit: int, current_only: bool = True, visit_id: Optional[int] = None,
+                category: Optional[str] = None, order_by: str = "julianday(a.AssertedAt) DESC, a.Id DESC",
+                order_args: Sequence = ()) -> list[AssertionView]:
+        """The items of the chart filters and the extra `conditions`, in the order `order_by`, at most `limit`."""
+        clauses, values = self._item_filters(patient_id, current_only, visit_id, category, None, visible_only)
+        sql = f"{ASSERTION_SELECT}{where([*clauses, *conditions])} ORDER BY {order_by} LIMIT ?"
+        return [to_view(r) for r in self.conn.execute(sql, (*values, *args, *order_args, limit))]
+
+    def allergies(self, patient_id: int, *, words: Sequence[str] = (), visible_only: bool,
+                  limit: int) -> list[AssertionView]:
+        conditions, args = contains_words("e.Display || ' ' || COALESCE(al.Substance, '')", words)
+        return self._lookup(patient_id, conditions, args, category="Allergy", visible_only=visible_only,
+                            limit=limit)
+
+    def prescriptions(self, patient_id: int, *, current_status: bool, visible_only: bool,
+                      limit: int) -> list[AssertionView]:
+        conditions = ["pr.Status IN ('active', 'draft')", NOT_REFUTED] if current_status else []
+        return self._lookup(patient_id, conditions, (), category="Prescription", visible_only=visible_only,
+                            limit=limit)
+
+    def diagnoses(self, patient_id: int, *, active_only: bool, visible_only: bool, limit: int) -> list[AssertionView]:
+        conditions = ["(dg.ClinicalStatus IS NULL OR dg.ClinicalStatus IN ('active', 'recurrence', 'relapse'))",
+                      NOT_REFUTED] if active_only else []
+        return self._lookup(patient_id, conditions, (), category="Diagnosis", visible_only=visible_only,
+                            limit=limit)
+
+    def lab_items(self, patient_id: int, *, words: Sequence[str] = (), visible_only: bool,
+                  limit: int) -> list[AssertionView]:
+        conditions, args = contains_words(
+            "e.Display || ' ' || COALESCE(lo.TestName, '') || ' ' || COALESCE(lr.Conclusion, '')", words)
+        return self._lookup(patient_id, ["+e.Category IN ('LabOrder', 'LabReport')", *conditions], args,
+                            visible_only=visible_only, limit=limit)
+
+    def visit_items(self, patient_id: int, visit_id: int, categories: Sequence[str], *, visible_only: bool,
+                    limit: int) -> list[AssertionView]:
+        marks = ",".join("?" * len(categories))
+        rank = "CASE e.Category " + " ".join(f"WHEN ? THEN {i}" for i in range(len(categories))) + " END"
+        return self._lookup(patient_id, [f"+e.Category IN ({marks})"], categories, visit_id=visit_id,
+                            visible_only=visible_only, limit=limit,
+                            order_by=f"{rank}, julianday(a.AssertedAt) DESC, a.Id DESC", order_args=categories)
+
+    def latest_observations(self, patient_id: int, codes: Sequence[str], *, visible_only: bool,
+                            limit: int) -> list[AssertionView]:
+        clauses, args = self._item_filters(patient_id, True, None, "Observation", None, visible_only)
+        clauses.append(f"e.Code IN ({','.join('?' * len(codes))})")
+        sql = (f"SELECT * FROM (SELECT {ASSERTION_COLUMNS}, ROW_NUMBER() OVER (PARTITION BY e.Code "
+               f"ORDER BY julianday(a.AssertedAt) DESC, a.Id DESC) AS CodeRank {ASSERTION_FROM}{where(clauses)}) "
+               "WHERE CodeRank = 1 ORDER BY julianday(AssertedAt) DESC, Id DESC LIMIT ?")
+        return [to_view(r) for r in self.conn.execute(sql, (*args, *codes, limit))]
+
+    def recommendations(self, patient_id: int, visit_id: int, *, author_role: Optional[str], visible_only: bool,
+                        limit: int) -> list[AssertionView]:
+        conditions, args = ["a.Intent = 'Recommendation'"], []
+        if author_role:
+            conditions.append("s.Role = ?")
+            args.append(author_role)
+        return self._lookup(patient_id, conditions, args, current_only=False, visit_id=visit_id,
+                            visible_only=visible_only, limit=limit, order_by="a.AssertedAt, a.Seq, a.Id DESC")
 
     def assertions_by_id(self, ids_: Sequence[int]) -> dict[int, AssertionView]:
         out: dict[int, AssertionView] = {}

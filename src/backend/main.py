@@ -47,6 +47,7 @@ def onboard(conn: sqlite3.Connection, report_path: Path | None = config.ONBOARD_
 
 def context_factory(settings: config.Settings) -> Callable:
     """Wire the concrete adapters to the ports. The API calls the factory once for each request."""
+    from application.assistant.rule_model import RuleModel
     from application.context import AppContext, Identity
     from infrastructure.clock import DemoClock
     from infrastructure.llm.fake_client import FakeLanguageModel
@@ -59,7 +60,7 @@ def context_factory(settings: config.Settings) -> Callable:
     from infrastructure.sqlite.users_repository import SqliteUserRepository
 
     clock = DemoClock(settings.now)
-    fake = FakeLanguageModel()
+    fake = FakeLanguageModel(RuleModel())   # the rules select the tool of an "ask" turn
     llm, mode, model = fake, "fake", None
     if settings.llm_mode == "llm":
         from infrastructure.llm import litellm_client

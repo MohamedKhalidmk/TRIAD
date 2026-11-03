@@ -1,9 +1,15 @@
-"""The Care Assistant rules: ask or tell, the intents, and the fake fact extractor."""
+"""The Care Assistant rules: ask or tell, the intents, the tool of the fake model and the fake fact extractor."""
 from __future__ import annotations
+
+import json
 
 import pytest
 
+from application.assistant.answers import HELP_TEXT
 from application.assistant.intents import allergy_term, intent_of, kind_of
+from application.assistant.rule_model import RuleModel, tool_for
+from application.assistant.tools import ToolResult
+from application.ports import ChatMessage, FinalText, ToolCalls
 from infrastructure.llm.fake_client import LOCAL, FakeLanguageModel, extract
 
 
@@ -70,7 +76,32 @@ def test_the_fake_extractor_finds_no_fact(text):
     assert extract(text) == []
 
 
-def test_the_fake_model_keeps_the_rule_draft():
-    model = FakeLanguageModel()
-    assert model.word_answer("q?", "The draft.", [], "clinician") == "The draft."
+@pytest.mark.parametrize("text,call", [
+    ("Is she allergic to penicillin?", ("get_allergies", {"substance": "penicillin"})),
+    ("Any allergies?", ("get_allergies", {})),
+    ("What medications am I taking?", ("get_medications", {})),
+    ("What is my plan?", ("get_plan", {})),
+    ("What did the nurse recommend?", ("get_recommendations", {"role": "Nurse"})),
+    ("What do you recommend?", ("get_recommendations", {})),
+    ("What was the troponin?", ("get_lab_results", {})),
+    ("What is the blood pressure?", ("get_vital_signs", {})),
+    ("What are the diagnoses?", ("get_diagnoses", {})),
+    ("Show the earlier visits", ("get_visits", {})),
+    ("What is the weather?", None),
+])
+def test_the_fake_model_maps_the_intent_to_one_tool_call(text, call):
+    assert tool_for(text) == call
+
+
+def test_the_fake_model_calls_one_tool_then_gives_the_text():
+    model = FakeLanguageModel(RuleModel())
+    question = [ChatMessage("system", "..."), ChatMessage("user", "Is she allergic to penicillin?")]
+    step = model.next_step(question, [])
+    assert isinstance(step, ToolCalls) and len(step.calls) == 1
+    assert (step.calls[0].name, json.loads(step.calls[0].arguments)) == ("get_allergies", {"substance": "penicillin"})
+    result = ToolResult(name="get_allergies", arguments={"substance": "penicillin"})
+    answer = model.next_step([*question, ChatMessage("tool", "{}", result=result)], [])
+    assert answer == FinalText("No penicillin allergy is recorded for this patient.")
+    help_text = model.next_step([ChatMessage("user", "What is the weather?")], [])
+    assert help_text == FinalText(HELP_TEXT)
     assert len(model.extract_facts("My mother has diabetes.", "Patient")) == 1

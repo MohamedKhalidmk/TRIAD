@@ -98,6 +98,24 @@ def test_the_start_check_passes_when_the_key_is_set(monkeypatch):
     assert litellm_client.check_ready("gemini/gemini-3.8-flash") is None
 
 
+def test_the_start_check_needs_a_model_that_can_call_tools(monkeypatch):
+    module = fake_litellm({"keys_in_environment": True, "missing_keys": []})
+    module.supports_function_calling = lambda model: False
+    monkeypatch.setitem(sys.modules, "litellm", module)
+    problem = litellm_client.check_ready("some/old-model")
+    assert "some/old-model cannot call tools" in problem and "TRIAD_LLM_MODEL" in problem
+
+
+def test_an_error_of_the_tool_check_does_not_stop_the_llm_mode(monkeypatch):
+    module = fake_litellm({"keys_in_environment": True, "missing_keys": []})
+
+    def unknown(model):
+        raise ValueError("This model is not in the model list.")
+    module.supports_function_calling = unknown
+    monkeypatch.setitem(sys.modules, "litellm", module)
+    assert litellm_client.check_ready("gemini/gemini-3.8-flash") is None
+
+
 def test_the_start_check_needs_litellm(monkeypatch):
     monkeypatch.setitem(sys.modules, "litellm", None)       # "import litellm" then raises ImportError
     assert "litellm is not installed" in litellm_client.check_ready("gemini/gemini-3.8-flash")

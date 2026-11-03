@@ -131,7 +131,6 @@ class PatientRepository(Protocol):
 
 
 class VisitRepository(Protocol):
-    def for_patient(self, patient_id: int) -> list[VisitView]: ...                  # all visits (the assistant)
     def for_patient_page(self, patient_id: int, page: PageRequest) -> Page[VisitView]: ...
     def get(self, visit_id: int) -> Optional[VisitView]: ...
     def open_visit_id(self, patient_id: int) -> Optional[int]: ...
@@ -144,8 +143,6 @@ class VisitRepository(Protocol):
 
 
 class RecordRepository(Protocol):
-    def assertions(self, patient_id: int, current_only: bool, visit_id: Optional[int] = None,
-                   category: Optional[str] = None) -> list[AssertionView]: ...
     def items_page(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
                    category: Optional[str] = None, text: Optional[str] = None, visible_only: bool = False,
                    page: PageRequest) -> Page[AssertionView]:
@@ -158,6 +155,44 @@ class RecordRepository(Protocol):
     def category_counts(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
                         text: Optional[str] = None, visible_only: bool = False) -> dict[str, int]:
         """The number of items of each category for the same filters (no category filter)."""
+        ...
+    # The lookups of the Care Assistant tools. Each one is one query with a WHERE clause on the patient and the
+    # filters, an ORDER BY and LIMIT ?. `visible_only` keeps only the patient-visible items (Q12, in SQL).
+    # `words`: each word must be in the text of the item (case is not important).
+    def allergies(self, patient_id: int, *, words: Sequence[str] = (), visible_only: bool,
+                  limit: int) -> list[AssertionView]:
+        """The current allergy items, newest first. The words are in the display or the substance."""
+        ...
+    def prescriptions(self, patient_id: int, *, current_status: bool, visible_only: bool,
+                      limit: int) -> list[AssertionView]:
+        """The current prescription items, newest first.
+
+        `current_status`: only the status active or draft, and not refuted or entered in error.
+        """
+        ...
+    def diagnoses(self, patient_id: int, *, active_only: bool, visible_only: bool, limit: int) -> list[AssertionView]:
+        """The current diagnosis items, newest first.
+
+        `active_only`: only a clinical status that is empty, active, recurrence or relapse, and not refuted
+        or entered in error.
+        """
+        ...
+    def lab_items(self, patient_id: int, *, words: Sequence[str] = (), visible_only: bool,
+                  limit: int) -> list[AssertionView]:
+        """The current lab orders and lab results, newest first. The words are in the display, the test name
+        or the conclusion."""
+        ...
+    def visit_items(self, patient_id: int, visit_id: int, categories: Sequence[str], *, visible_only: bool,
+                    limit: int) -> list[AssertionView]:
+        """The current items of the categories in one visit: in the order of `categories`, then newest first."""
+        ...
+    def latest_observations(self, patient_id: int, codes: Sequence[str], *, visible_only: bool,
+                            limit: int) -> list[AssertionView]:
+        """The newest current observation of each code (ROW_NUMBER() OVER (PARTITION BY the code)), newest first."""
+        ...
+    def recommendations(self, patient_id: int, visit_id: int, *, author_role: Optional[str], visible_only: bool,
+                        limit: int) -> list[AssertionView]:
+        """The recommendations of one visit, current and superseded, oldest first (the time, then Seq)."""
         ...
     def assertion(self, assertion_id: int) -> Optional[AssertionView]: ...
     def assertions_by_id(self, ids: Sequence[int]) -> dict[int, AssertionView]: ...
@@ -234,8 +269,63 @@ class DirectoryRepository(Protocol):
 
 # ----- the language model -----
 
-class LanguageModel(Protocol):
-    """Words an answer and extracts facts. The fake model needs no network."""
+@dataclass(frozen=True)
+class ToolDefinition:
+    """One tool that the model can call: the name, the description and the JSON Schema of the arguments."""
+    name: str
+    description: str
+    parameters: dict
 
-    def word_answer(self, question: str, draft: str, facts: Sequence[AssertionView], audience: str) -> str: ...
+
+@dataclass(frozen=True)
+class ToolCall:
+    """One tool call that the model asks for. `arguments` is the JSON text that the model gave.
+
+    `call_id` identifies the call in the conversation with the model (the provider or the fake model gives it).
+    It is not the id of a record. `provider_data` is data of the provider that must go back with the call
+    (for example a thought signature). The application does not read it.
+    """
+    call_id: str
+    name: str
+    arguments: str
+    provider_data: dict = field(default_factory=dict)
+
+
+@dataclass
+class ChatMessage:
+    """One message of the conversation with the model. The role is system, user, assistant or tool.
+
+    Only `content`, `tool_calls`, `tool_call_id` and `name` go to the model. `result` is the server-side
+    result of a tool message (the items with their ids). It never goes to the model. Only the fake model reads it.
+    """
+    role: str
+    content: str = ""
+    tool_calls: tuple[ToolCall, ...] = ()        # an assistant message that asks for tools
+    tool_call_id: Optional[str] = None           # a tool message: the call that it answers
+    name: Optional[str] = None                   # a tool message: the name of the tool
+    result: Optional[object] = None              # a tool message: the server-side result (not for the model)
+
+
+@dataclass
+class ToolCalls:
+    """The step of the model is one or more tool calls. `text` is the text that the model gave with them."""
+    calls: list[ToolCall]
+    text: str = ""
+
+
+@dataclass
+class FinalText:
+    """The step of the model is the final answer, with a reference such as [E1] after each fact."""
+    text: str
+
+
+class LanguageModel(Protocol):
+    """Selects the tools and writes the answer of an "ask" turn, and extracts the facts of a "tell" turn.
+
+    The fake model needs no network.
+    """
+
+    def next_step(self, messages: Sequence[ChatMessage], tools: Sequence[ToolDefinition]) -> ToolCalls | FinalText:
+        """The next step of the conversation: tool calls, or the final text."""
+        ...
     def extract_facts(self, text: str, speaker_role: str) -> list[ExtractedFact]: ...

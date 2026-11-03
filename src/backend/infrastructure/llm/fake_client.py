@@ -1,16 +1,16 @@
 """The fake language model (TRIAD_LLM=fake, the default). It needs no network.
 
-- word_answer: the rule-based draft is the answer.
+- next_step: the rules of the application select one tool and write the answer from its result
+  (application/assistant/rule_model.py). main.py gives these rules to the fake model.
 - extract_facts: a small set of patterns finds facts in a "tell" turn: family history, an allergy,
   and vital signs. If no pattern matches, it finds no fact.
 """
 from __future__ import annotations
 
 import re
-from typing import Sequence
+from typing import Protocol, Sequence
 
-from application.ports import ExtractedFact
-from domain.views import AssertionView
+from application.ports import ChatMessage, ExtractedFact, FinalText, ToolCalls, ToolDefinition
 
 LOINC = "http://loinc.org"
 LOCAL = "https://triad.example/fhir/CodeSystem/local"
@@ -67,11 +67,19 @@ def extract(text: str) -> list[ExtractedFact]:
     return facts
 
 
+class AskSteps(Protocol):
+    def next_step(self, messages: Sequence[ChatMessage], tools: Sequence[ToolDefinition]) -> ToolCalls | FinalText:
+        ...
+
+
 class FakeLanguageModel:
     name = "fake"
 
-    def word_answer(self, question: str, draft: str, facts: Sequence[AssertionView], audience: str) -> str:
-        return draft
+    def __init__(self, ask_steps: AskSteps):
+        self.ask_steps = ask_steps
+
+    def next_step(self, messages: Sequence[ChatMessage], tools: Sequence[ToolDefinition]) -> ToolCalls | FinalText:
+        return self.ask_steps.next_step(messages, tools)
 
     def extract_facts(self, text: str, speaker_role: str) -> list[ExtractedFact]:
         return extract(text)

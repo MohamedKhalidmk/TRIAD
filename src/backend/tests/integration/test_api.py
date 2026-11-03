@@ -4,7 +4,9 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import sys
 import time
+import types
 import uuid
 
 import pytest
@@ -299,11 +301,12 @@ def test_no_api_key_text_goes_to_a_response_the_log_or_the_database(full_copy, m
     secret = "triad-test-secret-0123456789"
     monkeypatch.setenv("GEMINI_API_KEY", secret)
     llm_check_passes(monkeypatch)
-    from infrastructure.llm import litellm_client
 
-    def fail(self, system, user):
+    def fail(**request):                                      # each call of the ask loop and of the extractor
         raise RuntimeError(f"The provider does not accept the API key {secret}.")
-    monkeypatch.setattr(litellm_client.LiteLlmLanguageModel, "_complete", fail)
+    litellm = types.ModuleType("litellm")
+    litellm.completion = fail
+    monkeypatch.setitem(sys.modules, "litellm", litellm)
     client = make_client(full_copy, llm_mode="llm", llm_model="gemini/gemini-3.8-flash")
     texts = [client.get("/api/health").text]
     session_id, turn = ask(client, OKAFOR, 1, "Is she allergic to penicillin?")
