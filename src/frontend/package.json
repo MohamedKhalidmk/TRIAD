@@ -13,7 +13,7 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "preview": "vite preview",
-    "check:demo": "node scripts/check-demo.mjs"
+    "check:demo": "node scripts/check-demo.mjs && node scripts/check-logo.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "5.105.1",

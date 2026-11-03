@@ -99,7 +99,7 @@ Rules:
 | `npm run build` | Checks the types (`tsc -b`), then builds `dist/`. |
 | `npm run typecheck` | Checks the types only. |
 | `npm run preview` | Serves `dist/` on port 4173 (with the same `/api` proxy). |
-| `npm run check:demo` | Checks the use cases of the Demo guide (see below). |
+| `npm run check:demo` | Checks the use cases of the Demo guide (see below). Then `scripts/check-logo.mjs` checks that `public/triad-icon.png` is the repository logo. |
 
 ## How the app acts as a user
 
@@ -153,7 +153,8 @@ src/frontend/
   package.json             exact versions, scripts, engines (Node.js 20.19 or later)
   .env.example             the settings template (dev.sh copies it to .env; git ignores .env)
   scripts/check-demo.mjs   the check of the Demo guide use cases
-  public/triad.svg         the icon
+  scripts/check-logo.mjs   the check that the app logo has the same bytes as assets/triad-icon.png
+  public/triad-icon.png    the logo of the top bar and the browser tab (a copy of assets/triad-icon.png)
   src/
     main.tsx               the entry point
     vite-env.d.ts          the types of the VITE_ values (import.meta.env)

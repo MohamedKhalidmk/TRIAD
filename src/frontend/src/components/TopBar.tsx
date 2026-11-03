@@ -55,7 +55,7 @@ export function TopBar({ onOpenDemoGuide }: { onOpenDemoGuide: () => void }) {
     <header className="topbar">
       <div className="topbar-inner">
         <Link to={ROUTES.home.path} className="brand" aria-label="TRIAD General Hospital, home page">
-          <img src="/triad.svg" alt="" width="28" height="28" />
+          <img src="/triad-icon.png" alt="" width="28" height="28" />
           <span className="brand-text">
             <span className="brand-name">TRIAD</span>
             <span className="brand-sub">General Hospital</span>
