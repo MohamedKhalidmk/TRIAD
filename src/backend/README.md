@@ -36,7 +36,10 @@ The frontend (`src/frontend/`) is also part of the ui layer.
   - The chart uses the current-state rule of Q1 (no assertion supersedes it).
   - The chain endpoint uses the recursive query of Q2 (`WITH RECURSIVE`).
   - The care-team check uses the logic of Q13 (Status = active, and nothing supersedes the entry).
-  - The patient-visible rule is the rule of Q12. A test shows that the API gives the same rows as Q12.
+  - The patient-visible rule is the rule of Q12. The chart query of a patient has the predicate of Q12 in its WHERE clause.
+    A test shows that this predicate, `domain/rules.py` and Q12 give the same rows for each patient.
+  - Each list endpoint gives one page (doc/api.md section 1.5): a `COUNT(*)` query and a query that ends with
+    `ORDER BY ..., Id LIMIT ? OFFSET ?` (`infrastructure/sqlite/paging.py`). Q14 shows one page of a chart.
 - The triggers and the CHECK constraints of the schema stay the last line of defense. The unit of work changes their errors into API errors (409 or 422).
 - The repositories use the Python standard library `sqlite3`. Each value is a `?` parameter. Table and column names come only from fixed lists.
 - The application layer uses ports, not SQL. A later ORM adapter can implement the same ports.
@@ -183,6 +186,7 @@ Run the tests from the root folder of the repository:
 | `tests/unit/test_assistant.py` | Ask or tell, the intents and the fake fact extractor. |
 | `tests/integration/test_hospital_visit.py` | The hospital-visit journey of `USER_FLOWS.md` section 3 (Use cases 0 to 9) through the API. |
 | `tests/unit/test_settings.py` | The `.env` loader (the shell wins, empty values set nothing), the database path, the `.env.example` files (no key values) and the start check of the LLM mode. |
+| `tests/integration/test_pages.py` | The pages of each list endpoint: the slices, `total`, the order, the 422 for a bad `limit` or `offset`, the chart `counts` and search, the SQL patient-visible rule = `rules.py` = Q12 for each patient, and Q14. |
 | `tests/integration/test_api.py` | Q12 = the patient chart, cards = Citation rows, the denied audit records, the errors, the LLM fallback and the start check, no key text in a response, the log or the database, the directory and the speed of the chart. |
 | `tests/integration/test_schema.py`, `test_onboard.py` | The SQL scripts 01 to 05 and the FHIR onboarding. |
 

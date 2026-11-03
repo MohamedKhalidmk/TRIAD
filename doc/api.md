@@ -66,6 +66,27 @@ The 403 for the chart of a patient whose care team does not include the user has
 - `TRIAD_LLM=llm`: LiteLLM words the answer and extracts facts. `TRIAD_LLM_MODEL` sets the model (default `gemini/gemini-3.8-flash`). The provider key comes from the usual environment variable (for example `GEMINI_API_KEY`), which `src/backend/.env` can set. If `litellm` or the key is missing at the start, the server runs in the fake mode, and `ChatSession.mode` is `fake`. If one call fails, the backend uses the fake mode for that turn.
 - The rules always select the evidence. The assistant cites only the assertions that the rules returned in that turn.
 
+### 1.5 Pagination
+
+Each GET that gives a list of rows gives one page of the list.
+
+- **Parameters:**
+  - `limit`: the number of rows of the page, an integer from 1 to 200. The default is 25.
+  - `offset`: the number of rows before the page, an integer, 0 or more. The default is 0.
+  - A value out of range, or a value that is not an integer, gives 422 `validation` with `fields.limit` or `fields.offset`.
+    The backend does not change a bad value.
+- **Response:** a `Page<T>` (section 2): `{ items, total, limit, offset }`.
+  - `total` is the number of rows that match the filters, on all pages.
+  - An offset after the end gives `items: []` and the correct `total`.
+  - The chart, the chain and the audit log add fields to the page: `Chart`, `Chain` and `AuditPage`.
+- **Order:** each list has a fixed order (section 3).
+  - The SQL query ends with `ORDER BY <the order of the list>, <table>.Id LIMIT ? OFFSET ?`. The Id is the last key,
+    so the order is stable: if no row changes between two pages, a row cannot show on two pages, and no row is missed.
+  - `total` comes from `SELECT COUNT(*)` with the same WHERE clause. The values are bound parameters.
+- **All rows:** read the pages until `offset + items.length >= total`. A select list with few rows (for example the 8 departments) can ask for `limit=200`.
+- **Not paged:** `/health`, `/me`, `/users/{key}`, `/patients/{id}`, `/visits/{id}/care-team`, `/chat/sessions/{id}` and `/codes`.
+  They give one row or one object, or a fixed list in the code.
+
 ## 2. Types (TypeScript notation)
 
 The backend sends exactly these shapes. `T | null` means the field is always present and can be null.
@@ -83,6 +104,7 @@ type VisitClass = 'AMB' | 'EMER' | 'IMP' | 'HH' | 'VR';
 type ChatMode = 'rules' | 'fake' | 'llm';
 
 interface ApiError { code: 'no_user' | 'forbidden' | 'not_found' | 'conflict' | 'validation'; message: string; fields?: Record<string, string>; }
+interface Page<T> { items: T[]; total: number; limit: number; offset: number; } // one page of a list (section 1.5); total: the rows on all pages
 interface Identifier { system: string; value: string; }
 interface Address { street: string | null; city: string | null; region: string | null; postalCode: string | null; country: string | null; }
 
@@ -128,8 +150,14 @@ interface AssertionView {
   supersedesId: number | null; supersededById: number | null; isCurrent: boolean;
   patientVisible: boolean;   // the patient-visible rule of USER_FLOWS.md section 2.1
 }
-interface Chart { patientId: number; items: AssertionView[]; }   // newest first
-interface Chain { headId: number; items: AssertionView[]; }      // newest first; items[0] is the current one. A patient gets the head only.
+interface Chart extends Page<AssertionView> {
+  // order: the category (Allergy, Diagnosis, Prescription, Observation, LabOrder, LabReport, Procedure, CareTeam), then newest first
+  patientId: number;
+  counts: Partial<Record<Category, number>>; // the items of each category for the same filters, without the category filter.
+                                             // A category with 0 items is not in it.
+}
+interface Chain extends Page<AssertionView> { headId: number; } // newest first; the first item of the first page is the current one.
+                                                                 // A patient gets the head only (total 1).
 
 // Care team
 interface CareTeamMember {
@@ -182,6 +210,7 @@ interface AuditEvent {
   action: 'read' | 'create' | 'update' | 'delete' | 'ask' | 'tell'; outcome: 'Allowed' | 'Denied';
   actorRole: Role; actorKey: string; actorName: string | null; path: string; chatTurnId: number | null;
 }
+interface AuditPage extends Page<AuditEvent> { denied: number; } // denied: the Denied records of the patient, on all pages
 
 // Directory
 interface Department { id: number; identifier: Identifier; name: string; type: string | null; phoneNumber: string | null; email: string | null; address: Address; staffCount: number; }
@@ -207,7 +236,7 @@ interface Medication { id: number; code: string; codeSystem: string; name: strin
 | Method and path | Body | Response | Who |
 |---|---|---|---|
 | `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed' }` | all, no header |
-| `GET /api/users?role=&q=&limit=50` | — | `UserView[]` (demo users first, then by name) | all, no header |
+| `GET /api/users?role=&q=&limit=&offset=` | — | `Page<UserView>` (the demo users first, in the order of section 1.1; then by name, then key) | all, no header |
 | `GET /api/users/{key}` | — | `UserView` | all, no header |
 | `GET /api/me` | — | `UserView` | any user |
 | `GET /api/codes?category=` | — | `CodePreset[]` (the codes of the record form and the journey) | staff |
@@ -216,7 +245,7 @@ interface Medication { id: number; code: string; codeSystem: string; name: strin
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/patients?q=&dob=&scope=all\|care-team\|open-visits&limit=50` | — | `PatientSummary[]` | staff; a patient gets self only |
+| `GET /api/patients?q=&dob=&scope=all\|care-team\|open-visits&limit=&offset=` | — | `Page<PatientSummary>` (by name) | staff; a patient gets self only |
 | `POST /api/patients` | `{ name, dateOfBirth, sex, phoneNumber?, address? }` | 201 `Patient` | MOA. 409 if (name, dateOfBirth) exists. |
 | `GET /api/patients/{id}` | — | `Patient` | staff; a patient: self only |
 | `PATCH /api/patients/{id}` | `{ sex?, phoneNumber?, address? }` | `Patient` | MOA. A change to name or dateOfBirth gives 422. |
@@ -229,7 +258,7 @@ interface Medication { id: number; code: string; codeSystem: string; name: strin
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/patients/{id}/visits` | — | `Visit[]` (newest first) | self, MOA, care team |
+| `GET /api/patients/{id}/visits?limit=&offset=` | — | `Page<Visit>` (newest first) | self, MOA, care team |
 | `POST /api/patients/{id}/visits` | `{ class, reason?, type?, locationId }` | 201 `Visit` | MOA. 409 if a visit is open. |
 | `POST /api/visits/{id}/locations` | `{ locationId }` | `Visit` | MOA, care team. Ends the current location (EndDate = now) and adds the new one. |
 | `POST /api/visits/{id}/end` | — | `Visit` | MOA, a doctor on the care team. Sets EndDate on the visit and on its open location. |
@@ -244,11 +273,16 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/patients/{id}/chart?visitId=&category=&history=false` | — | `Chart` | self (patient-visible items only), care team |
-| `GET /api/assertions/{id}/chain` | — | `Chain` | self (head only), care team |
+| `GET /api/patients/{id}/chart?visitId=&category=&history=false&q=&limit=&offset=` | — | `Chart` (one page) | self (patient-visible items only), care team |
+| `GET /api/assertions/{id}/chain?limit=&offset=` | — | `Chain` (one page, newest first) | self (head only), care team |
 | `POST /api/messages` | `NewMessage` | 201 `RecordResult` | see USER_FLOWS.md section 2 |
 
 - The chart gives the current items (one per entry that has a current assertion). `history=true` also gives the superseded assertions (staff only).
+- **Chart order.** The category in this order: Allergy, Diagnosis, Prescription, Observation, LabOrder, LabReport, Procedure, CareTeam.
+  Then the newest first, then the Id. So the items of one category stay together across pages.
+- **Chart search.** `q` searches part of the display, the statement and the author name (case is not important). A blank `q` is no search.
+- **Chart counts.** `counts` uses the same filters as the page (`visitId`, `history`, `q` and the patient-visible rule), but not `category`.
+  `total` also uses `category`. For a patient, the patient-visible rule is in the SQL WHERE clause (the predicate of query Q12), so `total` and the pages are correct.
 - **Visit of a new entry.** The default is the open visit. A staff user must have an open visit (else 422). For a patient report about a new fact with no open visit, the backend makes a VR visit that ends at once (EndDate = StartDate).
 - **The entry and version rule.** A new claim about the same fact (confirm, refute, a report on the item) is a new assertion on the same entry (`entryId`).
   A claim with different content (a new code, a new status, a new member list) is a new entry (`newEntry`) whose assertion supersedes the old one.
@@ -271,7 +305,7 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/patients/{id}/chat/sessions` | — | `ChatSessionSummary[]` (the sessions of this user about this patient, newest first) | self, care team |
+| `GET /api/patients/{id}/chat/sessions?limit=&offset=` | — | `Page<ChatSessionSummary>` (the sessions of this user about this patient, newest first) | self, care team |
 | `POST /api/patients/{id}/chat/sessions` | — | 201 `ChatSession` | self, care team |
 | `GET /api/chat/sessions/{id}` | — | `ChatSession` | the user of the session |
 | `POST /api/chat/sessions/{id}/turns` | `{ clientTurnId: string, text: string }` | `TurnResult` | the user of the session; still self or care team |
@@ -284,9 +318,9 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/patients/{id}/audit` | — | `AuditEvent[]` (newest first) | self, a doctor on the care team |
+| `GET /api/patients/{id}/audit?limit=&offset=` | — | `AuditPage` (newest first) | self, a doctor on the care team |
 
-The backend writes one audit record for each of these: a chart read, a chain read, an audit read, each write about one patient,
+The backend writes one audit record for each of these: a chart read, a chain read, an audit read (one record for each page), each write about one patient,
 each chat turn (`ask` or `tell`, with `chatTurnId`) and each 403 about one patient (Outcome = Denied).
 It does not write a record for list endpoints or for `GET /api/patients/{id}`.
 The `path` of a record is the route, with a name for each id, for example `/api/patients/{patient}/chart` (the form of the demo data).
@@ -297,19 +331,24 @@ Read: all staff. Create, change and delete: MOA only.
 
 | Method and path | Body | Response |
 |---|---|---|
-| `GET /api/departments` | — | `Department[]` |
+| `GET /api/departments?q=&limit=&offset=` | — | `Page<Department>` (by name) |
 | `POST /api/departments`, `PATCH /api/departments/{id}` | the fields of `Department` without `id` and `staffCount`; `identifier` is optional | `Department` |
 | `DELETE /api/departments/{id}` | — | 204. 409 if the department has staff or locations. |
-| `GET /api/locations?department=` | — | `Location[]` |
+| `GET /api/locations?department=&q=&limit=&offset=` | — | `Page<Location>` (by Id) |
 | `POST /api/locations`, `PATCH /api/locations/{id}` | the fields of `Location` without `id` and `inUse` | `Location` |
 | `DELETE /api/locations/{id}` | — | 204. 409 if a visit used the location. |
-| `GET /api/staff?role=&department=&q=&limit=200` | — | `Staff[]` |
+| `GET /api/staff?role=&department=&q=&limit=&offset=` | — | `Page<Staff>` (the hospital staff first, then by name) |
 | `POST /api/staff` | the fields of `Staff` without `id`, `key` and `departments`, plus `departmentId`, `roleCode`, `specialty?` | 201 `Staff` |
 | `PATCH /api/staff/{id}` | `{ email?, phoneNumber?, active?, languages?, licenseNumber?, qualification?, designation?, certificationNumber?, desk?, phoneExtension? }` | `Staff` |
 | `DELETE /api/staff/{id}` | — | 204. 409 if the staff member issued a message or works in a department. |
-| `GET /api/medications?q=&limit=200` | — | `Medication[]` |
+| `GET /api/medications?q=&limit=&offset=` | — | `Page<Medication>` (by name) |
 | `POST /api/medications`, `PATCH /api/medications/{id}` | the fields of `Medication` without `id` | `Medication` |
 | `DELETE /api/medications/{id}` | — | 204. 409 if a prescription uses it. |
+
+The search `q` (case is not important):
+- departments and locations: part of the name or part of the identifier value;
+- staff: part of the name, or the exact identifier value;
+- medications: part of the name, or the exact code.
 
 The backend makes the identifier of a new row when the body has none
 (system `https://triad.example/fhir/sid/<organization|location|employee>`, a new value).
