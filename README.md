@@ -58,7 +58,7 @@ See [`src/backend/README.md`](src/backend/README.md#settings-and-secrets-env) fo
 ### Other commands
 
 ```sh
-.venv/bin/python -m pytest -q                               # the 292 backend tests (about 6 s)
+.venv/bin/python -m pytest -q                               # the 418 backend tests (about 10 s)
 npm --prefix src/frontend run build                         # type-check and build the frontend into src/frontend/dist/
 npm --prefix src/frontend run check:demo                    # check the users and the pages of the Demo guide
 .venv/bin/python src/backend/main.py serve                  # serve the built app and the API on http://127.0.0.1:8000
@@ -71,7 +71,7 @@ npm --prefix src/frontend run check:demo                    # check the users an
 cd src/backend/models/relational/sql
 sqlite3 triad.db < ddl/01_create_tables.sql                   # the schema: 29 relations and 11 triggers
 sqlite3 triad.db < dml/02_insert_seed.sql                     # the scenario data
-sqlite3 -header -column triad.db < dml/03_select_queries.sql  # the queries Q1 to Q13
+sqlite3 -header -column triad.db < dml/03_select_queries.sql  # the queries Q1 to Q14
 ```
 
 The scripts `04_update_delete.sql` and `05_constraint_violations.sql` change the data, so run them on a copy.

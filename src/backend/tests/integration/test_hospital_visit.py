@@ -1,7 +1,7 @@
-"""The hospital-visit journey of USER_FLOWS.md section 3 (Steps 0 to 9), through the API.
+"""The hospital-visit journey of USER_FLOWS.md section 3 (Use cases 0 to 9), through the API.
 
 The test uses a copy of the full database, the fake chat mode and the fixed demo time.
-The steps share one database, so they run in the order of this file.
+The use cases share one database, so they run in the order of this file.
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ OLD_WORDS = ("asthma", "inhaler", "albuterol", "salbutamol")
 
 
 class Journey:
-    """The client and the ids that the steps share."""
+    """The client and the ids that the use cases share."""
 
     def __init__(self, client, db_path):
         self.client, self.db_path = client, db_path
@@ -96,7 +96,7 @@ def j(full_db, tmp_path_factory) -> Journey:
     return Journey(make_client(path), path)
 
 
-def test_step0_the_3mt_slide(j):
+def test_use_case0_the_3mt_slide(j):
     turn = j.ask(OKAFOR, 1, "Is she allergic to penicillin?")
     assert turn["kind"] == "ask"
     assert turn["text"] == "No. A physician ruled it out with an allergy test on Oct 2, 2026."
@@ -111,7 +111,7 @@ def test_step0_the_3mt_slide(j):
     assert not any(a["isCurrent"] for a in struck)
 
 
-def test_step1_arrival_at_the_front_desk(j):
+def test_use_case1_arrival_at_the_front_desk(j):
     found = j.get("/api/patients", SOFIA, params={"q": "marlin", "dob": "1966-02-18", "scope": "all"})["items"]
     assert [p["name"] for p in found] == ["Marlin805 Reggie481 Nienow652"]
     j.ids["B"] = b = found[0]["id"]
@@ -148,7 +148,7 @@ def test_step1_arrival_at_the_front_desk(j):
     assert latest["id"] == j.ids["visit"] and latest["isOpen"] and latest["locations"][-1]["name"] == "ER Waiting"
 
 
-def test_step2_waiting_room_patient_report(j):
+def test_use_case2_waiting_room_patient_report(j):
     b = j.ids["B"]
     turn = j.ask(PATIENT_B, b, "What medications am I taking?")
     assert "metformin" in turn["text"].lower()
@@ -176,7 +176,7 @@ def test_step2_waiting_room_patient_report(j):
     assert [a["id"] for a in j.chain(report["id"], PATIENT_B)] == [report["id"]]   # a patient sees the head only
 
 
-def test_step3_triage_by_the_nurse(j):
+def test_use_case3_triage_by_the_nurse(j):
     b = j.ids["B"]
     assert b in [p["id"] for p in j.get("/api/patients", NAIR, params={"scope": "care-team"})["items"]]
     assert j.get(f"/api/patients/{b}/visits", NAIR)["total"] > 1
@@ -216,7 +216,7 @@ def test_step3_triage_by_the_nurse(j):
     assert {a["id"] for a in mine} >= {asthma["id"], inhaler["id"]} | {a["id"] for a in vitals["assertions"]}
 
 
-def test_step4_the_physician(j):
+def test_use_case4_the_physician(j):
     b = j.ids["B"]
     turn = j.ask(OKAFOR, b, "What did the nurse recommend?")
     assert {c["assertion"]["id"] for c in turn["cards"]} == {j.ids["asthma"], j.ids["inhaler"]}
@@ -266,7 +266,7 @@ def test_step4_the_physician(j):
                  confirm=confirm["id"], furosemide=furosemide["id"], stop=stop["id"])
 
 
-def test_step5_transfer(j):
+def test_use_case5_transfer(j):
     visit = j.post(f"/api/visits/{j.ids['visit']}/locations", NAIR, json={"locationId": j.location("CARD-401")})
     names = [loc["name"] for loc in visit["locations"]]
     assert names == ["ER Waiting", "ER Bed 2", "Cardiology Room 401"]
@@ -280,7 +280,7 @@ def test_step5_transfer(j):
     assert j.get(f"/api/patients/{j.ids['B']}/chart", BECKER)["items"]
 
 
-def test_step6_evening_plan_of_the_patient(j):
+def test_use_case6_evening_plan_of_the_patient(j):
     turn = j.ask(PATIENT_B, j.ids["B"], "What is my plan?")
     text = turn["text"].lower()
     assert "heart failure" in text and "furosemide" in text
@@ -293,7 +293,7 @@ def test_step6_evening_plan_of_the_patient(j):
     assert {j.ids["failure"], j.ids["furosemide"]} <= {c["assertion"]["id"] for c in turn["cards"]}
 
 
-def test_step7_privacy_check(j):
+def test_use_case7_privacy_check(j):
     response = j.client.get(f"/api/patients/{j.ids['B']}/chart", headers=as_user(PARK))
     assert response.status_code == 403
     assert response.json() == {"code": "forbidden", "message": CARE_TEAM_DENIED}
@@ -304,7 +304,7 @@ def test_step7_privacy_check(j):
     assert denied[0]["path"] == "/api/patients/{patient}/chart" and denied[0]["action"] == "read"
 
 
-def test_step8_directory(j):
+def test_use_case8_directory(j):
     park = j.get("/api/staff", SOFIA, params={"q": "Jun Park"})["items"][0]
     changed = j.call("PATCH", f"/api/staff/{park['id']}", SOFIA, json={"phoneNumber": "+1-508-555-2999"})
     assert changed["phoneNumber"] == "+1-508-555-2999"
@@ -319,7 +319,7 @@ def test_step8_directory(j):
     assert "STORE-OLD" not in [loc["identifier"]["value"] for loc in j.items("/api/locations", SOFIA)]
 
 
-def test_step9_discharge(j):
+def test_use_case9_discharge(j):
     visit = j.post(f"/api/visits/{j.ids['visit']}/end", OKAFOR)
     assert visit["endDate"] and not visit["isOpen"]
     assert visit["locations"][-1]["endDate"] == visit["endDate"]
