@@ -14,6 +14,54 @@ explicit relationships for authorship and revision, so the current state is
 reached by traversal rather than by search. Clinical entities are modelled
 against the HL7 FHIR standard.
 
+## Quickstart
+
+You need Python 3.12, [uv](https://docs.astral.sh/uv/), Node.js 20.19 or later and SQLite 3.43 or later.
+Run the commands from the root folder of the repository. All data is synthetic.
+
+```sh
+# Install the Python packages and the frontend packages.
+uv venv --python 3.12 .venv
+uv pip install --python .venv/bin/python -r requirements.txt
+npm --prefix src/frontend ci
+
+# Start the API (port 8000) and the app (port 5173). The script builds the database if it is missing.
+./src/scripts/dev.sh
+```
+
+Open http://127.0.0.1:5173 and select **Demo guide** in the top bar. The guide follows the
+hospital-visit journey of [`USER_FLOWS.md`](USER_FLOWS.md). Each step has an **Act as** button that
+sets the user and opens the page. One Ctrl+C stops the two servers.
+To start again with a new database, run `./src/scripts/dev.sh --reset-db`.
+
+The Care Assistant uses a fake language model by default. It needs no API key and no network.
+
+### Other commands
+
+```sh
+.venv/bin/python -m pytest -q                               # the 282 backend tests (about 6 s)
+npm --prefix src/frontend run build                         # type-check and build the frontend into src/frontend/dist/
+npm --prefix src/frontend run check:demo                    # check the users and the pages of the Demo guide
+.venv/bin/python src/backend/main.py serve                  # serve the built app and the API on http://127.0.0.1:8000
+.venv/bin/python src/backend/main.py ensure-db --reset-db   # build the database again from the FHIR data (about 3 s)
+```
+
+### SQL scripts (sqlite3 only)
+
+```sh
+cd src/backend/models/relational/sql
+sqlite3 triad.db < ddl/01_create_tables.sql                   # the schema: 29 relations and 11 triggers
+sqlite3 triad.db < dml/02_insert_seed.sql                     # the scenario data
+sqlite3 -header -column triad.db < dml/03_select_queries.sql  # the queries Q1 to Q13
+```
+
+The scripts `04_update_delete.sql` and `05_constraint_violations.sql` change the data, so run them on a copy.
+See [`src/backend/models/relational/sql/README.md`](src/backend/models/relational/sql/README.md).
+
+More information: [`src/backend/README.md`](src/backend/README.md) (the layers, the environment
+variables and the LLM mode), [`src/frontend/README.md`](src/frontend/README.md) and the API contract
+[`doc/api.md`](doc/api.md).
+
 ## Data model (Milestone 4)
 
 TRIAD records each clinical fact as an **Assertion**. A staff member issues a

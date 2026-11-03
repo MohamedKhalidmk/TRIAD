@@ -60,7 +60,7 @@ if [ -f src/frontend/package.json ]; then
         echo "Installing the frontend packages (npm install) ..."
         npm --prefix src/frontend install 2>&1 | prefix "[web]"
     fi
-    echo "The frontend starts on http://localhost:5173."
+    echo "The frontend starts on http://127.0.0.1:5173."
     npm --prefix src/frontend run dev 2>&1 | prefix "[web]" &
 else
     echo "src/frontend/package.json does not exist. Only the API starts."
