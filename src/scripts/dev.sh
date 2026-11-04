@@ -58,8 +58,11 @@ if [ "$PORT" = "$VITE_PORT" ]; then
     exit 2
 fi
 
-# Stop all child processes on Ctrl+C, on an error and at the end.
-trap 'trap - INT TERM EXIT; kill 0' INT TERM EXIT
+# Stop all child processes on Ctrl+C, on an error and at the end (kill 0 sends SIGTERM to all of them).
+# Ctrl+C also sends SIGINT to uvicorn. If the reloader of uvicorn gets a second signal at the same time,
+# it can stop forever and keep the port. Thus, after Ctrl+C, the script waits 1 second before kill 0.
+trap 'trap - TERM EXIT; trap "" INT; sleep 1; kill 0' INT TERM
+trap 'trap - INT TERM EXIT; kill 0' EXIT
 
 prefix() {
     while IFS= read -r line || [ -n "$line" ]; do
