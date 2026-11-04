@@ -6,8 +6,8 @@ authors:
   - given-names: Asish A.
     family-names: George
     affiliation: University of Victoria
-  - given-names: Mohamed Khaled
-    family-names: Abuela
+  - given-names: Mohamed
+    family-names: Khaled
     affiliation: University of Victoria
 repository-code: "https://github.com/MohamedKhalidmk/TRIAD"
 license: CC-BY-NC-SA-4.0

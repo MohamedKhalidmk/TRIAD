@@ -248,7 +248,7 @@ assets/                        the logo, the icon, the figures of the reports an
 ## Team
 
 - Asish A. George
-- Mohamed Khaled Abuela
+- Mohamed Khaled
 
 ## Milestones
 
@@ -267,7 +267,7 @@ To cite TRIAD, use [`CITATION.cff`](CITATION.cff) or this BibTeX entry:
 
 ```bibtex
 @software{triad2026,
-  author = {George, Asish A. and Abuela, Mohamed Khaled},
+  author = {George, Asish A. and Khaled, Mohamed},
   title  = {{TRIAD}: Trusted {RDF} Interoperable Agent Data},
   year   = {2026},
   url    = {https://github.com/MohamedKhalidmk/TRIAD},
