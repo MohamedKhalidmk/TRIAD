@@ -266,6 +266,7 @@ echo "TRIAD starts on http://127.0.0.1:${PORT} (API: /api, documentation: /docs)
 echo ""
 echo "    Open http://127.0.0.1:${PORT} and select Demo guide."
 echo ""
+echo "To see the tables of the database (read-only), run ./src/scripts/dbview.sh in another terminal."
 echo "Press Ctrl+C to stop the server."
 
 # The server replaces this script (exec). Thus one Ctrl+C stops it, and no process stays.

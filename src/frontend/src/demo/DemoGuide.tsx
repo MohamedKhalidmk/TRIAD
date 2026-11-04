@@ -119,7 +119,8 @@ export function DemoGuide({ open, onClose }: { open: boolean; onClose: () => voi
     >
       <p className="muted small">
         Chat mode: if no API key is set, the app uses the fake LLM, and all use cases work offline. To start again, run{' '}
-        <code>./src/scripts/quickstart.sh --reset-db</code>.
+        <code>./src/scripts/quickstart.sh --reset-db</code>. To see the tables of the database (read-only), run{' '}
+        <code>./src/scripts/dbview.sh</code> and open http://127.0.0.1:8001.
       </p>
       <ol className="demo-steps" ref={listRef}>
         {USE_CASES.map((useCase) => (
