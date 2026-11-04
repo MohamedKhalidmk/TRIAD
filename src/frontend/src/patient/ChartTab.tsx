@@ -14,7 +14,7 @@ import { formatDateTime } from '../lib/dates';
 import { CATEGORY_GROUP_LABELS, CATEGORY_ORDER } from '../lib/labels';
 import { useDebounced } from '../lib/useDebounced';
 import { keepPageOf, usePage } from '../lib/usePage';
-import { detailSummary, pickIntent, supersededCount } from './assertionText';
+import { canSupersede, detailSummary, pickIntent, supersededCount } from './assertionText';
 import { ChainDialog } from './ChainView';
 import { detailsFromItem, isEntryCategory, LOINC_SYSTEM, type RecordSeed } from './recordModel';
 
@@ -233,7 +233,7 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
                   byId={byId}
                   history={withHistory}
                   isPatient={isPatient}
-                  canAct={canRecord}
+                  canAct={(item) => canRecord && canSupersede(user.role, item, staffIntent)}
                   actions={actions}
                 />
               ))}
@@ -264,7 +264,7 @@ interface ChartGroupProps {
   byId: Map<number, AssertionView>;
   history: boolean;
   isPatient: boolean;
-  canAct: boolean;
+  canAct: (item: AssertionView) => boolean;   // Supersede, Confirm and Refute
   actions: ItemActions;
 }
 
@@ -289,7 +289,7 @@ interface ChartItemProps {
   byId: Map<number, AssertionView>;
   history: boolean;
   isPatient: boolean;
-  canAct: boolean;
+  canAct: (item: AssertionView) => boolean;   // Supersede, Confirm and Refute
   actions: ItemActions;
 }
 
@@ -328,7 +328,7 @@ function ChartItem({ item, byId, history, isPatient, canAct, actions }: ChartIte
           )}
         </div>
       </div>
-      {editable && (canAct || isPatient) && (
+      {editable && (isPatient || canAct(item)) && (
         <div className="chart-item-actions">
           {isPatient ? (
             <button type="button" className="button button-small" onClick={() => actions.report(item)}>

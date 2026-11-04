@@ -1,6 +1,6 @@
 // Pure helpers that make text from an assertion.
 
-import type { AssertionView, Intent } from '../api/types';
+import type { AssertionView, Intent, Role } from '../api/types';
 import { formatYear } from '../lib/dates';
 
 function text(value: string | number | null | undefined): string {
@@ -50,6 +50,20 @@ export function supersededLine(item: AssertionView): string {
 export function pickIntent(allowed: Intent[], preferred: Intent[]): Intent {
   for (const intent of preferred) if (allowed.includes(intent)) return intent;
   return allowed[0] ?? 'Report';
+}
+
+/**
+ * True if a staff user can supersede `item` (Supersede, Confirm or Refute) with an assertion of `intent`.
+ * This is the rule of supersede_denial in src/backend/domain/access.py. The app uses it to show the buttons.
+ * The backend checks the rule again on each write.
+ */
+export function canSupersede(role: Role, item: AssertionView, intent: Intent): boolean {
+  // The supersede guard: only a doctor decision can supersede an item that the patient can see.
+  if (item.patientVisible && !(role === 'Doctor' && intent === 'Decision')) return false;
+  if (role === 'Doctor') return true;
+  if (role === 'Nurse') return item.intent === 'Report' || item.intent === 'Recommendation';
+  if (role === 'MOA') return item.category === 'CareTeam';
+  return false;
 }
 
 /**
