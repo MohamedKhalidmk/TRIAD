@@ -1,0 +1,5 @@
+# The optional database viewer of TRIAD (src/scripts/dbview.sh). Install it after requirements.txt:
+#     uv pip install --python .venv/bin/python -r requirements-dbview.txt
+# dbview.sh installs it itself. Datasette shows the SQLite database in the browser, read-only.
+# The app and the tests do not need this file.
+datasette==0.65.5
