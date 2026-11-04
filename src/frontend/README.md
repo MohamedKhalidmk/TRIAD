@@ -100,6 +100,8 @@ Rules:
 | `npm run typecheck` | Checks the types only. |
 | `npm run preview` | Serves `dist/` on port 4173 (with the same `/api` proxy). |
 | `npm run check:demo` | Checks the use cases of the Demo guide (see below). Then `scripts/check-logo.mjs` checks that `public/triad-icon.png` is the repository logo. |
+| `npm run e2e` | Runs the Playwright end-to-end tests on port 8123 (see [End-to-end tests](#end-to-end-tests-playwright)). |
+| `npm run e2e:screens` | Runs the same tests and writes the screenshots to `doc/screenshots/`. |
 
 ## How the app acts as a user
 
@@ -152,16 +154,104 @@ The use cases are in `src/demo/steps.json` (the list `useCases`; each use case h
 - each patient page has a demo patient key;
 - the file has Use cases 0 to 9, in order. Each use case has one or more steps and an expected result. Each step has actions.
 
+## End-to-end tests (Playwright)
+
+The Playwright tests use the real app in Chromium: the built frontend, the backend and a SQLite database.
+
+| File | What it tests |
+|---|---|
+| `e2e/hospital_visit.spec.ts` | The hospital-visit journey of `USER_FLOWS.md` section 3, Use case 0 to Use case 9, with the users and the pages of the Demo guide. It checks the expected result of each use case, and it takes the screenshots. The use cases share the database, so they run in order (serial mode). If one use case fails, Playwright skips the use cases after it. `src/backend/tests/integration/test_hospital_visit.py` does the same journey through the API. |
+| `e2e/crud.spec.ts` | The directory of the front desk: UPDATE (a staff member), INSERT and DELETE (a new location), three deletes that the server stops with a 409, and the pager of the Staff tab (292 staff, 25 on a page). |
+| `e2e/demo_guide.spec.ts` | The Demo guide lists the 10 use cases, and **Act as** sets the user and opens the page of the step. |
+
+### Before the first run
+
+1. Make the Python venv of the backend at the root of the repository (`.venv`). See the root [`README.md`](../../README.md).
+   To use a different Python, set `TRIAD_PYTHON` (an absolute path, or a path from the root of the repository).
+2. Install the packages and the headless Chromium of Playwright 1.59.1 (about 190 MB on the disk, one time only):
+
+   ```sh
+   cd src/frontend
+   npm ci
+   npx playwright install --only-shell chromium
+   ```
+
+   To see the browser (`npx playwright test --headed`), install the full Chromium: `npx playwright install chromium`.
+
+### Run
+
+```sh
+cd src/frontend
+npm run e2e
+```
+
+The run takes about 25 s on a laptop, together with the frontend build. The first run also builds the template database (about 3 s).
+
+`playwright.config.ts` starts the web server `e2e/serve.mjs`. The server:
+
+1. builds the frontend (`npm run build`), because `main.py serve` serves `dist/`;
+2. builds the template database `<temp>/triad-e2e/template.db` (`main.py ensure-db`). It keeps the template for the next run,
+   and it builds it again when a file of `src/backend` (the code, the SQL or the data) changes;
+3. copies the template to `<temp>/triad-e2e/run.db`, so each run starts from the same data and does not depend on an earlier run;
+4. starts `main.py serve` on port 8123 with `TRIAD_LLM=fake`, `TRIAD_NOW=2026-10-30T09:00:00-04:00` (the fixed demo time) and `TRIAD_SQL_LOG=off`.
+
+When the tests end, Playwright stops the server, and the server deletes `run.db`.
+The tests do not use the ports of `dev.sh` (8000 and 5173) or the database `src/backend/data/triad.db`.
+If port 8123 is in use, the run stops with an error. The tests need no network and no API key.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `TRIAD_PYTHON` | `.venv/bin/python` | The Python of the backend. |
+| `TRIAD_E2E_PORT` | `8123` | The port of the test server. |
+| `TRIAD_E2E_NO_BUILD` | — | `1`: do not build the frontend. Use the `dist/` folder that is there. |
+| `TRIAD_SCREENS` | — | `1`: write the screenshots to `doc/screenshots/` (`npm run e2e:screens` sets it). |
+
+Output (git ignores these folders):
+
+- `test-results/screenshots/`: the screenshots of a normal run.
+- `test-results/output/`: a screenshot and a trace of each failed test (`npx playwright show-trace <trace.zip>`).
+- `playwright-report/`: the HTML report (`npx playwright show-report`).
+
+To run one file or one use case: `npx playwright test crud` or `npx playwright test -g "Use case 0"`.
+The journey use cases need the use cases before them, so run the full journey file, not one use case of it.
+
+On Windows, use WSL2 (`npm run e2e:screens` uses the shell syntax `TRIAD_SCREENS=1`).
+
+### Screenshots
+
+The journey test takes the screenshots in Chromium at `deviceScaleFactor` 2. Each panel is a part of the page of at most
+900 × 640 CSS pixels, so it is easy to read when the report prints it small. The times are the times of the journey,
+because the demo time is fixed. The same code gives the same PNG files on the same computer.
+`npm run e2e:screens` writes them to `doc/screenshots/`:
+
+| File | Use case | What it shows |
+|---|---|---|
+| `00_doctor_patient_page.png` | 0 | The full window (1440 × 900, scale 1): the chart of Elena Marsh and the Care Assistant (the README overview). |
+| `01_doctor_slide_answer.png` | 0 | The 3MT slide answer: "No. A physician ruled it out with an allergy test on Oct 2, 2026.", with the two superseded assertions struck through. |
+| `02_moa_care_team_chain.png` | 1 | The care-team chain: {Nair, Okafor} ← {Nair, Okafor, Park} ← {Nair, Okafor}, each version by Sofia Alvarez. |
+| `03_nurse_triage_record.png` | 3 | The chart, found by the nurse name: the provisional asthma assessment and the inhaler recommendation of Priya Nair. |
+| `04_doctor_supersede_chain.png` | 4 | The assertion chain: heart failure (the decision of the doctor) supersedes the asthma assessment of the nurse. |
+| `05_doctor_tell_unconfirmed.png` | 4 | The "tell" turn: the agent records the family history as unconfirmed. |
+| `06_patient_evening_plan.png` | 6 | The plan of Patient B: heart failure and furosemide, no asthma and no inhaler. |
+| `07_nurse_403_denied.png` | 7 | The 403 panel of Jun Park, who is not on the care team. |
+| `08_patient_audit_denied.png` | 7 | The audit log of Patient B with the denied attempt of Jun Park (the red row). |
+| `09_moa_directory_409.png` | 8 | The 409 message: the Emergency department has staff, so the front desk cannot delete it. |
+| `10_doctor_visit_ended.png` | 9 | The ended visit with its three locations and their times. |
+| `11_doctor_chat_narrow.png` | 0 | The Care Assistant tab on a phone (390 px wide). |
+
 ## Folder structure
 
 ```
 src/frontend/
   index.html               the HTML page
   vite.config.ts           the dev server (port 5173, /api proxy to TRIAD_API_URL) and the build (dist/)
+  playwright.config.ts     the end-to-end tests: Chromium, one worker, the web server on port 8123
+  tsconfig.e2e.json        the type check of playwright.config.ts and e2e/ (tsc -b)
   package.json             exact versions, scripts, engines (Node.js 20.19 or later)
   .env.example             the settings template (dev.sh copies it to .env; git ignores .env)
   scripts/check-demo.mjs   the check of the Demo guide use cases
   scripts/check-logo.mjs   the check that the app logo has the same bytes as assets/triad-icon.png
+  e2e/                     the Playwright tests, their helpers and the web server of the tests (serve.mjs)
   public/triad-icon.png    the logo of the top bar and the browser tab (a copy of assets/triad-icon.png)
   src/
     main.tsx               the entry point
