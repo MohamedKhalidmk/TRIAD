@@ -1,9 +1,10 @@
 // The app: the providers, the top bar, the routes, the user picker and the Demo guide.
 
 import { useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { isAbortError, isApiError } from '../api/client';
+import { queryKeys } from '../api/endpoints';
 import { ErrorPanel, Loading } from '../components/ErrorView';
 import { TopBar } from '../components/TopBar';
 import { UserPickerDialog } from '../components/UserPicker';
@@ -17,7 +18,14 @@ import { ROUTES } from './routes';
 import { ActingUserProvider, useActingUser } from './session';
 
 function makeQueryClient(): QueryClient {
-  return new QueryClient({
+  const client: QueryClient = new QueryClient({
+    // Each write moves the time of the server on (doc/api.md section 1.3). So after each write the app reads
+    // GET /api/health again, and the clock of the top bar shows the new time.
+    mutationCache: new MutationCache({
+      onSuccess: () => {
+        void client.invalidateQueries({ queryKey: queryKeys.health });
+      },
+    }),
     defaultOptions: {
       queries: {
         // Each chart read writes an audit record. So the app does not read again when the window gets focus.
@@ -30,6 +38,7 @@ function makeQueryClient(): QueryClient {
       mutations: { retry: false },
     },
   });
+  return client;
 }
 
 export function App() {
