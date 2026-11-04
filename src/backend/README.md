@@ -29,6 +29,12 @@ main.py  ->  all layers (it connects the adapters to the ports)
 
 The frontend (`src/frontend/`) is also part of the ui layer.
 
+The architecture figure ([PNG](../../doc/architecture.png), [PDF](../../doc/architecture.pdf)) shows the three layers, the request path, the onboarding path and the Care Assistant.
+A solid arrow is a call. A dashed arrow with an open head means that an adapter implements a port. Grey parts are the TRIAD contribution, as in the ER diagram. A dashed box is a file or a service.
+The script `src/scripts/build_architecture.py` makes the figure. Its first lines give the commands that make it again.
+
+![TRIAD architecture](../../doc/architecture.png)
+
 ## Why raw SQL and no ORM
 
 - The schema in `ddl/01_create_tables.sql` is the single source of truth. An ORM would make a second copy of the schema in Python.
