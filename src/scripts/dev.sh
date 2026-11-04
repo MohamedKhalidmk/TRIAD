@@ -14,7 +14,9 @@
 #      then starts the Vite dev server (log prefix [web]). Vite sends /api to the API (TRIAD_API_URL).
 # One Ctrl+C stops the API and the frontend.
 # The API key of the LLM mode goes in src/backend/.env. After you change a .env file, start the script again.
-# PORT is a shell variable only (for example: PORT=9000 ./src/scripts/dev.sh). The .env files do not set it.
+# PORT (the API, default 8000) and VITE_PORT (the frontend, default 5173) are shell variables only
+# (for example: PORT=9000 VITE_PORT=5200 ./src/scripts/dev.sh). The .env files do not set them.
+# The script stops at the start if a port is in use.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -27,6 +29,34 @@ for arg in "$@"; do
         *) echo "Unknown option: $arg. Use --reset-db or no option." >&2; exit 2 ;;
     esac
 done
+
+PORT="${PORT:-8000}"
+VITE_PORT="${VITE_PORT:-5173}"
+
+# A connection succeeds only if a program listens on the port. Bash makes the connection (/dev/tcp).
+port_in_use() {
+    (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null
+}
+
+for item in "PORT:$PORT" "VITE_PORT:$VITE_PORT"; do
+    name="${item%%:*}"
+    port="${item#*:}"
+    case "$port" in
+        ''|*[!0-9]*) echo "$name is \"$port\". Use a port number, for example $name=9000." >&2; exit 2 ;;
+    esac
+    if [ "$name" = VITE_PORT ] && [ ! -f src/frontend/package.json ]; then
+        continue
+    fi
+    if port_in_use "$port"; then
+        echo "Port $port ($name) is in use. Stop the program that uses it (to find it: lsof -nP -iTCP:$port -sTCP:LISTEN)," >&2
+        echo "or use a different port, for example: $name=$((port + 1)) ./src/scripts/dev.sh" >&2
+        exit 1
+    fi
+done
+if [ "$PORT" = "$VITE_PORT" ]; then
+    echo "PORT and VITE_PORT are both $PORT. Use two different ports." >&2
+    exit 2
+fi
 
 # Stop all child processes on Ctrl+C, on an error and at the end.
 trap 'trap - INT TERM EXIT; kill 0' INT TERM EXIT
@@ -65,7 +95,6 @@ fi
 .venv/bin/python src/backend/main.py ensure-db ${RESET:+--reset-db}
 
 export PYTHONUNBUFFERED=1
-PORT="${PORT:-8000}"
 echo "The API starts on http://127.0.0.1:${PORT} (documentation: http://127.0.0.1:${PORT}/docs)."
 .venv/bin/uvicorn main:create_app --factory --app-dir src/backend --host 127.0.0.1 --port "$PORT" \
     --reload --reload-dir src/backend 2>&1 | prefix "[api]" &
@@ -77,8 +106,8 @@ if [ -f src/frontend/package.json ]; then
     fi
     # Vite sends /api to the API that this script starts. The shell value wins over src/frontend/.env.
     export TRIAD_API_URL="http://127.0.0.1:${PORT}"
-    echo "The frontend starts on http://127.0.0.1:5173. It sends /api to ${TRIAD_API_URL}."
-    npm --prefix src/frontend run dev 2>&1 | prefix "[web]" &
+    echo "The frontend starts on http://127.0.0.1:${VITE_PORT}. It sends /api to ${TRIAD_API_URL}."
+    npm --prefix src/frontend run dev -- --port "$VITE_PORT" 2>&1 | prefix "[web]" &
 else
     echo "src/frontend/package.json does not exist. Only the API starts."
 fi
