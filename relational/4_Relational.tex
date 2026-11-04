@@ -34,7 +34,7 @@ Clinical records are written by many people over years, and their facts change, 
 \includegraphics[width=.32\textwidth,height=42mm,keepaspectratio]{figures/03_nurse_triage_record.png}\hfill
 \includegraphics[width=.32\textwidth,height=42mm,keepaspectratio]{figures/01_doctor_slide_answer.png}\hfill
 \includegraphics[width=.32\textwidth,height=42mm,keepaspectratio]{figures/09_moa_directory_409.png}
-\caption{User interface. Left: a nurse adds a triage record and searches the chart; Supersede, Confirm and Refute add new assertions. Middle: the assistant answers the penicillin question with the doctor's 2026 assertion and the superseded 2019 and 2024 claims (Q2). Right: deleting a department that still has staff is refused.}
+\caption{User interface. Left: a chart search finds the nurse's triage records. Middle: the penicillin answer cites the doctor's 2026 assertion and the superseded 2019 and 2024 claims (Q2). Right: deleting a department that has staff is refused.}
 \label{fig:ui}
 \end{figure*}
 
@@ -63,24 +63,23 @@ Structured query language (SQL) script \texttt{01\_create\_\allowbreak tables.sq
 \par\noindent\begin{minipage}{\columnwidth}\begin{lstlisting}
 SELECT e.Category, e.Display, a.Verification,
        COALESCE(s.Name, 'Patient') AS Author, a.Statement
-FROM Patient p
-JOIN Visit v ON v.PatientId = p.Id
+FROM Patient p JOIN Visit v ON v.PatientId = p.Id
 JOIN ClinicalEntry e ON e.VisitId = v.Id
 JOIN Assertion a ON a.ClinicalEntryId = e.Id
-JOIN Message m ON m.Id = a.MessageId
-LEFT JOIN Staff s ON s.Id = m.StaffId
+JOIN Message m ON m.Id = a.MessageId LEFT JOIN Staff s ON s.Id = m.StaffId
 WHERE p.Name = 'Elena Marsh' AND p.DateOfBirth = '1971-05-14'
-  AND NOT EXISTS (SELECT 1 FROM Assertion n
-                  WHERE n.SupersedesId = a.Id);
+  AND NOT EXISTS (SELECT 1 FROM Assertion n WHERE n.SupersedesId = a.Id);
 \end{lstlisting}\end{minipage}\par
-\textbf{Q2, the revision chain}, starts at the current penicillin assertion and follows \emph{Supersedes} back. It returns three rows: the 2019 patient report, the 2024 copy, and the 2026 refutation.
+\textbf{Q2, the revision chain}, follows \emph{Supersedes} back from the current penicillin assertion: three rows, 2026, 2024, then 2019.
 \par\noindent\begin{minipage}{\columnwidth}\begin{lstlisting}
 WITH RECURSIVE chain (Id, SupersedesId, Depth) AS (
   SELECT a.Id, a.SupersedesId, 0 FROM Assertion a
   JOIN Allergy al ON al.ClinicalEntryId = a.ClinicalEntryId
-  WHERE lower(al.Substance) LIKE '%penicillin%'
-    AND NOT EXISTS (SELECT 1 FROM Assertion n
-                    WHERE n.SupersedesId = a.Id)
+  JOIN ClinicalEntry e ON e.Id = a.ClinicalEntryId
+  JOIN Visit v ON v.Id = e.VisitId JOIN Patient p ON p.Id = v.PatientId
+  WHERE p.Name = 'Elena Marsh' AND p.DateOfBirth = '1971-05-14'
+    AND lower(al.Substance) LIKE '%penicillin%'
+    AND NOT EXISTS (SELECT 1 FROM Assertion n WHERE n.SupersedesId = a.Id)
   UNION ALL
   SELECT a.Id, a.SupersedesId, c.Depth + 1
   FROM Assertion a JOIN chain c ON a.Id = c.SupersedesId)
@@ -91,10 +90,8 @@ FROM chain c JOIN Assertion a ON a.Id = c.Id ORDER BY c.Depth;
 \par\noindent\begin{minipage}{\columnwidth}\begin{lstlisting}
 SELECT d.Name, s.Role, COUNT(*) AS Staff,
        SUM(n.Designation = 'RN') AS RegisteredNurses
-FROM Department d
-JOIN WorksIn w ON w.DepartmentId = d.Id
-JOIN Staff s ON s.Id = w.StaffId
-LEFT JOIN Nurse n ON n.StaffId = s.Id
+FROM Department d JOIN WorksIn w ON w.DepartmentId = d.Id
+JOIN Staff s ON s.Id = w.StaffId LEFT JOIN Nurse n ON n.StaffId = s.Id
 GROUP BY d.Id, s.Role;
 \end{lstlisting}\end{minipage}\par
 
@@ -107,18 +104,27 @@ DELETE FROM Location WHERE IdentifierValue = 'STORE-OLD'
   AND NOT EXISTS (SELECT 1 FROM VisitLocation vl
                   WHERE vl.LocationId = Location.Id);
 \end{lstlisting}\end{minipage}\par
-A clinical fact is never overwritten. When the patient reports through the app, a new \texttt{Message} (no issuer) and a new \texttt{Assertion} whose \texttt{SupersedesId} is the current assertion are inserted; the old one stays. Changing an assertion in place is rejected:
+A clinical fact is never overwritten. A patient report through the app inserts a \texttt{Message} with no issuer and an \texttt{Assertion} that supersedes the current one; the old one stays (script 04, step~5):
 \par\noindent\begin{minipage}{\columnwidth}\begin{lstlisting}
-UPDATE Assertion SET Statement = 'Changed.' WHERE Id = 1;
--- Error: Assertion is append-only.
---        Add a new assertion that supersedes it.
+INSERT INTO Message (IdentifierSystem, IdentifierValue, StaffId, Channel,
+  Origin, SentAt, Text) VALUES ('https://triad.example/fhir/sid/message',
+  'MSG-ELENA-APP-0001', NULL, 'App', 'Patient', '2026-10-30T08:30:00-04:00',
+  'I take amlodipine every morning.');
+INSERT INTO Assertion (MessageId, Seq, ClinicalEntryId, SupersedesId,
+  AssertedAt, Intent, Source, Verification, Statement)
+SELECT last_insert_rowid(), 1, a.ClinicalEntryId, a.Id,
+  '2026-10-30T08:30:00-04:00', 'Report', 'Human', 'Unconfirmed',
+  'I take amlodipine every morning.'
+FROM Assertion a JOIN ClinicalEntry e ON e.Id = a.ClinicalEntryId
+WHERE e.IdentifierValue = 'MedicationRequest/mr-elena-amlodipine'
+  AND NOT EXISTS (SELECT 1 FROM Assertion n WHERE n.SupersedesId = a.Id);
 \end{lstlisting}\end{minipage}\par
-\texttt{05\_constraint\_violations.sql} holds 26 such statements; all fail as expected.
+Changing an assertion in place fails (\emph{Assertion is append-only}), as do all 26 statements of \texttt{05\_constraint\_\allowbreak violations.sql}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=.64\columnwidth]{figures/architecture.pdf}
-\caption{Architecture: user interface, logic and data layers. Grey boxes are TRIAD's contribution.}
+\caption{Architecture. Grey boxes are TRIAD's contribution.}
 \label{fig:arch}
 \end{figure}
 
