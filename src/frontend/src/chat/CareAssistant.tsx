@@ -7,6 +7,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { isAbortError, newClientTurnId } from '../api/client';
 import { api, queryKeys } from '../api/endpoints';
 import type { ChatSession, ChatTurn, Patient, UserView } from '../api/types';
+import { refreshClock } from '../app/clock';
 import { Badge } from '../components/Badges';
 import { ErrorBanner, Loading } from '../components/ErrorView';
 import { formatCount } from '../components/Pager';
@@ -90,6 +91,7 @@ export function CareAssistant({ patient, user }: { patient: Patient; user: UserV
       setPending(null);
       queryClient.invalidateQueries({ queryKey: queryKeys.chatSessions(patient.id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.audit(patient.id) });
+      refreshClock(queryClient);   // the turn is a write, so the time of the server moved on
       if (result.assistantTurn.kind === 'tell' || result.assistantTurn.recordedIds.length > 0) {
         queryClient.invalidateQueries({ queryKey: queryKeys.charts });
         queryClient.invalidateQueries({ queryKey: queryKeys.chains });

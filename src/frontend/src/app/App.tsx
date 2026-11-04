@@ -1,10 +1,9 @@
 // The app: the providers, the top bar, the routes, the user picker and the Demo guide.
 
 import { useState } from 'react';
-import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
 import { isAbortError, isApiError } from '../api/client';
-import { queryKeys } from '../api/endpoints';
 import { ErrorPanel, Loading } from '../components/ErrorView';
 import { TopBar } from '../components/TopBar';
 import { UserPickerDialog } from '../components/UserPicker';
@@ -14,17 +13,22 @@ import { HomePage } from '../pages/HomePage';
 import { PatientPage } from '../pages/PatientPage';
 import { PatientsPage } from '../pages/PatientsPage';
 import { WelcomePage } from '../pages/WelcomePage';
+import { AUDITED_READS, refreshClock } from './clock';
 import { ROUTES } from './routes';
 import { ActingUserProvider, useActingUser } from './session';
 
 function makeQueryClient(): QueryClient {
   const client: QueryClient = new QueryClient({
-    // Each write moves the time of the server on (doc/api.md section 1.3). So after each write the app reads
-    // GET /api/health again, and the clock of the top bar shows the new time.
-    mutationCache: new MutationCache({
-      onSuccess: () => {
-        void client.invalidateQueries({ queryKey: queryKeys.health });
+    // Each write moves the time of the server on (doc/api.md section 1.3). A chart, chain or audit read is also a
+    // write (an audit record). So after these requests the app reads GET /api/health again, and the clock of the
+    // top bar shows the new time. The chat turns call refreshClock() themselves.
+    queryCache: new QueryCache({
+      onSuccess: (_data, query) => {
+        if (AUDITED_READS.includes(String(query.queryKey[0]))) refreshClock(client);
       },
+    }),
+    mutationCache: new MutationCache({
+      onSuccess: () => refreshClock(client),
     }),
     defaultOptions: {
       queries: {
