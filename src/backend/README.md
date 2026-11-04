@@ -71,6 +71,8 @@ uv pip install --python .venv/bin/python -r requirements-llm.txt
 
 ## Run
 
+The quick way: `./src/scripts/quickstart.sh` (from any folder) makes `.venv`, builds the frontend and the database, runs the fast tests and serves the app on http://127.0.0.1:8000. Add `--reset-db` to build the database again.
+
 Build the database. The command builds it only if it is missing. It takes about 3 seconds.
 
 ```sh

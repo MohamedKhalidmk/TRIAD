@@ -318,7 +318,7 @@ There are four ways to check the flows. The first way is the fastest.
 1. **Read.** Each use case in section 3 gives the expected result. Screenshots of each use case are in `doc/screenshots/`.
 2. **Click through.**
    1. Run `./src/scripts/quickstart.sh`.
-   2. Open http://localhost:8000.
+   2. Open http://127.0.0.1:8000.
    3. Open the **Demo guide** panel in the top bar. It lists the use cases of section 3 and the steps of each use case.
    4. On each step of a use case, select **Act as ⟨user⟩**. The app sets the user and opens the correct page.
    5. To start again, run `./src/scripts/quickstart.sh --reset-db`.
