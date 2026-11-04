@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use TRIAD, please cite it with the data in this file."
+title: "TRIAD: Trusted RDF Interoperable Agent Data"
+type: software
+authors:
+  - given-names: Asish A.
+    family-names: George
+    affiliation: University of Victoria
+  - given-names: Mohamed Khaled
+    family-names: Abuela
+    affiliation: University of Victoria
+repository-code: "https://github.com/MohamedKhalidmk/TRIAD"
+license: CC-BY-NC-SA-4.0
+date-released: 2026-11-04
+abstract: >-
+  A data model for clinical records that many people make and change over time.
+  Each clinical fact is an assertion with an author and a source, and a new assertion
+  supersedes the old one, so the current state is the result of a traversal.
+  The Milestone 4 prototype is a hospital web app on SQLite with a Care Assistant chat.
+  The clinical entities follow HL7 FHIR R4. All data is synthetic (Synthea).
+keywords:
+  - clinical records
+  - provenance
+  - HL7 FHIR
+  - relational database
+  - SQLite
+references:
+  - type: article
+    title: "Synthea: An approach, method, and software mechanism for generating synthetic patients and the synthetic electronic health care record"
+    authors:
+      - family-names: Walonoski
+        given-names: Jason
+    journal: "Journal of the American Medical Informatics Association"
+    volume: 25
+    issue: 3
+    start: 230
+    end: 238
+    year: 2018
+    doi: 10.1093/jamia/ocx079
+  - type: standard
+    title: "Fast Healthcare Interoperability Resources (FHIR), Release 4 (v4.0.1)"
+    authors:
+      - name: HL7 International
+    url: "https://hl7.org/fhir/R4/"
