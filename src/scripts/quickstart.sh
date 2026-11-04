@@ -7,14 +7,16 @@
 #     ./src/scripts/quickstart.sh --reset-db  the same, but build the database again first
 #
 # The script:
-#   1. checks the prerequisites: uv (or Python 3.12), Node.js 20.19 or later, npm, and a free port;
+#   1. checks the prerequisites: uv (or Python 3.12), Node.js 20.19 or later (22.12 or later in version 22), npm,
+#      and a free port;
 #   2. makes src/backend/.env and src/frontend/.env from their .env.example files, if they are missing;
 #   3. makes .venv (Python 3.12) if it is missing, and installs the pinned packages of requirements.txt;
 #   4. runs "npm ci" if node_modules is missing or older than package-lock.json, then builds the frontend;
 #   5. runs "main.py ensure-db" (it builds the database only if it is missing);
 #   6. runs the fast tests (pytest -m "not slow");
 #   7. runs "main.py serve": the API and the built frontend on one port.
-# The first run takes about 1 to 3 minutes. A second run skips the work that is done.
+# The first run downloads Python 3.12 and the packages (about 50 MB). It takes from 15 seconds to some minutes.
+# The time changes with the speed of the network. A second run skips the work that is done and takes some seconds.
 # The chat uses the fake LLM (no network, no key), unless src/backend/.env sets TRIAD_LLM=llm.
 # One Ctrl+C stops the server.
 # PORT is a shell variable only (for example: PORT=9000 ./src/scripts/quickstart.sh). The .env files do not set it.
@@ -42,7 +44,10 @@ HINT=""
 # On an error, tell the step that stopped. The command above the message tells the cause.
 on_exit() {
     status=$?
-    if [ "$status" -ne 0 ] && [ -n "$STEP" ]; then
+    if [ "$status" -eq 130 ] && [ -n "$STEP" ]; then
+        echo "" >&2
+        echo "You stopped the quickstart (Ctrl+C) at step $STEP. Run the script again to continue." >&2
+    elif [ "$status" -ne 0 ] && [ -n "$STEP" ]; then
         echo "" >&2
         echo "The quickstart stopped at step $STEP. Read the messages above, correct the problem and run the script again." >&2
         if [ -n "$HINT" ]; then
