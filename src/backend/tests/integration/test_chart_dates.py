@@ -1,16 +1,21 @@
-"""The date filter of the chart (doc/api.md section 3.4): `from` and `to`, date-only, both days included."""
+"""The date filter of the chart (doc/api.md section 3.4): `from` and `to`, date-only, both days included.
+
+Each test runs on each store (the `store` fixture: SQLite and the knowledge graph) with the scenario data.
+The filter compares the local date of assertedAt (the first 10 characters, as written) on both stores.
+"""
 from __future__ import annotations
 
 import pytest
 
+from domain.rules import parse_time
 from tests.conftest import as_user, make_client
 
 OKAFOR, ELENA = "Doctor:E1005", 1
 
 
 @pytest.fixture
-def api(scenario_copy):
-    return make_client(scenario_copy)
+def api(store):
+    return store.client()
 
 
 def chart(api, **params):
@@ -68,3 +73,21 @@ def test_a_wrong_date_gives_422_for_that_field(api, name, value):
 def test_from_after_to_gives_422(api):
     response = chart(api, **{"from": "2026-10-03", "to": "2026-10-02"})
     assert response.status_code == 422 and "from" in response.json()["fields"]
+
+
+def test_the_local_date_decides_with_mixed_offsets(planted_store):
+    """The planted times have mixed offsets. The local date (as written) decides, not the UTC date."""
+    api = planted_store.client()
+    times = {row["id"]: parse_time(row["assertedAt"]) for row in planted_store.probe.rows("assertion")}
+    late = next(i for i, t in times.items() if t == parse_time("2026-10-02T21:30:00.100-04:00"))   # UTC: Oct 3
+    early = next(i for i, t in times.items() if t == parse_time("2026-10-03T01:10:00+05:30"))      # UTC: Oct 2
+    second = ids(chart(api, **{"from": "2026-10-02", "to": "2026-10-02"}))
+    third = ids(chart(api, **{"from": "2026-10-03", "to": "2026-10-03"}))
+    assert late in second and late not in third
+    assert early in third and early not in second
+    reference = make_client(planted_store.db_path)          # SQLite on the same data
+    for params in ({"from": "2026-10-02", "to": "2026-10-02"}, {"from": "2026-10-03"}, {"to": "2026-10-02"},
+                   {"from": "2026-10-02", "to": "2026-10-30", "q": "penicillin"}):
+        found, expected = chart(api, **params).json(), chart(reference, **params).json()
+        assert ids(chart(api, **params)) == ids(chart(reference, **params)), params
+        assert (found["total"], found["counts"]) == (expected["total"], expected["counts"]), params
