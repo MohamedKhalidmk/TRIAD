@@ -290,15 +290,22 @@ WHERE {
 #      For example two assertions that supersede the same assertion, or a visit of two patients. The rule comes from
 #      the TBox (owl:InverseFunctionalProperty). SQL: case "a second assertion that supersedes the same assertion"
 #      (UNIQUE SupersedesId).
-SELECT ?object ?property ?subject1 ?subject2
+#      The sub-select counts the subjects of each object. A join of two free subjects took more than 600 s on
+#      Virtuoso with some query plans; this form takes less than 1 s.
+SELECT ?object ?property ?subject
 FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
 FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
 FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
 WHERE {
-  { SELECT ?property WHERE { ?property a owl:InverseFunctionalProperty } }
-  ?subject1 ?property ?object .
-  ?subject2 ?property ?object .
-  FILTER (STR(?subject1) < STR(?subject2))
+  { SELECT ?object ?property
+    WHERE {
+      { SELECT ?property WHERE { ?property a owl:InverseFunctionalProperty } }
+      ?s ?property ?object .
+    }
+    GROUP BY ?object ?property
+    HAVING (COUNT(DISTINCT ?s) > 1)
+  }
+  ?subject ?property ?object .
 }
 
 # C17. One current assertion per entry: an entry with two assertions that nothing supersedes.
