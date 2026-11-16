@@ -27,7 +27,7 @@
 #   6. virtuoso only: runs "kg.sh up" and "kg.sh init" (start Virtuoso, make its user and its permissions);
 #   7. virtuoso and oxigraph: runs "main.py ensure-kg --store STORE". It builds the knowledge graph from the
 #      database only if the build marker of the store is not current, so a second run is fast;
-#   8. runs the fast tests (pytest -m "not slow");
+#   8. runs the fast tests (pytest -m "not slow and not virtuoso");
 #   9. runs "main.py serve --store STORE": the API and the built frontend on one port.
 # The number of steps is 7 for sqlite, 8 for oxigraph and 9 for virtuoso.
 # The first run downloads Python 3.12 and the packages (about 50 MB). With virtuoso it also pulls the Docker image.
@@ -379,7 +379,7 @@ fi
 step "the fast tests"
 
 # The tests make their own settings. The store of the shell must not change them.
-TRIAD_STORE=sqlite .venv/bin/python -m pytest -q -m "not slow"
+TRIAD_STORE=sqlite .venv/bin/python -m pytest -q -m "not slow and not virtuoso"
 echo "The fast tests pass. To run all the tests (also the slow tests), run: .venv/bin/python -m pytest -q"
 
 # ---------------------------------------------------------------------------------------------
