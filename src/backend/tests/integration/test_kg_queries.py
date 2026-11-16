@@ -54,6 +54,7 @@ from infrastructure.rdf import counts, kg_export, namespaces, oxigraph_store  # 
 from infrastructure.rdf.namespaces import ABOX_GRAPH, KG, SCRATCH_GRAPH, TBOX_GRAPH, TRIAD  # noqa: E402
 from infrastructure.rdf.protocol import SparqlError, send  # noqa: E402
 from tests.fixtures import kg as K  # noqa: E402
+from tests.fixtures.stores import ensure_virtuoso_data, selected_stores  # noqa: E402
 
 QUERY_IDS = list(K.sql_queries())
 ORDERED = {"Q2", "Q4", "Q14a"}
@@ -125,6 +126,10 @@ def virtuoso(virtuoso_kg, request) -> Data:
     """Virtuoso, with the database whose graph its ABox graph holds (TRIAD_KG_TEST_DB, else a new onboarding)."""
     named = os.environ.get("TRIAD_KG_TEST_DB", "").strip()
     db = Path(named).expanduser().resolve() if named else request.getfixturevalue("full_db")
+    if not named and "virtuoso" in selected_stores():
+        # With virtuoso in TRIAD_TEST_STORES, the store fixtures own the graphs of the container: load the full
+        # data (if this session did not load it last; tests/fixtures/stores.py).
+        ensure_virtuoso_data(db, seed=False, export_cache=request.getfixturevalue("kg_cache") / "virtuoso-export")
     conn = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
     try:
         expected = counts.expected_counts(conn)["per_predicate"]

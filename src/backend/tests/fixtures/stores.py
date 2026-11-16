@@ -15,13 +15,27 @@ conftest.py makes the fixtures `store` (the scenario data), `planted_store` (the
 A test on Oxigraph gets a new copy of a built store (pyoxigraph backup(): hard links, some milliseconds).
 The built store stays on disk (.pytest_cache/d/triad-kg/<marker>/), keyed by the build marker of its data, so a
 test run does not export and load the triples each time. The first run makes it (Morph-KGC and the bulk load).
-Virtuoso is one store: the fixture loads the data again only when the marker differs or when the last test wrote.
+
+Virtuoso is one store with one ABox graph (VirtuosoSession, WriteJournal):
+- A test session loads each data set one time, at its first use (the bulk loader of kg.sh). It does not trust
+  the graphs of the container: another process (an earlier test run, the app) can have written in them. The
+  export of the planted data and of the full data stays in .pytest_cache/d/triad-kg/virtuoso-export/<marker>/,
+  so a second session copies it into TRIAD_KG_DIR and runs only the bulk load.
+- conftest.py runs the Virtuoso tests after the other tests, in the order store, planted_store, full_store:
+  then a session loads each data set at most one time.
+- A test does not load the data again after a write. The journal sees each update request of the test (all
+  HttpSparqlClient objects) and, before the first request that names an individual, it keeps the stored triples
+  of that individual (as subject and as object). After the test, it deletes the triples of the individuals that
+  the test made or changed, and inserts the kept triples again. The meta graph gets the triples of the load again.
+  A check (the number of ABox triples and the build marker) finds a write that the journal cannot undo; then the
+  next test loads the data again.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import os
+import re
 import shutil
 import sqlite3
 import uuid
@@ -341,32 +355,248 @@ def virtuoso_answers(settings: config.Settings) -> bool:
         return False
 
 
-def virtuoso_handle(db_copy: Path, seed: bool) -> StoreHandle:
-    """A handle on the one Virtuoso store. This REPLACES the TRIAD graphs of the container (see the module text).
+# ---------------------------------------------------------------------------------------------
+# Virtuoso: one store for the test session (see the module text)
 
-    seed=True: the scenario data (kg.sh load --seed). seed=False: the export of db_copy (ensure-kg, which writes
-    the export files into TRIAD_KG_DIR, the folder that the container mounts).
-    """
-    from application.semantic.build_kg import ensure_kg, load_kg, wanted_marker
-    from infrastructure.rdf.kg_store import MorphKgcExporter, SeedSource, SqliteKgSource, VirtuosoTripleStore
+UNDO_CHUNK = 200            # the IRIs of one VALUES block of the journal
+INSERT_CHUNK = 500          # the triples of one INSERT DATA of the journal
+SAVE_AS_SUBJECT = "SELECT ?x ?p ?o FROM $abox WHERE { VALUES ?x { $iris } ?x ?p ?o }"
+SAVE_AS_OBJECT = "SELECT ?s ?p ?x FROM $abox WHERE { VALUES ?x { $iris } ?s ?p ?x }"
+DELETE_AS_SUBJECT = "WITH $abox DELETE { ?x ?p ?o } WHERE { VALUES ?x { $iris } ?x ?p ?o }"
+DELETE_AS_OBJECT = "WITH $abox DELETE { ?s ?p ?x } WHERE { VALUES ?x { $iris } ?s ?p ?x }"
+META_TRIPLES = "SELECT ?s ?p ?o FROM $meta WHERE { ?s ?p ?o }"
+ABOX_TRIPLES = "SELECT (COUNT(*) AS ?n) FROM $abox WHERE { ?s ?p ?o }"
+
+
+def _individuals(text: str) -> set[str]:
+    """The IRIs of the TRIAD individuals in the text of a request (with no angle brackets)."""
+    from infrastructure.rdf.namespaces import KG
+    return set(re.findall(r"<(" + re.escape(KG) + r"[a-z][a-z-]*/[0-9]+)>", text))
+
+
+def _is_insert_data(text: str) -> bool:
+    """True for an INSERT DATA request (after the PREFIX lines): it adds triples and deletes none."""
+    return re.match(r"\s*(?:PREFIX\s[^\n]*\n\s*)*INSERT\s+DATA\b", text, re.IGNORECASE) is not None
+
+
+def _chunks(values: list, size: int) -> list[list]:
+    return [values[i:i + size] for i in range(0, len(values), size)]
+
+
+def _triple(row: dict, s: str, p: str, o: str) -> str:
+    return f"{row[s]} {row[p]} {row[o]} ."
+
+
+@dataclass
+class VirtuosoSession:
+    """What the TRIAD graphs of the container hold in this test session (one object for each store key)."""
+    key: str
+    loaded: Optional[str] = None                      # the key of the loaded data; None: load again
+    counters: dict = field(default_factory=dict)      # the id counters after the load
+    meta: list = field(default_factory=list)          # the triples of the meta graph after the load
+    triples: int = 0                                  # the triples of the ABox graph after the load
+    marker: Any = None                                # the build marker after the load
+    loads: int = 0
+    restores: int = 0
+
+    def note_load(self, client: Any, store: Any, key: str) -> None:
+        from infrastructure.sparql import ids
+        self.loaded = key
+        self.counters = ids.read_counters(client)
+        self.meta = [_triple(r, "s", "p", "o") for r in client.select(META_TRIPLES, raw=True)]
+        self.triples = abox_triples(client)
+        self.marker = store.marker()
+        self.loads += 1
+
+
+VIRTUOSO_SESSIONS: dict[str, VirtuosoSession] = {}
+
+
+def virtuoso_session(key: str) -> VirtuosoSession:
+    if key not in VIRTUOSO_SESSIONS:
+        VIRTUOSO_SESSIONS[key] = VirtuosoSession(key)
+    return VIRTUOSO_SESSIONS[key]
+
+
+def abox_triples(client: Any) -> int:
+    rows = client.select(ABOX_TRIPLES)
+    return int(rows[0]["n"]) if rows else 0
+
+
+class WriteJournal:
+    """The undo of the writes of one test on Virtuoso (see the module text). start() before the test, restore()
+    after it. It sees the update requests of all HttpSparqlClient objects of the store (the app makes its own)."""
+
+    def __init__(self, session: VirtuosoSession):
+        self.session = session
+        self.kept: dict[str, list[str]] = {}    # IRI -> its stored triples before the first request that named it
+        self.new: set[str] = set()              # the individuals of the test (an id above the counter of the load)
+        self.meta = False                        # a request named the meta graph
+        self.unknown = False                     # a request named the ABox graph and no individual
+        self._original: Optional[Callable] = None
+
+    def start(self) -> None:
+        from infrastructure.sparql.client import HttpSparqlClient
+        original = HttpSparqlClient._update
+        journal = self
+
+        def journaled(client: Any, text: str) -> None:
+            if client.key == journal.session.key:
+                journal.before(client, text)
+            original(client, text)
+        self._original = original
+        HttpSparqlClient._update = journaled
+
+    def stop(self) -> None:
+        from infrastructure.sparql.client import HttpSparqlClient
+        if self._original is not None:
+            HttpSparqlClient._update = self._original
+            self._original = None
+
+    def _is_new(self, value: str) -> bool:
+        from infrastructure.sparql import terms
+        kind, number = terms.split_iri(value)
+        return number > self.session.counters.get(kind, 0)
+
+    def before(self, client: Any, text: str) -> None:
+        """Keep the stored triples of the individuals that the request names (one time for each individual)."""
+        from infrastructure.rdf.namespaces import ABOX_GRAPH, META_GRAPH
+        from infrastructure.sparql.terms import Term
+        if f"<{META_GRAPH}>" in text:
+            self.meta = True
+        found = _individuals(text)
+        if not found:
+            self.unknown = self.unknown or f"<{ABOX_GRAPH}>" in text
+            return
+        new = {v for v in found if self._is_new(v)}
+        self.new |= new
+        if _is_insert_data(text):            # it adds triples only: the delete of the new individuals undoes it
+            return
+        for chunk in _chunks(sorted(found - new - set(self.kept)), UNDO_CHUNK):
+            iris = Term(" ".join(f"<{v}>" for v in chunk))
+            for v in chunk:
+                self.kept[v] = []
+            for r in client.select(SAVE_AS_SUBJECT, {"iris": iris}, raw=True):
+                self.kept[r["x"][1:-1]].append(_triple(r, "x", "p", "o"))
+            for r in client.select(SAVE_AS_OBJECT, {"iris": iris}, raw=True):
+                self.kept[r["x"][1:-1]].append(_triple(r, "s", "p", "x"))
+
+    def wrote(self) -> bool:
+        return bool(self.kept or self.new or self.meta or self.unknown)
+
+    def restore(self, client: Any, store: Any) -> None:
+        """Undo the writes of the test. If that is not possible, the next test loads the data again."""
+        from infrastructure.sparql.terms import Term
+        from infrastructure.sparql.unit_of_work import StoreState
+        self.stop()
+        if not self.wrote():
+            return
+        session = self.session
+        StoreState.forget(client.key)
+        if self.unknown:
+            session.loaded = None
+            return
+        for chunk in _chunks(sorted(set(self.kept) | self.new), UNDO_CHUNK):
+            iris = Term(" ".join(f"<{v}>" for v in chunk))
+            client.update(DELETE_AS_SUBJECT, {"iris": iris})
+            client.update(DELETE_AS_OBJECT, {"iris": iris})
+        lines = [line for line in dict.fromkeys(t for kept in self.kept.values() for t in kept)
+                 if not any(self._is_new(v) for v in _individuals(line))]
+        for chunk in _chunks(lines, INSERT_CHUNK):
+            client.update("INSERT DATA { GRAPH $abox { $triples } }", {"triples": Term("\n".join(chunk))})
+        if self.meta:
+            client.update("WITH $meta DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }")
+            if session.meta:
+                client.update("INSERT DATA { GRAPH $meta { $triples } }", {"triples": Term("\n".join(session.meta))})
+        session.restores += 1
+        if abox_triples(client) != session.triples or store.marker() != session.marker:
+            session.loaded = None
+
+
+_MARKER_KEYS: dict[tuple, str] = {}
+
+
+def data_key(db_source: Path, seed: bool) -> str:
+    """The key of a data set: the marker key of its database (kept for each file, its size and its time)."""
+    stat = Path(db_source).stat()
+    memo = (str(Path(db_source).resolve()), stat.st_size, stat.st_mtime_ns)
+    if memo not in _MARKER_KEYS:
+        _MARKER_KEYS[memo] = marker_key(db_source)
+    return ("seed-" if seed else "export-") + _MARKER_KEYS[memo]
+
+
+def cached_export(db_source: Path, export_cache: Path, key: str) -> Path:
+    """The folder of the export (triad_kg.nt.gz, kg_report.json) of a database. It is made once for each key."""
+    from application.semantic.build_kg import wanted_marker
+    from infrastructure.rdf.kg_store import NT_FILE, REPORT_FILE, MorphKgcExporter, SqliteKgSource
+    final = export_cache / key
+    if (final / NT_FILE).is_file() and (final / REPORT_FILE).is_file():
+        return final
+    export_cache.mkdir(parents=True, exist_ok=True)
+    work = export_cache / f".export-{uuid.uuid4().hex[:8]}"
+    exporter = MorphKgcExporter(db_source, work)
+    exporter.export("all", wanted_marker(SqliteKgSource(db_source), exporter, "all"))
+    if final.exists():
+        shutil.rmtree(work, ignore_errors=True)
+    else:
+        os.replace(work, final)
+    return final
+
+
+def ensure_virtuoso_data(db_source: Path, seed: bool, export_cache: Path) -> tuple[config.Settings, Any, Any,
+                                                                                VirtuosoSession]:
+    """Make the TRIAD graphs of Virtuoso hold a data set: the seed graph (seed=True) or the export of db_source.
+    It loads only if this session did not load the data set last. Return (settings, client, store, session)."""
+    from application.semantic.build_kg import load_kg
+    from infrastructure.rdf.kg_store import (NT_FILE, REPORT_FILE, SeedSource, SqliteKgSource, VirtuosoTripleStore,
+                                             export_of_folder)
     from infrastructure.sparql.client import HttpSparqlClient
     from infrastructure.sparql.unit_of_work import StoreState
-    settings = base_settings(db_copy, store="virtuoso", kg_dir=config.env_kg_dir())
+    settings = base_settings(db_source, store="virtuoso", kg_dir=config.env_kg_dir())
     client = HttpSparqlClient(settings.sparql_query_url, settings.sparql_update_url, settings.sparql_user,
                               settings.sparql_password)
     store = VirtuosoTripleStore(client, settings.kg_dir)
-    state = StoreState.of(client.key)
-    if seed:
-        source = SeedSource()
-        try:
-            if store.marker() != source.marker() or state.last_write is not None:
+    session = virtuoso_session(client.key)
+    key = data_key(db_source, seed)
+    if session.loaded != key:
+        session.loaded = None
+        if seed:
+            source = SeedSource()
+            try:
                 load_kg(source, source.export(), source.marker(), store, "the tests")
-        finally:
-            source.close()
-    else:
-        source = SqliteKgSource(db_copy)
-        exporter = MorphKgcExporter(db_copy, settings.kg_dir)
-        reset = state.last_write is not None and store.marker() == wanted_marker(source, exporter, "all")
-        ensure_kg(source, exporter, store, reset=reset)
+            finally:
+                source.close()
+        else:
+            folder = cached_export(db_source, export_cache, key)
+            settings.kg_dir.mkdir(parents=True, exist_ok=True)
+            for name in (NT_FILE, REPORT_FILE):           # the container reads the export only in TRIAD_KG_DIR
+                shutil.copyfile(folder / name, settings.kg_dir / name)
+            export, marker = export_of_folder(settings.kg_dir)
+            load_kg(SqliteKgSource(db_source), export, marker, store, "the tests")
+        session.note_load(client, store, key)
     StoreState.forget(client.key)
-    return StoreHandle("virtuoso", db_copy, settings, KgProbe(client))
+    return settings, client, store, session
+
+
+def virtuoso_handle(db_copy: Path, db_source: Path, seed: bool, export_cache: Path) -> StoreHandle:
+    """A handle on the one Virtuoso store. This REPLACES the TRIAD graphs of the container (see the module text).
+
+    seed=True: the scenario data (kg.sh load --seed). seed=False: the export of db_source (the copy db_copy has the
+    same data), which goes into TRIAD_KG_DIR, the folder that the container mounts. close() undoes the writes.
+    """
+    from infrastructure.sparql.client import HttpSparqlClient
+    settings, client, store, session = ensure_virtuoso_data(db_source, seed, export_cache)
+    settings = base_settings(db_copy, store="virtuoso", kg_dir=settings.kg_dir)
+    probe = KgProbe(HttpSparqlClient(settings.sparql_query_url, settings.sparql_update_url, settings.sparql_user,
+                                     settings.sparql_password))
+    handle = StoreHandle("virtuoso", db_copy, settings, probe)
+    journal = WriteJournal(session)
+    journal.start()
+
+    def restore() -> None:
+        handle._client = None
+        journal.restore(client, store)
+    handle.cleanup.append(restore)
+    return handle
+
+

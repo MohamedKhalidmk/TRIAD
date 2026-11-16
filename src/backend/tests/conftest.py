@@ -165,8 +165,22 @@ def built_oxigraph(db: Path, kg_cache: Path, tmp_path_factory) -> Path:
 STORE_FIXTURES = ("store", "planted_store", "full_store", "module_full_store")
 
 
+def virtuoso_group(item) -> int:
+    """The place of a test in the run order: 0 for a test that does not use Virtuoso, then the Virtuoso tests of
+    `store`, `planted_store` and `full_store`, then the other Virtuoso tests (they read the full graph)."""
+    params = getattr(getattr(item, "callspec", None), "params", {})
+    for group, name in enumerate(STORE_FIXTURES, start=1):
+        if params.get(name) == "virtuoso":
+            return group
+    return len(STORE_FIXTURES) + 1 if item.get_closest_marker("virtuoso") is not None else 0
+
+
 def pytest_collection_modifyitems(config, items):
-    """@pytest.mark.stores("oxigraph", ...): deselect the parameters of the other stores."""
+    """@pytest.mark.stores("oxigraph", ...): deselect the parameters of the other stores.
+
+    With Virtuoso in TRIAD_TEST_STORES, the Virtuoso tests run last, in the order of their data set (the sort keeps
+    the order of the tests in a group). Virtuoso has one ABox graph, so a session then loads each data set one time
+    (tests/fixtures/stores.py)."""
     keep, drop = [], []
     for item in items:
         only = item.get_closest_marker("stores")
@@ -176,6 +190,8 @@ def pytest_collection_modifyitems(config, items):
     if drop:
         config.hook.pytest_deselected(items=drop)
         items[:] = keep
+    if "virtuoso" in selected_stores():
+        items.sort(key=virtuoso_group)
 
 
 def open_store_handle(request, db_source: Path, tmp_path: Path, kg_cache: Path, tmp_path_factory,
@@ -190,7 +206,7 @@ def open_store_handle(request, db_source: Path, tmp_path: Path, kg_cache: Path, 
     pytest.importorskip("SPARQLWrapper")
     if not virtuoso_answers(base_settings(copy, store="virtuoso")):
         pytest.skip("Virtuoso does not answer on TRIAD_SPARQL_QUERY_URL (start it with: ./src/scripts/kg.sh up).")
-    return virtuoso_handle(copy, seed=seed)
+    return virtuoso_handle(copy, db_source, seed=seed, export_cache=kg_cache / "virtuoso-export")
 
 
 @pytest.fixture(params=store_params())
