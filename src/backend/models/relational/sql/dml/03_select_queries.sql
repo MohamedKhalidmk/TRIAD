@@ -8,7 +8,7 @@ PRAGMA foreign_keys = ON;
 -- Q1. The current record of one patient: each assertion that nothing supersedes,
 --     with its entry, its visit, its message and its author.
 SELECT e.Category, e.Display, a.Verification, a.Intent,
-       COALESCE(s.Name, 'Patient') AS Author, m.Origin, date(v.StartDate) AS VisitDate, a.Statement
+       COALESCE(s.Name, 'Patient') AS Author, m.Origin, substr(v.StartDate, 1, 10) AS VisitDate, a.Statement
 FROM Patient p
 JOIN Visit v ON v.PatientId = p.Id
 JOIN ClinicalEntry e ON e.VisitId = v.Id
@@ -34,7 +34,7 @@ WITH RECURSIVE chain (Id, SupersedesId, Depth) AS (
     SELECT a.Id, a.SupersedesId, c.Depth + 1
     FROM Assertion a JOIN chain c ON a.Id = c.SupersedesId
 )
-SELECT c.Depth, date(a.AssertedAt) AS Date, COALESCE(s.Name, 'Patient') AS Author, s.Role,
+SELECT c.Depth, substr(a.AssertedAt, 1, 10) AS Date, COALESCE(s.Name, 'Patient') AS Author, s.Role,
        m.Origin, a.Verification, a.Statement
 FROM chain c
 JOIN Assertion a ON a.Id = c.Id
@@ -51,7 +51,7 @@ SELECT CASE a.Verification WHEN 'Refuted' THEN 'No' WHEN 'Confirmed' THEN 'Yes' 
             WHEN s.Role = 'Doctor' THEN 'Physician'
             WHEN s.Role = 'MOA' THEN 'Front desk'
             ELSE s.Role END AS AuthorLabel,
-       date(a.AssertedAt) AS Date, a.Statement
+       substr(a.AssertedAt, 1, 10) AS Date, a.Statement
 FROM Patient p
 JOIN Visit v ON v.PatientId = p.Id
 JOIN ClinicalEntry e ON e.VisitId = v.Id
@@ -82,7 +82,7 @@ ORDER BY Outcome;
 
 -- Q5. The visit timeline of one patient, with the locations (M:N TakesPlaceIn).
 --     Location.Type gives the department of the location.
-SELECT date(v.StartDate) AS VisitDate, v.Class, v.Reason, l.Name AS Location, l.Type AS Department,
+SELECT substr(v.StartDate, 1, 10) AS VisitDate, v.Class, v.Reason, l.Name AS Location, l.Type AS Department,
        vl.StartDate AS ArrivedAt, vl.EndDate AS LeftAt
 FROM Patient p
 JOIN Visit v ON v.PatientId = p.Id
@@ -107,7 +107,7 @@ ORDER BY m.SentAt;
 
 -- Q7. The current active medications of one patient.
 SELECT med.Name AS Medication, pr.Dosage, pr.Frequency, pr.Status, COALESCE(s.Name, 'Patient') AS Author,
-       date(a.AssertedAt) AS Date
+       substr(a.AssertedAt, 1, 10) AS Date
 FROM Patient p
 JOIN Visit v ON v.PatientId = p.Id
 JOIN ClinicalEntry e ON e.VisitId = v.Id
@@ -169,7 +169,7 @@ LIMIT 5;
 -- Q10. Trace an answer of the Care Assistant: chat turn -> citations -> assertion -> message -> author.
 SELECT cs.IdentifierValue AS Session, t.Seq AS Turn, t.Text AS Answer, ct.Rank,
        e.Display AS Fact, a.Verification, COALESCE(s.Name, 'Patient') AS Author, m.Origin,
-       date(a.AssertedAt) AS Date
+       substr(a.AssertedAt, 1, 10) AS Date
 FROM ChatSession cs
 JOIN ChatTurn t ON t.ChatSessionId = cs.Id AND t.Speaker = 'Assistant'
 JOIN Citation ct ON ct.ChatTurnId = t.Id
@@ -184,13 +184,13 @@ SELECT ae.At, ae.Action, ae.Outcome, ae.ActorRole, COALESCE(s.Name, ae.ActorValu
 FROM AuditEvent ae
 LEFT JOIN Staff s ON s.IdentifierSystem = ae.ActorSystem AND s.IdentifierValue = ae.ActorValue
 WHERE ae.SubjectName = 'Elena Marsh' AND ae.SubjectDateOfBirth = '1971-05-14'
-  AND date(ae.At) = '2026-10-29'
+  AND substr(ae.At, 1, 10) = '2026-10-29'
 ORDER BY ae.At;
 
 -- Q12. What the patient can see (the patient-visible rule). An item is visible when it is current,
 --      it is not entered in error, and it is a doctor decision by a person, a confirmed
 --      observation or lab result, or a report that the patient sent.
-SELECT e.Category, e.Display, a.Verification, date(a.AssertedAt) AS Date, a.Statement
+SELECT e.Category, e.Display, a.Verification, substr(a.AssertedAt, 1, 10) AS Date, a.Statement
 FROM Patient p
 JOIN Visit v ON v.PatientId = p.Id
 JOIN ClinicalEntry e ON e.VisitId = v.Id
@@ -207,7 +207,7 @@ ORDER BY e.Category, a.AssertedAt;
 
 -- Q13. The current care team of a patient: care-team entries that nothing supersedes and that are
 --      active, with the members joined to Staff by their identifier values.
-SELECT date(v.StartDate) AS VisitDate, ct.Name AS CareTeam, s.Name AS Member, s.Role, ctm.Role AS TeamRole
+SELECT substr(v.StartDate, 1, 10) AS VisitDate, ct.Name AS CareTeam, s.Name AS Member, s.Role, ctm.Role AS TeamRole
 FROM Patient p
 JOIN Visit v ON v.PatientId = p.Id
 JOIN ClinicalEntry e ON e.VisitId = v.Id
@@ -224,7 +224,7 @@ ORDER BY VisitDate, s.Name;
 --       The order is the order of the chart: the category, then the newest first, then the Id.
 --       The Id is the last key, so the order is stable: an item cannot show on two pages.
 --       Patient B is in the full database only (main.py ensure-db). On the scenario data (01 + 02), the page is empty.
-SELECT e.Category, e.Display, a.Verification, date(a.AssertedAt) AS Date,
+SELECT e.Category, e.Display, a.Verification, substr(a.AssertedAt, 1, 10) AS Date,
        CASE WHEN m.StaffId IS NULL THEN p.Name ELSE s.Name END AS Author
 FROM Patient p
 JOIN Visit v ON v.PatientId = p.Id

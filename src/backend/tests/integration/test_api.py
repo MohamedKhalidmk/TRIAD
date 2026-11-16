@@ -38,7 +38,7 @@ def q12_ids(path, name: str, dob: str) -> set[int]:
     """Run query Q12 of dml/03_select_queries.sql for one patient. It returns the assertion ids."""
     text = (config.DML_DIR / "03_select_queries.sql").read_text(encoding="utf-8")
     block = re.search(r"-- Q12\..*?(SELECT e\.Category.*?;)", text, re.S).group(1)
-    sql = block.replace("SELECT e.Category, e.Display, a.Verification, date(a.AssertedAt) AS Date, a.Statement",
+    sql = block.replace("SELECT e.Category, e.Display, a.Verification, substr(a.AssertedAt, 1, 10) AS Date, a.Statement",
                         "SELECT a.Id", 1)
     sql = sql.replace("'Elena Marsh'", "?").replace("'1971-05-14'", "?")
     conn = sqlite3.connect(path)
