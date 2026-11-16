@@ -322,7 +322,7 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
   A value in the full form does not change. The date (the first 10 characters) and the instant do not change. A value that is not ISO 8601 gives 422 (`fields` names the detail).
   The knowledge graph keeps these values as `xsd:dateTime` (the range of the ontology), and a date-only value is not an `xsd:dateTime`.
 - In an `AssertionView`, `details` of a Prescription has `medication` (the name), `dosage`, `frequency` and `status`.
-  `details` of a CareTeam has `name`, `status` and `members` (the member names, separated by commas).
+  `details` of a CareTeam has `name`, `status` and `members` (the member names, separated by commas). The names are in the order of the member identifier (the system, then the value), on each store; a member that is not a staff member shows its value. The `members` list of a `CareTeamVersion` keeps the order of the request.
 
 ### 3.5 Care Assistant (chat)
 

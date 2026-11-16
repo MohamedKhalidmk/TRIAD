@@ -660,3 +660,18 @@ def test_the_care_team_endpoints_give_the_same_responses(api_pair):
     expected = reference.put(f"/api/visits/{VISIT}/care-team", headers=as_user("MOA:E1001"), json=wrong)
     assert (found.status_code, found.json()) == (expected.status_code, expected.json())
 
+
+def test_the_member_order_of_a_care_team_is_the_same_on_each_store(api_pair):
+    """doc/api.md section 3.4: `details.members` of a CareTeam item has the names in the order of the member
+    identifier (system, then value), not in the order of the request or of the names (SQLite: the covering index
+    of CareTeamMember; the KG sorts in Python). The `members` list of the care team keeps the order of the request."""
+    api, reference = api_pair
+    body = {"members": [{"system": EMPLOYEE, "value": value} for value in ("E1005", "E1002", "E1004")]}
+    for client in (api, reference):
+        team = client.put(f"/api/visits/{VISIT}/care-team", headers=as_user("MOA:E1001"), json=body)
+        assert team.status_code == 200, team.text
+        assert [m["value"] for m in team.json()["current"]["members"]] == ["E1005", "E1002", "E1004"]
+        items = all_items(client, "/api/patients/1/chart", OKAFOR, category="CareTeam")
+        current = next(a for a in items if a["id"] == team.json()["current"]["assertionId"])
+        assert current["details"]["members"] == "Priya Nair, Jun Park, Amara Okafor"     # E1002, E1004, E1005
+
