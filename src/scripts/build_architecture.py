@@ -1,31 +1,45 @@
 #!/usr/bin/env python3
-"""Generate the TRIAD architecture figure as a one-page draw.io file (doc/architecture.drawio).
+"""Generate the TRIAD architecture figures as one-page draw.io files.
 
-The figure shows the three layers of the course manual (UI, logic, data) with their Clean Architecture
-names, the request path, the onboarding path, the SQL scripts path and the Care Assistant.
+doc/architecture.drawio: the three layers of the course manual (UI, logic, data) with their Clean Architecture
+names, the request path, the onboarding path, the script paths and the Care Assistant. The data layer has two sets
+of adapters for the same ports. TRIAD_STORE selects one set:
+- sqlite/: the relational database of Milestone 4 (the driver: the Python module sqlite3);
+- sparql/: the knowledge graph of Milestone 5. The driver of Virtuoso 7.2 is SPARQLWrapper (the SPARQL 1.1
+  Protocol over HTTP). The driver of the embedded store Oxigraph (the tests, and a computer with no Docker) is
+  pyoxigraph.
+Each box of the data layer names its driver, as the architecture figure of the SEKE 2015 paper does.
 
-- A solid arrow is a call or a request. It points from the caller to the part that it calls.
+doc/kg_build.drawio: the build line of the knowledge graph. The data: FHIR R4 files -> onboarding -> SQLite ->
+the R2RML mapping (Morph-KGC) -> the RDF files -> the bulk loader -> Virtuoso (the ABox graph). The ontology:
+triad.ttl -> build_ontology.py -> triad.owl (RDF/XML) -> the TBox graph, and the check by hand in Protege.
+
+- A solid arrow is a call, a request or a flow of data. It points from the caller to the part that it calls.
 - A dashed arrow with an open head means "implements": an adapter of infrastructure/ implements a port
   of application/. Thus all code dependencies point to the logic layer (the dependency rule).
   The ports bar also tells that only main.py (the composition root) connects the adapters to the ports.
 - Grey shows the TRIAD contribution, as in the ER diagram: the authorship and revision model (domain rules),
   the access and audit layer, and the agent layer (Care Assistant, language model).
-- A dashed box is a file or a service outside the code.
+- A dashed box is a file, a tool or a service outside the code. A cylinder is a data store.
 
-The figure goes in the report at column width (about 8.5 cm). Thus it has few boxes and large text:
-the drawing is about 650 units wide, so the text size 24 is about 9 pt in print.
+The figures go in the report at column width (about 8.5 cm). Thus they have few boxes and large text:
+each drawing is about 650 units wide, so the text size 24 is about 9 pt in print.
 
-Make the figure again after a change (from the root folder of the repository):
+Make the figures again after a change (from the root folder of the repository):
     python3 src/scripts/build_architecture.py
     drawio -x -f png --scale 2 --crop -o doc/architecture.png doc/architecture.drawio
     drawio -x -f pdf --crop -o doc/architecture.pdf doc/architecture.drawio
+    drawio -x -f png --scale 2 --crop -o doc/kg_build.png doc/kg_build.drawio
+    drawio -x -f pdf --crop -o doc/kg_build.pdf doc/kg_build.drawio
 """
 from __future__ import annotations
 
 import html
 from pathlib import Path
 
-OUT = Path(__file__).resolve().parents[2] / "doc" / "architecture.drawio"
+DOC = Path(__file__).resolve().parents[2] / "doc"
+OUT = DOC / "architecture.drawio"
+OUT_KG = DOC / "kg_build.drawio"
 
 GREY = "#E6E6E6"           # the same grey as the ER diagram
 WHITE = "#FFFFFF"
@@ -35,26 +49,27 @@ LINE = FONT * LINE_HEIGHT  # the height of one text line
 BASE = (f"html=1;whiteSpace=wrap;strokeColor=#000000;fontColor=#000000;fontSize={FONT};"
         "fontFamily=Helvetica;spacing=3;")
 
-# The grid: three columns in each layer band.
+# The grid of the UI and logic bands: three columns.
 LEFT, RIGHT = 0, 652
 COLS = {1: (10, 220), 2: (240, 172), 3: (422, 220)}   # column -> (x, width)
-# The lowest row of the data band has its own grid of four boxes: a file, the database, a file, a service.
-LOW = {"files": (10, 166), "db": (186, 136), "sql": (346, 148), "provider": (504, 138)}
+# The grid of the data band: four columns (x, width). Column 3 is the Virtuoso lane, column 4 the Oxigraph lane.
+DATA = {1: (10, 120), 2: (140, 136), 3: (286, 220), 4: (516, 126)}
 PAD = 18                   # from a band line to the boxes
 GAP = 22                   # between two bands
 GAP_PORTS = 32             # between logic and data: room for the label "implements"
 ARROW = 26                 # the space for a short arrow between two boxes
+CYLINDER = 22              # the extra height of a cylinder: its caps need room
 
 
-def span(first: int, last: int | None = None) -> tuple[float, float]:
+def span(first: int, last: int | None = None, grid: dict = COLS) -> tuple[float, float]:
     """The x and the width of a box that spans the columns first to last."""
     last = last or first
-    x0 = COLS[first][0]
-    return x0, COLS[last][0] + COLS[last][1] - x0
+    x0 = grid[first][0]
+    return x0, grid[last][0] + grid[last][1] - x0
 
 
-def middle(column: int) -> float:
-    x, w = span(column)
+def middle(column: int, grid: dict = COLS) -> float:
+    x, w = span(column, grid=grid)
     return x + w / 2
 
 
@@ -103,7 +118,7 @@ class Figure:
         style = BASE + f"fillColor={GREY if grey else WHITE};"
         if shape == "cylinder":
             style = "shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=8;" + style
-        elif shape == "bar":
+        elif shape == "bar":        # a port bar or a driver: square corners, italic text
             style = "rounded=0;fontStyle=2;" + style
         else:
             style = "rounded=1;arcSize=6;" + style
@@ -111,14 +126,9 @@ class Figure:
             style += "dashed=1;dashPattern=5 4;"
         self._vertex(value, style, x, y, w, h, key)
 
-    def at(self, key: str, value: str, column: int, y: float, h: float, **kw) -> None:
-        """A box in one column of the grid."""
-        x, w = span(column)
-        self.box(key, value, x, y, w, h, **kw)
-
-    def low(self, key: str, value: str, y: float, h: float, **kw) -> None:
-        """A box in the lowest row of the data band."""
-        x, w = LOW[key]
+    def at(self, key: str, value: str, column: int, y: float, h: float, grid: dict = COLS, **kw) -> None:
+        """A box in one column of a grid."""
+        x, w = span(column, grid=grid)
         self.box(key, value, x, y, w, h, **kw)
 
     def text(self, value: str, x: float, y: float, w: float, h: float, align: str = "left") -> None:
@@ -147,10 +157,19 @@ class Figure:
             f'source="{self.ids[source]}" target="{self.ids[target]}"><mxGeometry relative="1" as="geometry"/></mxCell>'
         )
 
-    def xml(self, width: int, height: int) -> str:
+    def legend(self, y: float, items: list[tuple[str, dict, int]]) -> float:
+        """One legend row: a small box and its text for each item (text, box options, text width)."""
+        x = 10
+        for i, (label, options, width) in enumerate(items):
+            self.box(f"legend_{i}", "", x, y + 4, 34, 24, **options)
+            self.text(label, x + 42, y, width, 32)
+            x += 42 + width + 8
+        return y + 32
+
+    def xml(self, name: str, diagram_id: str, width: int, height: int) -> str:
         return (
             '<mxfile host="build_architecture.py" type="device">'
-            '<diagram name="TRIAD architecture" id="architecture">'
+            f'<diagram name="{name}" id="{diagram_id}">'
             f'<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" page="1" '
             f'pageWidth="{width}" pageHeight="{height}" background="#FFFFFF">'
             f'<root><mxCell id="0"/><mxCell id="1" parent="0"/>{"".join(self.cells)}</root>'
@@ -159,6 +178,7 @@ class Figure:
 
 
 def build() -> tuple[Figure, float]:
+    """The architecture figure: the three layers, with the relational and the semantic data layer."""
     f = Figure()
 
     # ----- UI: the React frontend and the api/ layer -----
@@ -179,7 +199,7 @@ def build() -> tuple[Figure, float]:
     h_domain, h_onboard = tall(3), tall(2)
     h_access, h_case = tall(2), tall(3)
     floor = top + max(h_domain + ARROW + h_onboard, h_access + ARROW + h_case)   # the top of the ports bar
-    h_bar = 34
+    h_bar = tall(2)
     f.band("<b>logic</b> (biz) · application/, domain/", y, floor + h_bar + 10 - y)
     f.at("domain", lines("<b>domain/</b> rules:", "supersede, current", "state, patient-visible"), 1, top, h_domain,
          grey=True)
@@ -191,51 +211,145 @@ def build() -> tuple[Figure, float]:
     f.at("agent", lines("<b>Care Assistant</b>", "agent loop → tools", "refs E1, E2; no ids"), 3, floor - h_case,
          h_case, grey=True)
     x, w = span(1, 3)
-    f.box("ports", "ports (Python Protocols); main.py connects the adapters", x, floor, w, h_bar, shape="bar")
+    f.box("ports", lines("ports (Python Protocols); main.py connects the adapters",
+                         "TRIAD_STORE: the sqlite/ or the sparql/ adapters"), x, floor, w, h_bar, shape="bar")
     f.arrow("routers", "access", middle(3))
     f.arrow("access", "domain", side=((0, 0.5), (1, round(h_access / 2 / h_domain, 4))))
     f.arrow("access", "usecases", middle(2))
     f.arrow("access", "agent", middle(3))
     y = floor + h_bar + 10
 
-    # ----- data: infrastructure/ (adapters) and SQLite 3 -----
+    # ----- data: infrastructure/ (the adapters and their drivers), SQLite 3, Virtuoso 7.2, Oxigraph -----
     y += GAP_PORTS
-    f.text("<i>implements</i>", middle(1) + 14, y - GAP_PORTS, 200, GAP_PORTS)
-    top = y + PAD
-    h_adapter = tall(3)
-    f.at("fhir", lines("<b>FHIR reader</b>", "+ mappers", "(anti-corruption)"), 1, top, h_adapter)
-    f.at("repos", lines("<b>Repositories</b>", "raw sqlite3", "LIMIT/OFFSET"), 2, top, h_adapter)
-    f.at("llm", lines("<b>Language model</b>", "fake (default)", "or LiteLLM"), 3, top, h_adapter, grey=True)
-    low = top + h_adapter + ARROW
-    h_low = tall(3)
-    h_db = h_low + 22                                # the caps of the cylinder need room
-    f.low("files", lines("<b>FHIR R4 files</b>", "Synthea,", "TRIAD bundle"), low, h_low, dashed=True)
-    f.low("db", lines("<b>SQLite 3</b>", "29 relations", "11 triggers"), low, h_db, shape="cylinder")
-    f.low("sql", lines("<b>SQL scripts</b>", "01–05 via", "sqlite3 CLI"), low, h_low, dashed=True)
-    f.low("provider", lines("<b>Provider</b>", "for example", "Gemini"), low, h_low, dashed=True)
-    bottom = low + h_db + PAD + 2
-    f.band("<b>data</b> (dal) · infrastructure/, SQLite 3", y, bottom - y, label_at_bottom=True)
+    h3 = tall(3)
+    h_store = h3 + CYLINDER
+    # Row A: the FHIR reader, and the language model with its provider. The sqlite/ and sparql/ adapters are in
+    # row B; their "implements" arrows go up through the free space of row A (x_sqlite and x_sparql).
+    row_a = y + PAD
+    x_sqlite = middle(2, DATA)
+    x_sparql = DATA[3][0] + 44
+    x_llm, w_llm = 372, 120
+    x_provider = x_llm + w_llm + ARROW
+    f.at("fhir", lines("<b>FHIR</b>", "reader +", "mappers"), 1, row_a, h3, grid=DATA)
+    f.box("llm", lines("<b>LLM</b>", "fake, or", "LiteLLM"), x_llm, row_a, w_llm, h3, grey=True)
+    f.box("provider", lines("<b>Provider</b>", "(Gemini)"), x_provider, row_a, RIGHT - 10 - x_provider, h3,
+          dashed=True)
+    # Row B: the FHIR files, and the two sets of repositories (the same ports).
+    row_b = row_a + h3 + ARROW
+    f.at("files", lines("<b>FHIR R4</b>", "files", "(Synthea)"), 1, row_b, h3, grid=DATA, dashed=True)
+    f.at("repos", lines("<b>sqlite/</b>", "repositories", "raw sqlite3"), 2, row_b, h3, grid=DATA)
+    x, w = span(3, 4, DATA)
+    f.box("sparql", lines("<b>sparql/</b> repositories", "write buffer, guards,", "one INSERT DATA"),
+          x, row_b, w, h3)
+    # Row C: the SQL scripts and SQLite; the two drivers of the knowledge graph.
+    row_c = row_b + h3 + ARROW
+    f.box("sql", lines("<b>SQL</b>", "scripts", "01–05"), DATA[1][0], row_c, 100, h3, dashed=True)
+    f.at("db", lines("<b>SQLite 3</b>", "29 relations", "11 triggers"), 2, row_c, h_store, grid=DATA,
+         shape="cylinder")
+    f.at("wrapper", lines("SPARQLWrapper", "SPARQL 1.1", "Protocol (HTTP)"), 3, row_c, h3, grid=DATA, shape="bar")
+    f.at("pyoxigraph", lines("pyoxigraph", "embedded"), 4, row_c, h3, grid=DATA, shape="bar")
+    # Row D: the SPARQL scripts and the two triple stores.
+    row_d = row_c + h_store + 20
+    f.box("sparql_scripts", lines("<b>SPARQL scripts</b>", "01–06: kg.sh,", "Conductor"), DATA[1][0], row_d,
+          240, h3, dashed=True)
+    f.at("virtuoso", lines("<b>Virtuoso 7.2</b>", "in Docker", "TBox, ABox graphs"), 3, row_d, h_store, grid=DATA,
+         shape="cylinder")
+    f.at("oxigraph", lines("<b>Oxigraph</b>", "tests,", "no Docker"), 4, row_d, h_store, grid=DATA,
+         shape="cylinder")
+    bottom = row_d + h_store + PAD + 2
+    f.band("<b>data</b> (dal) · infrastructure/, SQLite 3, Virtuoso 7.2", y, bottom - y, label_at_bottom=True)
 
-    for adapter, column in (("fhir", 1), ("repos", 2), ("llm", 3)):
-        f.arrow(adapter, "ports", middle(column), implements=True)
-    f.arrow("fhir", "files", LOW["files"][0] + LOW["files"][1] / 2)
-    f.arrow("repos", "db", (COLS[2][0] + LOW["db"][0] + LOW["db"][1]) / 2)     # where the two boxes overlap
-    f.arrow("llm", "provider", LOW["provider"][0] + LOW["provider"][1] / 2)
-    f.arrow("sql", "db", side=((0, 0.5), (1, 0.5)))
+    for adapter, x_abs in (("fhir", middle(1, DATA)), ("repos", x_sqlite), ("sparql", x_sparql),
+                           ("llm", x_llm + w_llm / 2)):
+        f.arrow(adapter, "ports", x_abs, implements=True)
+    f.text("<i>implements</i>", x_llm + w_llm / 2 + 14, y - GAP_PORTS, 180, GAP_PORTS)
+    f.arrow("fhir", "files", middle(1, DATA))
+    f.arrow("llm", "provider", side=((1, 0.5), (0, 0.5)))
+    f.arrow("repos", "db", x_sqlite)
+    f.arrow("sparql", "wrapper", middle(3, DATA))
+    f.arrow("sparql", "pyoxigraph", middle(4, DATA))
+    f.arrow("wrapper", "virtuoso", middle(3, DATA))
+    f.arrow("pyoxigraph", "oxigraph", middle(4, DATA))
+    f.arrow("sql", "db", side=((1, 0.5), (0, round(h3 / 2 / h_store, 4))))
+    f.arrow("sparql_scripts", "virtuoso", side=((1, 0.5), (0, round(h3 / 2 / h_store, 4))))
     y = bottom + 20
 
     # ----- legend: one row -----
-    f.box("legend_grey", "", 10, y + 4, 34, 24, grey=True)
-    f.text("TRIAD contribution", 52, y, 230, 32)
-    f.box("legend_dashed", "", 290, y + 4, 34, 24, dashed=True)
-    f.text("file or service", 332, y, 200, 32)
-    return f, y + 32
+    end = f.legend(y, [("TRIAD contribution", {"grey": True}, 230),
+                       ("file, tool or service", {"dashed": True}, 250)])
+    return f, end
+
+
+# The grid of the build figure: three lanes (x, width). Lane 1: the data (ABox). Lane 2: the mapping and the
+# check by hand. Lane 3: the ontology (TBox). The gaps between the lanes hold the side arrows.
+LANES = {1: (10, 208), 2: (242, 170), 3: (436, 206)}
+STEP_GAP = 30                # the space for the arrow between two rows
+
+
+def build_kg() -> tuple[Figure, float]:
+    """The build line of the knowledge graph: from the FHIR files and triad.ttl to the two graphs of the store."""
+    f = Figure()
+    h2, h3 = tall(2), tall(3)
+
+    y = 10
+    f.at("fhir_files", lines("<b>FHIR R4 files</b>", "Synthea,", "TRIAD bundle"), 1, y, h3, grid=LANES, dashed=True)
+    f.at("ttl", lines("<b>triad.ttl</b>", "Turtle source,", "by hand"), 3, y, h3, grid=LANES, dashed=True)
+
+    y += h3 + STEP_GAP
+    f.at("onboarding", lines("<b>Onboarding</b>", "main.py ensure-db"), 1, y, h2, grid=LANES)
+    f.at("build_owl", lines("<b>Build, checks</b>", "build_ontology.py"), 3, y, h2, grid=LANES)
+
+    y += h2 + STEP_GAP
+    f.at("sqlite", lines("<b>SQLite 3</b>", "188,312 rows"), 1, y, h2 + CYLINDER, grid=LANES, shape="cylinder")
+    f.at("protege", lines("<b>Protégé 5.6</b>", "HermiT check", "(by hand)"), 2, y, h3, grid=LANES, dashed=True)
+    f.at("owl", lines("<b>triad.owl</b>", "RDF/XML,", "1,956 triples"), 3, y, h3, grid=LANES, dashed=True)
+
+    y += h3 + STEP_GAP
+    f.at("r2rml", lines("<b>R2RML</b> mapping", "Morph-KGC 2.10", "main.py export-kg"), 1, y, h3, grid=LANES)
+    f.at("mapping", lines("<b>triad.r2rml.ttl</b>", "W3C R2RML,", "35 TriplesMaps"), 2, y, h3, grid=LANES,
+         dashed=True)
+
+    y += h3 + STEP_GAP
+    f.at("rdf", lines("<b>RDF files</b>", ".nt.gz, .rdf.gz", "1,298,482 triples"), 1, y, h3, grid=LANES,
+         dashed=True)
+
+    y += h3 + STEP_GAP
+    x, w = span(1, 3, LANES)
+    f.box("load", lines("<b>main.py ensure-kg</b>: load, count check, marker",
+                        "bulk loader (kg.sh load), or pyoxigraph"), x, y, w, h2)
+
+    y += h2 + STEP_GAP
+    h_store = h3 + CYLINDER
+    x, w = span(1, 2, LANES)
+    f.box("virtuoso", lines("<b>Virtuoso 7.2</b>", "graph/tbox ← triad.owl", "graph/abox ← RDF files"),
+          x, y, w, h_store, shape="cylinder")
+    f.at("oxigraph", lines("<b>Oxigraph</b>", "embedded,", "same graphs"), 3, y, h_store, grid=LANES,
+         shape="cylinder")
+
+    f.arrow("fhir_files", "onboarding", middle(1, LANES))
+    f.arrow("onboarding", "sqlite", middle(1, LANES))
+    f.arrow("sqlite", "r2rml", middle(1, LANES))
+    f.arrow("r2rml", "rdf", middle(1, LANES))
+    f.arrow("rdf", "load", middle(1, LANES))
+    f.arrow("mapping", "r2rml", side=((0, 0.5), (1, 0.5)))
+    f.arrow("ttl", "build_owl", middle(3, LANES))
+    f.arrow("build_owl", "owl", middle(3, LANES))
+    f.arrow("owl", "protege", side=((0, 0.5), (1, 0.5)))
+    f.arrow("owl", "load", middle(3, LANES))
+    f.arrow("load", "virtuoso", middle(1, LANES))
+    f.arrow("load", "oxigraph", middle(3, LANES))
+
+    y += h_store + 20
+    end = f.legend(y, [("step (a command)", {}, 200), ("file or tool", {"dashed": True}, 150)])
+    return f, end
 
 
 def main() -> None:
-    fig, height = build()
-    OUT.write_text(fig.xml(RIGHT, int(height) + 10), encoding="utf-8")
-    print(f"Wrote {OUT} ({RIGHT} x {height:.0f} units).")
+    for out, make, name, diagram_id in ((OUT, build, "TRIAD architecture", "architecture"),
+                                        (OUT_KG, build_kg, "TRIAD knowledge-graph build", "kg-build")):
+        fig, height = make()
+        out.write_text(fig.xml(name, diagram_id, RIGHT, int(height) + 10), encoding="utf-8")
+        print(f"Wrote {out} ({RIGHT} x {height:.0f} units).")
 
 
 if __name__ == "__main__":
