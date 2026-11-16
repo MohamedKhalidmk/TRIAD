@@ -187,8 +187,9 @@ def test_the_chart_is_in_the_category_order_then_newest_first(api, longest_chart
     for params in ({}, {"history": "true"}):
         items = all_items(api, f"/api/patients/{B_ID}/chart", B_DOCTOR, **params)
         assert items == sorted(items, key=chart_key)
-    # The longest chart: the full order in one call of the port of the store (on a KG store, one query gives all
-    # 12,471 rows: no row limit of the store cuts them), and the last API page is its end.
+    # The longest chart (plan 5.5, the largest-chart count): the full order in one call of the port of the store.
+    # On a KG store, one query gives all 12,471 rows: no row limit of the store cuts them (the Virtuoso client
+    # raises an error when the header X-SPARQL-MaxRows shows a cut result). The last API page is its end.
     rows = [{"category": a.category, "assertedAt": a.asserted_at, "id": a.id} for a in longest_chart]
     assert len(rows) == 12471 and rows == sorted(rows, key=chart_key)
     last = get(api, f"/api/patients/{LONG_PATIENT}/chart", LONG_DOCTOR, limit=200, offset=12400)

@@ -19,7 +19,7 @@ ports as `infrastructure/sqlite/` (`application/ports.py`), so the API, the use 
 | `guards.py` | The guard framework and the guards of agent A. `guards_records.py` (B), `guards_chat.py` (C), `guards_directory.py` (D) hold the other guards. |
 | `sparql_log.py` | The SPARQL log (`TRIAD_SPARQL_LOG`): the template of each request, not the values. |
 | `users_repository.py` | `SparqlUserRepository`: complete. It is the worked example below. |
-| `*_repository.py` | The other repositories: stubs (each method raises `NotImplementedError("agent X")`). |
+| `*_repository.py` | The other repositories (agents B, C and D): the same methods and results as `infrastructure/sqlite/`. |
 
 The build of the graph is in `application/semantic/build_kg.py` (the use case and its ports) and
 `infrastructure/rdf/kg_store.py`, `infrastructure/rdf/logical_hash.py` (the adapters).
@@ -162,7 +162,10 @@ def one_head_per_entry(change: Change, facts: Facts) -> None:
   `Medication.Code, Medication.CodeSystem`), `foreign_key_conflict()` (409), `check_failed(text)` (422,
   `fields.database`), `trigger_failed(text)` (422, the text of the trigger).
 - `kinds`: the guard runs only when the change touches one of these kinds. The guards run in the order of
-  registration (agent A first).
+  registration (agent A first), then in the order of `guards.EXTENSIONS`: the assertion guards (B, the triggers
+  of SQLite) before the chat guards (C) and the key guards (D, UNIQUE), because SQLite runs the BEFORE INSERT
+  triggers of a row before its UNIQUE constraints. `test_store_guards.py` checks the order, and the guard table
+  (each case of `05_constraint_violations.sql` that the API can reach) on each store.
 - The guards of agent A: `delete.allow-list` (Assertion and AuditEvent are append-only: no replace, no delete, no
   new triple on a stored one), `foreign-keys` (a deleted row is not in use; each IRI of a new triple exists), and
   the example `patient.key-is-fixed`.
@@ -176,6 +179,7 @@ The store fixtures are in `tests/conftest.py` (code in `tests/fixtures/stores.py
 | `store` | the scenario data (01 + 02) | fast |
 | `planted_store` | the planted data (`tests/fixtures/plant.py`) | fast |
 | `full_store` | the full data (the onboarding) | marker `slow`; the first run builds the full graph (about 15 s) |
+| `module_full_store` | the full data, ONE copy for all tests of a module | marker `slow`; for tests that share their data (the journey `test_hospital_visit.py`, `test_pages.py`, `test_assistant_tools.py`). pytest runs the tests of the module for one store, then for the next. Do not use `full_store` in the same module (on Virtuoso its load replaces the data of the module). |
 
 Each one is parametrized over `TRIAD_TEST_STORES` (default `sqlite,oxigraph`). A handle gives `store.client()`
 (a TestClient), `store.open_ctx()` (an `AppContext`), `store.reference()` (a SQLite context on the same data),
@@ -193,7 +197,19 @@ def test_a_denied_chart_read_is_in_the_audit_log(full_store):                  #
 
 The probe uses the ontology terms: `count(kind, **match)`, `rows(kind, **match)`, `row(kind, id)`, `last(kind)`.
 An FK term gives the integer id of the target (for a reverse-direction term, the parent: `issues` of a message is
-the staff id). `tests/integration/test_store_users.py` is the example file.
+the staff id). `count(kind)` with no match is one COUNT, and `row(kind, id)` reads one subject: use them on the
+full data (`probe.count("message")`). The probe reads the kinds of `ids.KIND_TABLE` (the subtype columns, for
+example `OnsetDate`, are not in it). `tests/integration/test_store_users.py` is the example file.
+
+The other patterns of the converted tests (`test_api.py`, `test_pages.py`, `test_assistant_tools.py`):
+- A query of the scripts runs in the language of the store: the SQL of `dml/03_select_queries.sql` on SQLite, the
+  SPARQL of `models/semantic/sparql/03_select_queries.sparql` on a KG store (`q12_ids`, `q14` of the tests).
+- The expected result of a full chart comes from `store.reference()` (the port has no method that reads a full
+  chart); the input rows that a test does not change (for example the head of the longest chain) come from the
+  SQLite copy `store.db_path`.
+- A check of the SQL text runs only on SQLite (`@pytest.mark.stores("sqlite")`); its KG form checks the SPARQL log
+  (`sparql_log="on"`: the template of each request, for example the LIMIT of each chart read of a chat turn).
+- Times compare as instants (`domain.rules.parse_time`).
 
 ```
 .venv/bin/python -m pytest -q src/backend/tests/integration/test_store_users.py      # sqlite and oxigraph
