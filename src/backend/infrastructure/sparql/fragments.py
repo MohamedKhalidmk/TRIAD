@@ -70,7 +70,7 @@ CURRENT = current()
 # It needs the variables of the assertion view. A patient report has no issuer (?s is not bound).
 PATIENT_VISIBLE = CURRENT + """
 FILTER (?verification != "EnteredInError" && (
-    (?intent = "Decision" && ?source = "Human" && BOUND(?staffRole) && sameTerm(?staffRole, triad:Doctor))
+    (?intent = "Decision" && ?source = "Human" && BOUND(?staffRole) && ?staffRole = triad:Doctor)
     || (?type IN (triad:Observation, triad:LabReport) && ?verification = "Confirmed")
     || (!BOUND(?s) && ?origin = "Patient")))"""
 
@@ -94,10 +94,13 @@ def bind_id(subject: str, kind: str, target: str = "?n") -> str:
 
 
 def rank(variable: str, classes: Sequence[str]) -> str:
-    """The place of a class IRI in a list, for ORDER BY: IF(sameTerm(?x, triad:A), 0, IF(..., 1, ... n))."""
+    """The place of a class IRI in a list, for ORDER BY: IF(?x = triad:A, 0, IF(..., 1, ... n)).
+
+    The IRIs compare with "=", not with sameTerm(): on Virtuoso, sameTerm(?type, triad:Allergy) is false also when
+    ?type is triad:Allergy (writing rule 11 of models/semantic/sparql/README.md)."""
     text = str(len(classes))
     for index in range(len(classes) - 1, -1, -1):
-        text = f"IF(sameTerm({variable}, {terms.class_term(classes[index])}), {index}, {text})"
+        text = f"IF({variable} = {terms.class_term(classes[index])}, {index}, {text})"
     return text
 
 
