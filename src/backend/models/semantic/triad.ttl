@@ -1,0 +1,1448 @@
+# TRIAD ontology (Milestone 5): the hand-written Turtle source.
+#
+# build_ontology.py checks this file and writes triad.owl (RDF/XML). Do not edit triad.owl.
+# ontology.md explains each mapping from the ER model and the relations to OWL.
+# The order: the header, the classes, the object properties, the datatype properties,
+# the restrictions, the keys, the alignment (PROV-O and FHIR R4).
+#
+# Rules (ontology.md, sections 4 and 5):
+# - OWL 2 has no xsd:date. A date-only attribute has the range rdfs:Literal in this file; the data uses xsd:date.
+# - A property that two columns share has one rdfs:domain: the union of its classes.
+# - A property with a closed range (owl:oneOf) has exactly one column. Two columns never share it.
+# - The named inverses and the derived properties have no triples in the store.
+
+@prefix triad:   <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix fhir:    <http://hl7.org/fhir/> .
+
+# =============================================================================
+# Header
+# =============================================================================
+
+<https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> a owl:Ontology ;
+    owl:versionIRI <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad/5.0.0> ;
+    owl:versionInfo "5.0.0" ;
+    rdfs:label "TRIAD ontology"@en ;
+    dcterms:title "TRIAD: Trusted RDF Interoperable Agent Data"@en ;
+    dcterms:creator "Asish A. George" , "Mohamed Khaled" ;
+    dcterms:license <https://creativecommons.org/licenses/by-nc-sa/4.0/> ;
+    dcterms:source <https://github.com/MohamedKhalidmk/TRIAD/blob/main/src/backend/models/er/README.md> ,
+        <https://github.com/MohamedKhalidmk/TRIAD/blob/main/src/backend/models/relational/sql/ddl/01_create_tables.sql> ;
+    rdfs:comment "The ontology of TRIAD, a model for clinical records that many people make and change over time. Each clinical fact is an assertion with an author and a source message. A new assertion supersedes the old one. The ontology maps the TRIAD ER model and its 29 relations to RDFS and OWL 2 DL. The data is in a separate named graph. All data is synthetic."@en .
+
+# The annotation properties that this ontology uses (OWL 2 DL needs a declaration for each one).
+dcterms:title a owl:AnnotationProperty .
+dcterms:creator a owl:AnnotationProperty .
+dcterms:license a owl:AnnotationProperty .
+dcterms:source a owl:AnnotationProperty .
+skos:closeMatch a owl:AnnotationProperty .
+skos:relatedMatch a owl:AnnotationProperty .
+
+# =============================================================================
+# Classes (ER entity sets, IS-A, association classes and value classes)
+# =============================================================================
+
+# --- Directory -------------------------------------------------------------
+
+# ER entity set Department (relation 1).
+triad:Department a owl:Class ;
+    rdfs:label "Department"@en ;
+    rdfs:comment "A unit of the hospital, for example a clinic or a ward."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER entity set Location (relation 2).
+triad:Location a owl:Class ;
+    rdfs:label "Location"@en ;
+    rdfs:comment "A place where care occurs, for example a room, a ward or a bed."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER entity set Staff (relation 3). ISA Staff -> Doctor, Nurse, MOA (disjoint, total).
+triad:Staff a owl:Class ;
+    rdfs:label "Staff"@en ;
+    rdfs:comment "A person who works in the hospital. Each staff member is exactly one of Doctor, Nurse or MOA."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype Doctor (relation 6).
+triad:Doctor a owl:Class ;
+    rdfs:subClassOf triad:Staff ;
+    rdfs:label "Doctor"@en ;
+    rdfs:comment "A staff member who is a physician."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype Nurse (relation 7).
+triad:Nurse a owl:Class ;
+    rdfs:subClassOf triad:Staff ;
+    rdfs:label "Nurse"@en ;
+    rdfs:comment "A staff member who is a nurse."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype MOA (relation 8).
+triad:MOA a owl:Class ;
+    rdfs:subClassOf triad:Staff ;
+    rdfs:label "MOA"@en ;
+    rdfs:comment "A staff member who is a medical office assistant. An MOA works at the front desk."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER relationship WorksIn (M:N with attributes, relation 5): an association class (W3C n-ary pattern).
+triad:WorksIn a owl:Class ;
+    rdfs:label "Works in"@en ;
+    rdfs:comment "One role of one staff member in one department. It holds the role code, the specialty and the dates. The ER relationship WorksIn becomes this class, because the relationship has attributes."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Patients and visits ------------------------------------------------------
+
+# ER entity set Patient (relation 9).
+triad:Patient a owl:Class ;
+    rdfs:label "Patient"@en ;
+    rdfs:comment "A person who gets care in the hospital. The name and the date of birth identify the patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER multivalued composite attribute Patient.Identifier (relation 10): a value class.
+triad:PatientIdentifier a owl:Class ;
+    rdfs:label "Patient identifier"@en ;
+    rdfs:comment "One identifier of a patient, for example a medical record number or a health number. Each value of the multivalued attribute Patient.Identifier is one node."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER entity set Visit (relation 11).
+triad:Visit a owl:Class ;
+    rdfs:label "Visit"@en ;
+    rdfs:comment "One encounter of a patient with the hospital, for example an office visit, a phone call or a stay."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER relationship TakesPlaceIn (M:N with attributes, relation 12): an association class.
+triad:VisitLocation a owl:Class ;
+    rdfs:label "Visit location"@en ;
+    rdfs:comment "One period of one visit at one location. The ER relationship TakesPlaceIn becomes this class, because the relationship has attributes."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Clinical entries ---------------------------------------------------------
+
+# ER entity set ClinicalEntry (relation 13). ISA ClinicalEntry -> 8 subtypes (disjoint, total).
+triad:ClinicalEntry a owl:Class ;
+    rdfs:label "Clinical entry"@en ;
+    rdfs:comment "One clinical fact of a visit, for example a diagnosis or a prescription. Each entry is exactly one of the 8 subclasses. The assertions about the entry give its history."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype Diagnosis (relation 14).
+triad:Diagnosis a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Diagnosis"@en ;
+    rdfs:comment "A clinical entry that names a condition of the patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype Procedure (relation 15).
+triad:Procedure a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Procedure"@en ;
+    rdfs:comment "A clinical entry that records a procedure on the patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype Allergy (relation 16).
+triad:Allergy a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Allergy"@en ;
+    rdfs:comment "A clinical entry that records an allergy or an intolerance."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype Observation (relation 17).
+triad:Observation a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Observation"@en ;
+    rdfs:comment "A clinical entry that records a measurement or a finding, for example a blood pressure."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype LabOrder (relation 18).
+triad:LabOrder a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Lab order"@en ;
+    rdfs:comment "A clinical entry that orders a laboratory test."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype LabReport (relation 19).
+triad:LabReport a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Lab report"@en ;
+    rdfs:comment "A clinical entry that gives the result of a laboratory test."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype Prescription (relation 21).
+triad:Prescription a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Prescription"@en ;
+    rdfs:comment "A clinical entry that orders a medication for the patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER subtype CareTeam (relation 22).
+triad:CareTeam a owl:Class ;
+    rdfs:subClassOf triad:ClinicalEntry ;
+    rdfs:label "Care team"@en ;
+    rdfs:comment "A clinical entry that lists the staff members who care for the patient. Only a member of a current, active care team can open the chart."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER multivalued composite attribute CareTeam.Member (relation 23): a value class.
+triad:CareTeamMember a owl:Class ;
+    rdfs:label "Care team member"@en ;
+    rdfs:comment "One member of a care team. It keeps the identifier of the staff member as a value (a FHIR reference by identifier), so it adds no loop to the tree."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER entity set Medication (relation 20).
+triad:Medication a owl:Class ;
+    rdfs:label "Medication"@en ;
+    rdfs:comment "A medication. The code and the code system identify it, for example an RxNorm code or a Canadian DIN."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Authorship: messages and assertions (the TRIAD core) ---------------------
+
+# ER entity set Message (relation 24).
+triad:Message a owl:Class ;
+    rdfs:label "Message"@en ;
+    rdfs:comment "A communication that brings facts into the record, for example a phone note, a visit note or a copied record. A staff member issues it, or the patient sends it through the app."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER weak entity set Assertion (relation 25), owner Message.
+triad:Assertion a owl:Class ;
+    rdfs:label "Assertion"@en ;
+    rdfs:comment "One claim of a message about one clinical entry. It is a weak entity: its message and its sequence number identify it. A new assertion can supersede an old one. The current record is the set of assertions that no assertion supersedes."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Agent layer and audit log ------------------------------------------------
+
+# ER entity set ChatSession (relation 26).
+triad:ChatSession a owl:Class ;
+    rdfs:label "Chat session"@en ;
+    rdfs:comment "A conversation of one user with the Care Assistant about one patient. It is a log: it keeps the user and the patient as values, not as links."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER weak entity set ChatTurn (relation 27), owner ChatSession.
+triad:ChatTurn a owl:Class ;
+    rdfs:label "Chat turn"@en ;
+    rdfs:comment "One turn of a chat session: a question of the user or an answer of the assistant. It is a weak entity: its session and its sequence number identify it."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER relationship Cites (M:N with the attribute Rank, relation 28): an association class.
+triad:Citation a owl:Class ;
+    rdfs:label "Citation"@en ;
+    rdfs:comment "The link from an assistant turn to one assertion that the answer used. The ER relationship Cites becomes this class, because the relationship has the attribute Rank."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER entity set AuditEvent (relation 29).
+triad:AuditEvent a owl:Class ;
+    rdfs:label "Audit event"@en ;
+    rdfs:comment "A record of one access to the data of a patient, or of one denied access. It is a log: it keeps the actor and the patient as values, not as links."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Disjointness ---------------------------------------------------------------
+
+# ISA Staff (disjoint, total): each staff member is exactly one subtype.
+triad:Staff owl:disjointUnionOf ( triad:Doctor triad:Nurse triad:MOA ) .
+
+# ISA ClinicalEntry (disjoint, total): each entry is exactly one subtype.
+triad:ClinicalEntry owl:disjointUnionOf ( triad:Diagnosis triad:Procedure triad:Allergy triad:Observation
+                                          triad:LabOrder triad:LabReport triad:Prescription triad:CareTeam ) .
+
+# The 12 top classes, the 3 association classes and the 2 value classes are pairwise disjoint.
+# OWL has no Unique Name Assumption, so this catches a typing error (an IRI with two classes).
+[] a owl:AllDisjointClasses ;
+    owl:members ( triad:Department triad:Location triad:Staff triad:Patient triad:Visit triad:ClinicalEntry
+                  triad:Medication triad:Message triad:Assertion triad:ChatSession triad:ChatTurn triad:AuditEvent
+                  triad:WorksIn triad:VisitLocation triad:Citation
+                  triad:PatientIdentifier triad:CareTeamMember ) .
+
+# =============================================================================
+# Object properties (ER relationships)
+# =============================================================================
+
+# --- The 17 stored properties (one per foreign-key column) --------------------
+
+# ER Issues (Staff 1 : Message 0..N; a message has 0..1 issuer). FK Message.StaffId (reverse direction).
+triad:issues a owl:ObjectProperty , owl:InverseFunctionalProperty ;
+    rdfs:domain triad:Staff ;
+    rdfs:range triad:Message ;
+    rdfs:label "issues"@en ;
+    rdfs:comment "The staff member issues the message. A message has zero or one issuer. A message with no issuer comes from the patient. Column: Message.StaffId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER Contains (identifying; Message 1 : Assertion 1..N). FK Assertion.MessageId (reverse direction).
+triad:contains a owl:ObjectProperty , owl:InverseFunctionalProperty ;
+    rdfs:domain triad:Message ;
+    rdfs:range triad:Assertion ;
+    rdfs:label "contains"@en ;
+    rdfs:comment "The message contains the assertion. This is the identifying relationship of the weak entity Assertion. Column: Assertion.MessageId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER About (Assertion 1..N : ClinicalEntry 1). FK Assertion.ClinicalEntryId.
+triad:about a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range triad:ClinicalEntry ;
+    rdfs:label "about"@en ;
+    rdfs:comment "The assertion is about the clinical entry. Each assertion is about exactly one entry. Column: Assertion.ClinicalEntryId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER Supersedes (unary, 1:1). FK Assertion.SupersedesId (UNIQUE, nullable).
+triad:supersedes a owl:ObjectProperty , owl:FunctionalProperty , owl:InverseFunctionalProperty ,
+        owl:AsymmetricProperty , owl:IrreflexiveProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range triad:Assertion ;
+    rdfs:subPropertyOf triad:supersedesTransitively ;
+    rdfs:label "supersedes"@en ;
+    rdfs:comment "The new assertion replaces the old assertion. An assertion replaces zero or one assertion, and zero or one assertion replaces it. Column: Assertion.SupersedesId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER During (ClinicalEntry 0..N : Visit 1, total). FK ClinicalEntry.VisitId.
+triad:during a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ClinicalEntry ;
+    rdfs:range triad:Visit ;
+    rdfs:label "during"@en ;
+    rdfs:comment "The clinical entry is recorded during the visit. Each entry has exactly one visit. Column: ClinicalEntry.VisitId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER Has (Patient 1 : Visit 0..N). FK Visit.PatientId (reverse direction).
+triad:hasVisit a owl:ObjectProperty , owl:InverseFunctionalProperty ;
+    rdfs:domain triad:Patient ;
+    rdfs:range triad:Visit ;
+    rdfs:label "has visit"@en ;
+    rdfs:comment "The patient has the visit. Each visit has exactly one patient. Column: Visit.PatientId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER TakesPlaceIn (Visit M : Location N): the visit end. FK VisitLocation.VisitId.
+triad:ofVisit a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:VisitLocation ;
+    rdfs:range triad:Visit ;
+    rdfs:label "of visit"@en ;
+    rdfs:comment "The visit of the visit location. Column: VisitLocation.VisitId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER TakesPlaceIn: the location end. FK VisitLocation.LocationId.
+triad:atLocation a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:VisitLocation ;
+    rdfs:range triad:Location ;
+    rdfs:label "at location"@en ;
+    rdfs:comment "The location of the visit location. Column: VisitLocation.LocationId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER WorksIn (Staff M : Department N): the staff end. FK WorksIn.StaffId.
+triad:ofStaff a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:WorksIn ;
+    rdfs:range triad:Staff ;
+    rdfs:label "of staff"@en ;
+    rdfs:comment "The staff member of the role. Each staff member works in one or more departments. Column: WorksIn.StaffId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER WorksIn: the department end. FK WorksIn.DepartmentId.
+triad:atDepartment a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:WorksIn ;
+    rdfs:range triad:Department ;
+    rdfs:label "at department"@en ;
+    rdfs:comment "The department of the role. Column: WorksIn.DepartmentId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER Prescribes (Prescription 0..N : Medication 1). FK Prescription.MedicationId.
+triad:prescribes a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Prescription ;
+    rdfs:range triad:Medication ;
+    rdfs:label "prescribes"@en ;
+    rdfs:comment "The prescription orders the medication. Each prescription names exactly one medication. Column: Prescription.MedicationId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER Includes (identifying; ChatSession 1 : ChatTurn 0..N). FK ChatTurn.ChatSessionId (reverse direction).
+triad:includes a owl:ObjectProperty , owl:InverseFunctionalProperty ;
+    rdfs:domain triad:ChatSession ;
+    rdfs:range triad:ChatTurn ;
+    rdfs:label "includes"@en ;
+    rdfs:comment "The chat session includes the turn. This is the identifying relationship of the weak entity ChatTurn. Column: ChatTurn.ChatSessionId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER Cites (ChatTurn M : Assertion N): the turn end. FK Citation.ChatTurnId.
+triad:byTurn a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Citation ;
+    rdfs:range triad:ChatTurn ;
+    rdfs:label "by turn"@en ;
+    rdfs:comment "The assistant turn that cites. Column: Citation.ChatTurnId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER Cites: the assertion end. FK Citation.AssertionId.
+triad:citedAssertion a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Citation ;
+    rdfs:range triad:Assertion ;
+    rdfs:label "cited assertion"@en ;
+    rdfs:comment "The assertion that the turn cites. Column: Citation.AssertionId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER InTurn (AuditEvent 0..N : ChatTurn 0..1). FK AuditEvent.ChatTurnId (nullable).
+triad:inTurn a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range triad:ChatTurn ;
+    rdfs:label "in turn"@en ;
+    rdfs:comment "The chat turn that caused the audit record. An audit record has zero or one turn. Column: AuditEvent.ChatTurnId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER multivalued composite attribute Patient.Identifier. FK PatientIdentifier.PatientId (reverse direction).
+triad:identifier a owl:ObjectProperty , owl:InverseFunctionalProperty ;
+    rdfs:domain triad:Patient ;
+    rdfs:range triad:PatientIdentifier ;
+    rdfs:label "identifier"@en ;
+    rdfs:comment "One identifier of the patient. A patient has zero or more identifiers. Each identifier belongs to exactly one patient. Column: PatientIdentifier.PatientId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# ER multivalued composite attribute CareTeam.Member. FK CareTeamMember.CareTeamId (reverse direction).
+# CareTeamId holds CareTeam.Id, not the entry Id. The R2RML mapping joins CareTeam to find the entry.
+triad:member a owl:ObjectProperty , owl:InverseFunctionalProperty ;
+    rdfs:domain triad:CareTeam ;
+    rdfs:range triad:CareTeamMember ;
+    rdfs:label "member"@en ;
+    rdfs:comment "One member of the care team. Each member belongs to exactly one care team. Column: CareTeamMember.CareTeamId (through CareTeam.ClinicalEntryId)."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- The 5 named inverses (no triples in the store) ---------------------------
+
+triad:inMessage a owl:ObjectProperty , owl:FunctionalProperty ;
+    owl:inverseOf triad:contains ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range triad:Message ;
+    rdfs:label "in message"@en ;
+    rdfs:comment "The message that contains the assertion. This is the inverse of contains. The store has no triples of it. The key of Assertion and the chain of assertedBy use it."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:inSession a owl:ObjectProperty , owl:FunctionalProperty ;
+    owl:inverseOf triad:includes ;
+    rdfs:domain triad:ChatTurn ;
+    rdfs:range triad:ChatSession ;
+    rdfs:label "in session"@en ;
+    rdfs:comment "The chat session that includes the turn. This is the inverse of includes. The store has no triples of it. The keys of ChatTurn use it."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:issuedBy a owl:ObjectProperty , owl:FunctionalProperty ;
+    owl:inverseOf triad:issues ;
+    rdfs:domain triad:Message ;
+    rdfs:range triad:Staff ;
+    rdfs:label "issued by"@en ;
+    rdfs:comment "The staff member who issued the message. This is the inverse of issues. The store has no triples of it."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:visitOf a owl:ObjectProperty , owl:FunctionalProperty ;
+    owl:inverseOf triad:hasVisit ;
+    rdfs:domain triad:Visit ;
+    rdfs:range triad:Patient ;
+    rdfs:label "visit of"@en ;
+    rdfs:comment "The patient of the visit. This is the inverse of hasVisit. The store has no triples of it. The chain of ofPatient uses it."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:memberOf a owl:ObjectProperty , owl:FunctionalProperty ;
+    owl:inverseOf triad:member ;
+    rdfs:domain triad:CareTeamMember ;
+    rdfs:range triad:CareTeam ;
+    rdfs:label "member of"@en ;
+    rdfs:comment "The care team of the member. This is the inverse of member. The store has no triples of it. The key of CareTeamMember uses it."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- The 3 derived properties (a reasoner infers them; the store has no triples of them) ---
+
+# Mohamed's review point 1 (decision D5): the author of an assertion is the issuer of its message.
+triad:assertedBy a owl:ObjectProperty ;
+    owl:propertyChainAxiom ( triad:inMessage triad:issuedBy ) ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range triad:Staff ;
+    rdfs:label "asserted by"@en ;
+    rdfs:comment "The staff member who issued the message of the assertion. This is a property chain: inMessage, then issuedBy. An assertion of a patient message has no value. A relayed claim gets the relay as its author."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The one path Assertion -> ClinicalEntry -> Visit -> Patient of the tree.
+triad:ofPatient a owl:ObjectProperty ;
+    owl:propertyChainAxiom ( triad:about triad:during triad:visitOf ) ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range triad:Patient ;
+    rdfs:label "of patient"@en ;
+    rdfs:comment "The patient that the assertion is about. This is a property chain: about, then during, then visitOf."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The history of an assertion. OWL 2 DL does not allow Irreflexive on a transitive property,
+# so a reasoner cannot find a supersedes cycle of 3 or more. The guards and 05_constraint_checks.sparql find it.
+triad:supersedesTransitively a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range triad:Assertion ;
+    rdfs:label "supersedes transitively"@en ;
+    rdfs:comment "The assertion replaces the other assertion directly or through a chain of supersedes links. It is transitive, and supersedes is a sub-property of it."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# =============================================================================
+# Datatype properties (ER attributes)
+# =============================================================================
+# Each single-valued attribute is a FunctionalProperty. language is the only multivalued attribute.
+
+# --- Shared properties (one rdfs:domain: the union of the classes) -------------
+
+# The composite attribute Identifier (System + Value, the FHIR Identifier). The key of 9 classes.
+triad:identifierSystem a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Staff triad:Visit
+                  triad:ClinicalEntry triad:Message triad:ChatSession triad:AuditEvent triad:PatientIdentifier ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "identifier system"@en ;
+    rdfs:comment "The system of the identifier: a URI that names the namespace of the value. With identifierValue it identifies the individual. Columns: IdentifierSystem of Department, Location, Staff, Visit, ClinicalEntry, Message, ChatSession and AuditEvent; PatientIdentifier.System."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:identifierValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Staff triad:Visit
+                  triad:ClinicalEntry triad:Message triad:ChatSession triad:AuditEvent triad:PatientIdentifier ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "identifier value"@en ;
+    rdfs:comment "The value of the identifier in its system. Columns: IdentifierValue of Department, Location, Staff, Visit, ClinicalEntry, Message, ChatSession and AuditEvent; PatientIdentifier.Value."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:name a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Staff triad:Patient
+                  triad:Medication triad:CareTeam ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "name"@en ;
+    rdfs:comment "The name. Columns: Name of Department, Location, Staff, Patient, Medication and CareTeam."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:phoneNumber a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Staff triad:Patient ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "phone number"@en ;
+    rdfs:comment "The phone number. Columns: PhoneNumber of Department, Location, Staff and Patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:email a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Staff ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "email"@en ;
+    rdfs:comment "The email address. Columns: Email of Department and Staff."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The composite attribute Address (Street, City, Region, PostalCode, Country): one property per part.
+triad:street a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Patient ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "street"@en ;
+    rdfs:comment "The street part of the address. Columns: Street of Department, Location and Patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:city a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Patient ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "city"@en ;
+    rdfs:comment "The city part of the address. Columns: City of Department, Location and Patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:region a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Patient ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "region"@en ;
+    rdfs:comment "The region part of the address, for example a province or a state. Columns: Region of Department, Location and Patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:postalCode a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Patient ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "postal code"@en ;
+    rdfs:comment "The postal code part of the address. Columns: PostalCode of Department, Location and Patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:country a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Department triad:Location triad:Patient ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "country"@en ;
+    rdfs:comment "The country part of the address. Columns: Country of Department, Location and Patient."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:startDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Visit triad:VisitLocation ) ] ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "start date"@en ;
+    rdfs:comment "The time when the visit, or the period at a location, starts. Columns: Visit.StartDate, VisitLocation.StartDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:endDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Visit triad:VisitLocation ) ] ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "end date"@en ;
+    rdfs:comment "The time when the visit, or the period at a location, ends. Columns: Visit.EndDate, VisitLocation.EndDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:code a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:ClinicalEntry triad:Medication ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "code"@en ;
+    rdfs:comment "The code in its code system, for example a SNOMED CT, LOINC or RxNorm code. Columns: ClinicalEntry.Code, Medication.Code."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:codeSystem a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:ClinicalEntry triad:Medication ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "code system"@en ;
+    rdfs:comment "The URI of the code system of the code. Columns: ClinicalEntry.CodeSystem, Medication.CodeSystem."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:text a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:ClinicalEntry triad:Message triad:ChatTurn ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "text"@en ;
+    rdfs:comment "The free text. Columns: ClinicalEntry.Text, Message.Text, ChatTurn.Text."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The partial key Seq of the two weak entities. CHECK (Seq >= 1) in both tables gives the facet.
+triad:seq a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Assertion triad:ChatTurn ) ] ;
+    rdfs:range [ a rdfs:Datatype ; owl:onDatatype xsd:integer ; owl:withRestrictions ( [ xsd:minInclusive 1 ] ) ] ;
+    rdfs:label "sequence number"@en ;
+    rdfs:comment "The position in the owner, from 1: the assertion in its message, or the turn in its session. It is the partial key of the weak entity. Columns: Assertion.Seq, ChatTurn.Seq."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:clinicalStatus a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Diagnosis triad:Allergy ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "clinical status"@en ;
+    rdfs:comment "The clinical status, for example active or resolved. Columns: Diagnosis.ClinicalStatus, Allergy.ClinicalStatus."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:licenseNumber a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:Doctor triad:Nurse ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "license number"@en ;
+    rdfs:comment "The professional license number. Columns: Doctor.LicenseNumber, Nurse.LicenseNumber."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The composite attribute Subject (Name + DateOfBirth) of the two logs: the patient key as a value.
+triad:subjectName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:ChatSession triad:AuditEvent ) ] ;
+    rdfs:range xsd:string ;
+    rdfs:label "subject name"@en ;
+    rdfs:comment "The name of the patient of the log record, as a value. Columns: ChatSession.SubjectName, AuditEvent.SubjectName."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# A date-only attribute: OWL 2 has no xsd:date, so the range is rdfs:Literal.
+triad:subjectDateOfBirth a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( triad:ChatSession triad:AuditEvent ) ] ;
+    rdfs:range rdfs:Literal ;
+    rdfs:label "subject date of birth"@en ;
+    rdfs:comment "The date of birth of the patient of the log record, as a value. The value is an xsd:date. OWL 2 has no xsd:date, so the range is rdfs:Literal, and SHACL checks the datatype. Columns: ChatSession.SubjectDateOfBirth, AuditEvent.SubjectDateOfBirth."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Department and Location -----------------------------------------------------
+
+triad:departmentType a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Department ;
+    rdfs:range xsd:string ;
+    rdfs:label "department type"@en ;
+    rdfs:comment "The type of the department. Column: Department.Type."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:locationType a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Location ;
+    rdfs:range xsd:string ;
+    rdfs:label "location type"@en ;
+    rdfs:comment "The type of the location, for example a ward or an emergency room. Column: Location.Type."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:physicalType a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Location ;
+    rdfs:range xsd:string ;
+    rdfs:label "physical type"@en ;
+    rdfs:comment "The physical form of the location, for example a room or a bed. Column: Location.PhysicalType."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Staff and its subtypes --------------------------------------------------------
+
+triad:staffSex a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Staff ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "female" "male" "other" "unknown" ) ] ;
+    rdfs:label "staff sex"@en ;
+    rdfs:comment "The administrative sex of the staff member. A closed value set. Column: Staff.Sex."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:active a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Staff ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "active"@en ;
+    rdfs:comment "True when the staff record is in active use. Column: Staff.Active (1 or 0)."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The multivalued attribute Staff.Language (relation 4): many triples, so not functional.
+triad:language a owl:DatatypeProperty ;
+    rdfs:domain triad:Staff ;
+    rdfs:range xsd:string ;
+    rdfs:label "language"@en ;
+    rdfs:comment "A language that the staff member speaks, as a BCP 47 code. A staff member can have many languages: each one is a triple. Column: StaffLanguage.Language."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:roleCode a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:WorksIn ;
+    rdfs:range xsd:string ;
+    rdfs:label "role code"@en ;
+    rdfs:comment "The code of the role of the staff member in the department (FHIR PractitionerRole.code). Column: WorksIn.RoleCode."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:specialty a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:WorksIn ;
+    rdfs:range xsd:string ;
+    rdfs:label "specialty"@en ;
+    rdfs:comment "The specialty of the role. Column: WorksIn.Specialty."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# Date-only attributes: the range is rdfs:Literal (OWL 2 has no xsd:date).
+triad:roleStartDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:WorksIn ;
+    rdfs:range rdfs:Literal ;
+    rdfs:label "role start date"@en ;
+    rdfs:comment "The date when the role starts. The value is an xsd:date. OWL 2 has no xsd:date, so the range is rdfs:Literal. Column: WorksIn.StartDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:roleEndDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:WorksIn ;
+    rdfs:range rdfs:Literal ;
+    rdfs:label "role end date"@en ;
+    rdfs:comment "The date when the role ends. The value is an xsd:date. OWL 2 has no xsd:date, so the range is rdfs:Literal. Column: WorksIn.EndDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:qualification a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Doctor ;
+    rdfs:range xsd:string ;
+    rdfs:label "qualification"@en ;
+    rdfs:comment "The qualification of the doctor, for example MD. Column: Doctor.Qualification."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:designation a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Nurse ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "RN" "LPN" "RPN" "NP" ) ] ;
+    rdfs:label "designation"@en ;
+    rdfs:comment "The nursing designation. A closed value set. Column: Nurse.Designation."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:certificationNumber a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:MOA ;
+    rdfs:range xsd:string ;
+    rdfs:label "certification number"@en ;
+    rdfs:comment "The certification number of the medical office assistant. Column: MOA.CertificationNumber."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:desk a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:MOA ;
+    rdfs:range xsd:string ;
+    rdfs:label "desk"@en ;
+    rdfs:comment "The desk where the medical office assistant works. Column: MOA.Desk."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:phoneExtension a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:MOA ;
+    rdfs:range xsd:string ;
+    rdfs:label "phone extension"@en ;
+    rdfs:comment "The phone extension of the desk. Column: MOA.PhoneExtension."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Patient and Visit -----------------------------------------------------------
+
+# A date-only attribute and part of the Patient key: the range is rdfs:Literal (OWL 2 has no xsd:date).
+triad:dateOfBirth a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Patient ;
+    rdfs:range rdfs:Literal ;
+    rdfs:label "date of birth"@en ;
+    rdfs:comment "The date of birth of the patient. With the name, it identifies the patient. The value is an xsd:date. OWL 2 has no xsd:date, so the range is rdfs:Literal. Column: Patient.DateOfBirth."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:patientSex a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Patient ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "female" "male" "other" "unknown" ) ] ;
+    rdfs:label "patient sex"@en ;
+    rdfs:comment "The administrative sex of the patient (FHIR AdministrativeGender). A closed value set. Column: Patient.Sex."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:visitClass a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Visit ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "AMB" "EMER" "IMP" "HH" "VR" ) ] ;
+    rdfs:label "visit class"@en ;
+    rdfs:comment "The class of the visit (FHIR Encounter.class): ambulatory, emergency, inpatient, home health or virtual. A closed value set. Column: Visit.Class."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:visitType a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Visit ;
+    rdfs:range xsd:string ;
+    rdfs:label "visit type"@en ;
+    rdfs:comment "The type of the visit, for example a general examination. Column: Visit.Type."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:reason a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Visit ;
+    rdfs:range xsd:string ;
+    rdfs:label "reason"@en ;
+    rdfs:comment "The reason for the visit. Column: Visit.Reason."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- ClinicalEntry and its subtypes ------------------------------------------------
+
+triad:display a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ClinicalEntry ;
+    rdfs:range xsd:string ;
+    rdfs:label "display"@en ;
+    rdfs:comment "The display text of the code of the entry. Column: ClinicalEntry.Display."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:recordedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ClinicalEntry ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "recorded at"@en ;
+    rdfs:comment "The time when the entry was first recorded. Column: ClinicalEntry.RecordedAt."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:onsetDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Diagnosis ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "onset date"@en ;
+    rdfs:comment "The time when the condition starts. Column: Diagnosis.OnsetDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:abatementDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Diagnosis ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "abatement date"@en ;
+    rdfs:comment "The time when the condition ends. Column: Diagnosis.AbatementDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:severity a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Diagnosis ;
+    rdfs:range xsd:string ;
+    rdfs:label "severity"@en ;
+    rdfs:comment "The severity of the condition. Column: Diagnosis.Severity."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:performedDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Procedure ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "performed date"@en ;
+    rdfs:comment "The time when the procedure occurred. Column: Procedure.PerformedDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:procedureOutcome a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Procedure ;
+    rdfs:range xsd:string ;
+    rdfs:label "procedure outcome"@en ;
+    rdfs:comment "The outcome of the procedure, as free text. Column: Procedure.Outcome."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:substance a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Allergy ;
+    rdfs:range xsd:string ;
+    rdfs:label "substance"@en ;
+    rdfs:comment "The substance that causes the allergy. Column: Allergy.Substance."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:allergyType a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Allergy ;
+    rdfs:range xsd:string ;
+    rdfs:label "allergy type"@en ;
+    rdfs:comment "The type of the reaction: allergy or intolerance. Column: Allergy.Type."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:allergyCategory a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Allergy ;
+    rdfs:range xsd:string ;
+    rdfs:label "allergy category"@en ;
+    rdfs:comment "The category of the substance, for example food or medication. Column: Allergy.AllergyCategory."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:criticality a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Allergy ;
+    rdfs:range xsd:string ;
+    rdfs:label "criticality"@en ;
+    rdfs:comment "The risk of a serious reaction. Column: Allergy.Criticality."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:value a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "value"@en ;
+    rdfs:comment "The result of the observation, as text. A value can be a number, a code or a text, so the range is xsd:string. Column: Observation.Value."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:unit a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:label "unit"@en ;
+    rdfs:comment "The unit of the value, for example mm[Hg]. Column: Observation.Unit."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:testName a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:LabOrder ;
+    rdfs:range xsd:string ;
+    rdfs:label "test name"@en ;
+    rdfs:comment "The name of the ordered test. Column: LabOrder.TestName."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:priority a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:LabOrder ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "routine" "urgent" "asap" "stat" ) ] ;
+    rdfs:label "priority"@en ;
+    rdfs:comment "The priority of the order (FHIR RequestPriority). A closed value set. Column: LabOrder.Priority."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:specimen a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:LabOrder ;
+    rdfs:range xsd:string ;
+    rdfs:label "specimen"@en ;
+    rdfs:comment "The specimen for the test, for example blood. Column: LabOrder.Specimen."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:issuedDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:LabReport ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "issued date"@en ;
+    rdfs:comment "The time when the laboratory issued the report. Column: LabReport.IssuedDate."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:conclusion a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:LabReport ;
+    rdfs:range xsd:string ;
+    rdfs:label "conclusion"@en ;
+    rdfs:comment "The conclusion of the report. Column: LabReport.Conclusion."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:dosage a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Prescription ;
+    rdfs:range xsd:string ;
+    rdfs:label "dosage"@en ;
+    rdfs:comment "The dose of the medication, for example 5 mg. Column: Prescription.Dosage."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:frequency a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Prescription ;
+    rdfs:range xsd:string ;
+    rdfs:label "frequency"@en ;
+    rdfs:comment "How often the patient takes the medication, for example daily. Column: Prescription.Frequency."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# Not shared with careTeamStatus: this column has no closed value set (decision D10).
+triad:prescriptionStatus a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Prescription ;
+    rdfs:range xsd:string ;
+    rdfs:label "prescription status"@en ;
+    rdfs:comment "The status of the prescription, for example active or stopped, as text. Column: Prescription.Status."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:careTeamStatus a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:CareTeam ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "proposed" "active" "suspended" "inactive" "entered-in-error" ) ] ;
+    rdfs:label "care team status"@en ;
+    rdfs:comment "The status of the care team (FHIR CareTeamStatus). A closed value set. Column: CareTeam.Status."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The parts of the multivalued composite attribute CareTeam.Member (Identifier, Role).
+triad:memberSystem a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:CareTeamMember ;
+    rdfs:range xsd:string ;
+    rdfs:label "member system"@en ;
+    rdfs:comment "The identifier system of the staff member of the care team, as a value. Column: CareTeamMember.MemberSystem."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:memberValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:CareTeamMember ;
+    rdfs:range xsd:string ;
+    rdfs:label "member value"@en ;
+    rdfs:comment "The identifier value of the staff member of the care team, as a value. A guard checks that exactly one staff member has this identifier. Column: CareTeamMember.MemberValue."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:memberRole a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:CareTeamMember ;
+    rdfs:range xsd:string ;
+    rdfs:label "member role"@en ;
+    rdfs:comment "The role of the member in the care team. Column: CareTeamMember.Role."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Medication -------------------------------------------------------------------
+
+triad:form a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Medication ;
+    rdfs:range xsd:string ;
+    rdfs:label "form"@en ;
+    rdfs:comment "The dose form of the medication, for example a tablet. Column: Medication.Form."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:manufacturer a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Medication ;
+    rdfs:range xsd:string ;
+    rdfs:label "manufacturer"@en ;
+    rdfs:comment "The manufacturer of the medication. Column: Medication.Manufacturer."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- Message and Assertion ---------------------------------------------------------
+
+triad:channel a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Message ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "InPerson" "Phone" "Video" "Email" "Fax" "Transfer" "Chat" "App" ) ] ;
+    rdfs:label "channel"@en ;
+    rdfs:comment "The channel of the message. A closed value set. Column: Message.Channel."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:origin a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Message ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "Patient" "Staff" "OtherClinic" "PharmaNet" "Lab" "Agent" ) ] ;
+    rdfs:label "origin"@en ;
+    rdfs:comment "The source of the information in the message. A message with no issuer has the origin Patient. A closed value set. Column: Message.Origin."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:sentAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Message ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "sent at"@en ;
+    rdfs:comment "The time when the message was sent. Column: Message.SentAt."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:assertedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "asserted at"@en ;
+    rdfs:comment "The time of the claim. Column: Assertion.AssertedAt."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:intent a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "Report" "Recommendation" "Decision" ) ] ;
+    rdfs:label "intent"@en ;
+    rdfs:comment "The intent of the claim: a report, a recommendation or a decision. A closed value set. Column: Assertion.Intent."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:source a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "Human" "Agent" ) ] ;
+    rdfs:label "source"@en ;
+    rdfs:comment "Who made the claim: a person, or the agent for a person. A closed value set. Column: Assertion.Source."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:verification a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "Unconfirmed" "Provisional" "Differential" "Confirmed" "Refuted" "EnteredInError" ) ] ;
+    rdfs:label "verification"@en ;
+    rdfs:comment "The verification status of the claim. A closed value set. Column: Assertion.Verification."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:statement a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Assertion ;
+    rdfs:range xsd:string ;
+    rdfs:label "statement"@en ;
+    rdfs:comment "The claim as text. Column: Assertion.Statement."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- ChatSession, ChatTurn and Citation -----------------------------------------------
+
+# The composite attribute User (Role + Identifier) of ChatSession.
+triad:userRole a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatSession ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "Patient" "Doctor" "Nurse" "MOA" ) ] ;
+    rdfs:label "user role"@en ;
+    rdfs:comment "The role of the user of the chat session, as a value. A closed value set. Column: ChatSession.UserRole."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:userSystem a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatSession ;
+    rdfs:range xsd:string ;
+    rdfs:label "user system"@en ;
+    rdfs:comment "The identifier system of the user, as a value. Column: ChatSession.UserSystem."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:userValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatSession ;
+    rdfs:range xsd:string ;
+    rdfs:label "user value"@en ;
+    rdfs:comment "The identifier value of the user, as a value. Column: ChatSession.UserValue."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:startedAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatSession ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "started at"@en ;
+    rdfs:comment "The time when the chat session started. Column: ChatSession.StartedAt."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:mode a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatSession ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "rules" "fake" "llm" ) ] ;
+    rdfs:label "mode"@en ;
+    rdfs:comment "The answer mode of the Care Assistant. A closed value set. Column: ChatSession.Mode."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:model a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatSession ;
+    rdfs:range xsd:string ;
+    rdfs:label "model"@en ;
+    rdfs:comment "The name of the language model in the llm mode. Column: ChatSession.Model."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:clientTurnId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatTurn ;
+    rdfs:range xsd:string ;
+    rdfs:label "client turn id"@en ;
+    rdfs:comment "The identifier that the client gives to the turn. A second request with the same identifier does not add a turn. Column: ChatTurn.ClientTurnId."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:speaker a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatTurn ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "User" "Assistant" ) ] ;
+    rdfs:label "speaker"@en ;
+    rdfs:comment "Who speaks in the turn: the user or the assistant. A closed value set. Column: ChatTurn.Speaker."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:createdAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:ChatTurn ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "created at"@en ;
+    rdfs:comment "The time of the turn. Column: ChatTurn.CreatedAt."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# CHECK (Rank >= 1) gives the facet.
+triad:rank a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:Citation ;
+    rdfs:range [ a rdfs:Datatype ; owl:onDatatype xsd:integer ; owl:withRestrictions ( [ xsd:minInclusive 1 ] ) ] ;
+    rdfs:label "rank"@en ;
+    rdfs:comment "The position of the cited assertion in the answer, from 1. Column: Citation.Rank."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# --- AuditEvent -----------------------------------------------------------------------
+
+triad:at a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range xsd:dateTime ;
+    rdfs:label "at"@en ;
+    rdfs:comment "The time of the access. Column: AuditEvent.At."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:action a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "read" "create" "update" "delete" "ask" "tell" ) ] ;
+    rdfs:label "action"@en ;
+    rdfs:comment "The action of the access. A closed value set. Column: AuditEvent.Action."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# Not shared with procedureOutcome: this column has a closed value set (decision D10).
+triad:auditOutcome a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "Allowed" "Denied" ) ] ;
+    rdfs:label "audit outcome"@en ;
+    rdfs:comment "The result of the access rule: allowed or denied. A closed value set. Column: AuditEvent.Outcome."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# The composite attribute Actor (Role + Identifier) of AuditEvent.
+triad:actorRole a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range [ a rdfs:Datatype ; owl:oneOf ( "Patient" "Doctor" "Nurse" "MOA" ) ] ;
+    rdfs:label "actor role"@en ;
+    rdfs:comment "The role of the person who made the access, as a value. A closed value set. Column: AuditEvent.ActorRole."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:actorSystem a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range xsd:string ;
+    rdfs:label "actor system"@en ;
+    rdfs:comment "The identifier system of the person who made the access, as a value. Column: AuditEvent.ActorSystem."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:actorValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range xsd:string ;
+    rdfs:label "actor value"@en ;
+    rdfs:comment "The identifier value of the person who made the access, as a value. Column: AuditEvent.ActorValue."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+triad:path a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:domain triad:AuditEvent ;
+    rdfs:range xsd:string ;
+    rdfs:label "path"@en ;
+    rdfs:comment "The API path of the access. Column: AuditEvent.Path."@en ;
+    rdfs:isDefinedBy <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad> .
+
+# =============================================================================
+# Restrictions (cardinality)
+# =============================================================================
+# NOT NULL -> owl:minCardinality 1. Mandatory and single -> owl:cardinality 1. Optional single -> owl:maxCardinality 1.
+# The unqualified forms apply where rdfs:range fixes the class. The qualified forms apply only on the inverse paths.
+# Under the Open World Assumption a missing value is unknown, not an error: SHACL checks the data.
+
+# --- Object properties (ER cardinality and participation) -------------------
+
+triad:Message rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:issuedBy ; owl:maxCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:contains ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Assertion rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:inMessage ;
+      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass triad:Message ] ,
+    [ a owl:Restriction ; owl:onProperty triad:about ; owl:cardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:supersedes ; owl:maxCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:ClinicalEntry rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty [ owl:inverseOf triad:about ] ;
+      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass triad:Assertion ] ,
+    [ a owl:Restriction ; owl:onProperty triad:during ; owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Visit rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:visitOf ;
+      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass triad:Patient ] .
+
+triad:VisitLocation rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:ofVisit ; owl:cardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:atLocation ; owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:WorksIn rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:ofStaff ; owl:cardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:atDepartment ; owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+# New in Milestone 5: each staff member works in at least one department (the data has it: 292 of 292).
+triad:Staff rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty [ owl:inverseOf triad:ofStaff ] ;
+      owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass triad:WorksIn ] .
+
+triad:Prescription rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:prescribes ; owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:ChatTurn rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:inSession ;
+      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass triad:ChatSession ] .
+
+triad:Citation rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:byTurn ; owl:cardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:citedAssertion ; owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:PatientIdentifier rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty [ owl:inverseOf triad:identifier ] ;
+      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass triad:Patient ] .
+
+triad:CareTeamMember rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:memberOf ;
+      owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass triad:CareTeam ] .
+
+# --- Datatype properties (NOT NULL columns) -----------------------------------
+
+triad:Department rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:name ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Location rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:name ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Staff rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:name ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:active ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:WorksIn rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:roleCode ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Nurse rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:designation ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:MOA rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:desk ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Patient rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:name ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:dateOfBirth ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:patientSex ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:PatientIdentifier rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Visit rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:visitClass ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:startDate ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:VisitLocation rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:startDate ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:ClinicalEntry rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:code ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:codeSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:display ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:recordedAt ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Diagnosis rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:clinicalStatus ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Procedure rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:performedDate ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Allergy rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:substance ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Observation rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:value ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:LabOrder rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:testName ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:priority ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:LabReport rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:issuedDate ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Medication rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:code ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:codeSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:name ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Prescription rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:prescriptionStatus ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:CareTeam rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:careTeamStatus ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:CareTeamMember rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:memberSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:memberValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Message rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:channel ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:origin ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:sentAt ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:text ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Assertion rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:seq ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:assertedAt ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:intent ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:source ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:verification ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:statement ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:ChatSession rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:userRole ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:userSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:userValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:subjectName ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:subjectDateOfBirth ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:startedAt ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:mode ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:ChatTurn rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:seq ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:clientTurnId ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:speaker ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:text ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:createdAt ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:Citation rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:rank ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+triad:AuditEvent rdfs:subClassOf
+    [ a owl:Restriction ; owl:onProperty triad:identifierSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:identifierValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:at ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:action ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:auditOutcome ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:actorRole ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:actorSystem ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:actorValue ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:subjectName ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:subjectDateOfBirth ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] ,
+    [ a owl:Restriction ; owl:onProperty triad:path ; owl:minCardinality "1"^^xsd:nonNegativeInteger ] .
+
+# =============================================================================
+# Keys (owl:hasKey): the candidate keys (UNIQUE) of the DDL
+# =============================================================================
+# Two named individuals of the class with the same key values are the same individual (owl:sameAs).
+# This is not an error. SHACL, 05_constraint_checks.sparql and the app guards find duplicate keys.
+
+triad:Department owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:Location owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:Staff owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:Visit owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:ClinicalEntry owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:Message owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:ChatSession owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:AuditEvent owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:Patient owl:hasKey ( triad:name triad:dateOfBirth ) .
+triad:PatientIdentifier owl:hasKey ( triad:identifierSystem triad:identifierValue ) .
+triad:Medication owl:hasKey ( triad:code triad:codeSystem ) .
+# The weak entities: the owner (through the named inverse) and the partial key.
+triad:Assertion owl:hasKey ( triad:inMessage triad:seq ) .
+triad:ChatTurn owl:hasKey ( triad:inSession triad:seq ) , ( triad:inSession triad:clientTurnId ) .
+# The association classes and the value class CareTeamMember.
+triad:WorksIn owl:hasKey ( triad:ofStaff triad:atDepartment triad:roleCode ) .
+triad:VisitLocation owl:hasKey ( triad:ofVisit triad:atLocation triad:startDate ) .
+triad:Citation owl:hasKey ( triad:byTurn triad:citedAssertion ) .
+triad:CareTeamMember owl:hasKey ( triad:memberOf triad:memberSystem triad:memberValue ) .
+
+# =============================================================================
+# Alignment: PROV-O (declared here, not imported) and FHIR R4
+# =============================================================================
+
+# PROV-O terms. TRIAD does not use owl:imports: these declarations are a local copy of the PROV-O terms.
+prov:Entity a owl:Class ;
+    rdfs:label "Entity"@en ;
+    rdfs:comment "PROV-O: a thing with a fixed form, for example a message or a claim. TRIAD declares this term here and does not import PROV-O."@en ;
+    rdfs:isDefinedBy <http://www.w3.org/ns/prov-o#> .
+
+prov:Agent a owl:Class ;
+    rdfs:label "Agent"@en ;
+    rdfs:comment "PROV-O: a thing that is responsible for an activity or an entity. TRIAD declares this term here and does not import PROV-O."@en ;
+    rdfs:isDefinedBy <http://www.w3.org/ns/prov-o#> .
+
+prov:Person a owl:Class ;
+    rdfs:subClassOf prov:Agent ;
+    rdfs:label "Person"@en ;
+    rdfs:comment "PROV-O: an agent that is a person. TRIAD declares this term here and does not import PROV-O."@en ;
+    rdfs:isDefinedBy <http://www.w3.org/ns/prov-o#> .
+
+prov:wasAttributedTo a owl:ObjectProperty ;
+    rdfs:domain prov:Entity ;
+    rdfs:range prov:Agent ;
+    rdfs:label "was attributed to"@en ;
+    rdfs:comment "PROV-O: the agent that is responsible for the entity. TRIAD declares this term here and does not import PROV-O."@en ;
+    rdfs:isDefinedBy <http://www.w3.org/ns/prov-o#> .
+
+prov:wasRevisionOf a owl:ObjectProperty ;
+    rdfs:domain prov:Entity ;
+    rdfs:range prov:Entity ;
+    rdfs:label "was revision of"@en ;
+    rdfs:comment "PROV-O: the entity is a revised version of the other entity. TRIAD declares this term here and does not import PROV-O."@en ;
+    rdfs:isDefinedBy <http://www.w3.org/ns/prov-o#> .
+
+# A message and an assertion are PROV entities. A staff member is a PROV person.
+triad:Message rdfs:subClassOf prov:Entity .
+triad:Assertion rdfs:subClassOf prov:Entity .
+triad:Staff rdfs:subClassOf prov:Person .
+
+# The new assertion is a revision of the old one. The issuer and the author are the responsible agents.
+triad:supersedes rdfs:subPropertyOf prov:wasRevisionOf .
+triad:issuedBy rdfs:subPropertyOf prov:wasAttributedTo .
+triad:assertedBy rdfs:subPropertyOf prov:wasAttributedTo .
+
+# FHIR R4 (http://hl7.org/fhir/, the namespace of the FHIR R4 Turtle). The ER README section 5 gives the matches.
+triad:Department skos:closeMatch fhir:Organization .
+triad:Location skos:closeMatch fhir:Location .
+triad:Staff skos:closeMatch fhir:Practitioner .
+triad:WorksIn skos:closeMatch fhir:PractitionerRole .
+triad:Patient skos:closeMatch fhir:Patient .
+triad:PatientIdentifier skos:closeMatch fhir:Identifier .
+triad:Visit skos:closeMatch fhir:Encounter .
+triad:Diagnosis skos:closeMatch fhir:Condition .
+triad:Procedure skos:closeMatch fhir:Procedure .
+triad:Allergy skos:closeMatch fhir:AllergyIntolerance .
+triad:Observation skos:closeMatch fhir:Observation .
+triad:LabOrder skos:closeMatch fhir:ServiceRequest .
+triad:LabReport skos:closeMatch fhir:DiagnosticReport .
+triad:Prescription skos:closeMatch fhir:MedicationRequest .
+triad:CareTeam skos:closeMatch fhir:CareTeam .
+triad:Medication skos:closeMatch fhir:Medication .
+triad:Message skos:closeMatch fhir:Communication ;
+    skos:relatedMatch fhir:DocumentReference .
+# An assertion is one claim, and a FHIR Provenance describes one resource version: related, not close.
+triad:Assertion skos:relatedMatch fhir:Provenance .
+triad:AuditEvent skos:closeMatch fhir:AuditEvent .
+# ClinicalEntry, the Staff subtypes, VisitLocation, CareTeamMember and the agent layer
+# (ChatSession, ChatTurn, Citation) have no FHIR R4 resource of their own.
