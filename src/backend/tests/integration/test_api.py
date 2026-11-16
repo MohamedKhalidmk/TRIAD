@@ -144,7 +144,8 @@ def test_the_access_rules_through_the_api(client, user, method, url, status):
         assert response.json()["code"] == "forbidden"
 
 
-def test_the_user_header(client):
+def test_the_user_header(full_store):
+    client = full_store.client()          # SQLite and the knowledge graph (the store fixture of conftest.py)
     assert client.get("/api/me").json()["code"] == "no_user"
     assert client.get("/api/me", headers=as_user("Doctor:E9999")).status_code == 401
     assert client.get("/api/me", headers=as_user("Nobody")).status_code == 401

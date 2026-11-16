@@ -87,6 +87,18 @@ Each GET that gives a list of rows gives one page of the list.
 - **Not paged:** `/health`, `/me`, `/users/{key}`, `/patients/{id}`, `/visits/{id}/care-team`, `/chat/sessions/{id}` and `/codes`.
   They give one row or one object, or a fixed list in the code.
 
+### 1.6 Data store (Milestone 5)
+
+- The environment variable `TRIAD_STORE` (or `main.py serve --store`) selects the data store of the backend:
+  - `sqlite` (the default): the relational database (Milestone 4).
+  - `virtuoso` or `oxigraph`: the knowledge graph (RDF, SPARQL). The API, the types and the rules of this file stay the same.
+- `GET /api/health` gives `store` (the value of `TRIAD_STORE`) and `ontologyVersion`: the version of the TRIAD ontology
+  of the knowledge graph (for example `'5.0.0'`), or `null` for `sqlite`. `schemaVersion` stays: the knowledge graph is
+  built from a database of that schema version.
+- Health reads no triple count. The frontend reads health after each write, so it must stay fast.
+- With a knowledge-graph store, a time can come back with a different text form of the same instant: the stores drop
+  the trailing zeros of the seconds (`09:00:00.100-04:00` becomes `09:00:00.1-04:00`). The offset does not change.
+
 ## 2. Types (TypeScript notation)
 
 The backend sends exactly these shapes. `T | null` means the field is always present and can be null.
@@ -235,7 +247,7 @@ interface Medication { id: number; code: string; codeSystem: string; name: strin
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed' }` | all, no header |
+| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed', store: 'sqlite' \| 'virtuoso' \| 'oxigraph', ontologyVersion: string \| null }` (section 1.6) | all, no header |
 | `GET /api/users?role=&q=&limit=&offset=` | — | `Page<UserView>` (the demo users first, in the order of section 1.1; then by name, then key) | all, no header |
 | `GET /api/users/{key}` | — | `UserView` | all, no header |
 | `GET /api/me` | — | `UserView` | any user |

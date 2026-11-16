@@ -4,7 +4,8 @@
 # Usage (from any folder):
 #     ./src/scripts/kg.sh up               start Virtuoso (the first run makes the container and its volume)
 #     ./src/scripts/kg.sh init [--strict]  make the user triad, and set the roles and the graph permissions
-#     ./src/scripts/kg.sh load [--seed]    load the ontology into the TBox graph and the data into the ABox graph
+#     ./src/scripts/kg.sh load [--seed] [--no-export]
+#                                          load the ontology into the TBox graph and the data into the ABox graph
 #     ./src/scripts/kg.sh status           show the container, the triples of each graph and the access rules
 #     ./src/scripts/kg.sh sparql FILE [--only ID[,ID...]] [--max-rows N] [--keep-going]
 #                                          run the queries and the updates of a .sparql file
@@ -23,6 +24,8 @@
 #     Then it clears the TBox and ABox graphs, loads models/semantic/triad.owl and TRIAD_KG_DIR/triad_kg.nt.gz
 #     with the bulk loader, and checks the result (the load list, and the counts of kg_report.json).
 #     "load --seed" loads the scenario graph models/semantic/kg/triad_kg_seed.rdf into the ABox graph.
+#     "load --no-export" loads the export that is in TRIAD_KG_DIR, with no ensure-db and no export-kg
+#     ("main.py ensure-kg --store virtuoso" runs it after its own export).
 # sparql FILE: a marker line "# ID. Title" (Q1, U1, QA, B.1, ...) starts each operation. Queries go to
 #     TRIAD_SPARQL_QUERY_URL; updates go to TRIAD_SPARQL_UPDATE_URL as TRIAD_SPARQL_USER. FILE can also be
 #     the name of a file in src/backend/models/semantic/sparql/. See infrastructure/rdf/sparql_script.py.
@@ -356,7 +359,7 @@ EOF
 }
 
 cmd_load() {
-    local seed="$1" owl data data_name import_dir started out file line rest state error ok=yes tbox_count abox_count
+    local seed="$1" export="${2:-yes}" owl data data_name import_dir started out file line rest state error ok=yes tbox_count abox_count
     load_settings
     need_running
     owl="$KG_SEMANTIC_DIR/triad.owl"
@@ -364,7 +367,7 @@ cmd_load() {
         data="$KG_SEMANTIC_DIR/kg/triad_kg_seed.rdf"
         import_dir="$IMPORT_SEMANTIC/kg"
     else
-        if main_has_export_kg; then
+        if [ "$export" = yes ] && main_has_export_kg; then
             echo "Making the knowledge graph from the database (main.py ensure-db, then main.py export-kg) ..."
             "$PY" src/backend/main.py ensure-db
             "$PY" src/backend/main.py export-kg --scope all --out "$KG_DIR"
@@ -579,13 +582,15 @@ case "$COMMAND" in
         cmd_init "$STRICT" ;;
     load)
         SEED=no
+        EXPORT=yes
         for arg in "$@"; do
             case "$arg" in
                 --seed) SEED=yes ;;
-                *) fail "Unknown option of load: $arg. Use --seed or no option." ;;
+                --no-export) EXPORT=no ;;
+                *) fail "Unknown option of load: $arg. Use --seed, --no-export or no option." ;;
             esac
         done
-        cmd_load "$SEED" ;;
+        cmd_load "$SEED" "$EXPORT" ;;
     sparql) cmd_sparql "$@" ;;
     help|-h|--help) usage ;;
     *) usage >&2; echo "" >&2; fail "Unknown command: $COMMAND. See the list above." ;;

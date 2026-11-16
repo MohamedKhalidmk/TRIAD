@@ -26,3 +26,9 @@ ABOX_GRAPH = GRAPH + "abox"         # the data (ABox)
 SCRATCH_GRAPH = GRAPH + "scratch"   # the scratch graph of the SPARQL scripts and the planted checks
 META_GRAPH = GRAPH + "meta"         # the id counters and the build marker
 GRAPHS = (TBOX_GRAPH, ABOX_GRAPH, SCRATCH_GRAPH, META_GRAPH)
+
+# The subjects of the meta graph (plan 3.5 and 5.3). They are not individuals of the ontology.
+# An id counter: <KG counter/<class path>> triad:issued N. Each write adds a fact; the current value is the MAX.
+COUNTER = KG + "counter/"
+# The build marker of ensure-kg: the hashes of the data and of the mapping, the ontology version, the scope.
+BUILD_MARKER = KG + "build-marker"

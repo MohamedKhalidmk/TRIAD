@@ -61,6 +61,8 @@ class Health(Model):
     mode: str
     now: str
     clock: Literal["system", "fixed"]
+    store: Literal["sqlite", "virtuoso", "oxigraph"]
+    ontology_version: Optional[str]
 
 
 # ----- users and patients -----

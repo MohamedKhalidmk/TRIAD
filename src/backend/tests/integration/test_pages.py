@@ -120,7 +120,8 @@ def test_a_page_value_out_of_range_gives_422(api, b_chain, params, field):
 
 # ----- the order of each list -----
 
-def test_the_demo_users_come_first_on_all_pages(api):
+def test_the_demo_users_come_first_on_all_pages(full_store):
+    api = full_store.client()             # SQLite and the knowledge graph (the store fixture of conftest.py)
     first = get(api, "/api/users", None, limit=5)
     second = get(api, "/api/users", None, limit=5, offset=5)
     assert [u["key"] for u in first["items"]] == list(PINNED_KEYS[:5]) and all(u["pinned"] for u in first["items"])
