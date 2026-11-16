@@ -69,7 +69,9 @@ for (_table, _column), (_term, _sort) in V.COLUMNS.items():
         SUBTYPE_PROPERTIES.setdefault(_table, {})[_column] = _term
 
 BIND_N = fragments.bind_id("?a", "assertion", "?n")
-NEWEST_FIRST = ["DESC(?at)", "DESC(?n)"]
+# The time order is by the instant (fragments.instant): Virtuoso orders a stored xsd:dateTime by its text.
+BIND_INSTANT = f"BIND ({fragments.instant('?at')} AS ?instant)"
+NEWEST_FIRST = ["DESC(?instant)", "DESC(?n)"]
 
 
 def _iris(values: Iterable[str]) -> Term:
@@ -313,9 +315,10 @@ SELECT ?a FROM $abox WHERE {{
   FILTER (?type = triad:CareTeam)
   ?a triad:about ?e ; triad:assertedAt ?at .
   {fragments.CURRENT}
+  {BIND_INSTANT}
   {BIND_N}
 }}
-ORDER BY DESC(?at) DESC(?n) LIMIT 1"""
+ORDER BY DESC(?instant) DESC(?n) LIMIT 1"""
 
 
 def _author(source: str, origin: str, staff_id: Optional[int], staff_name: Optional[str],
@@ -461,7 +464,7 @@ class SparqlRecordRepository:
         if len(touched) > 1:
             items.bind(_rank("?type", fragments.CHART_CATEGORIES))
             order.insert(0, "?rank")
-        items.bind(BIND_N)
+        items.bind(BIND_INSTANT).bind(BIND_N)
         if not paging.ends_with_id(order, items.text()):
             raise ValueError("The order of a page must end with the integer id of the IRI.")
         part = PageRequest(page.limit, page.offset - first)
@@ -487,7 +490,8 @@ class SparqlRecordRepository:
     def _lookup(self, items: _Items, *, visible_only: bool, limit: int, current_only: bool = True,
                 order_by: Optional[Sequence[str]] = None) -> list[AssertionView]:
         """The items of the filters, in the order `order_by` (default: the newest first, then the id)."""
-        items.where(current_only=current_only, visible_only=visible_only).need("at").bind(BIND_N)
+        items.where(current_only=current_only, visible_only=visible_only).need("at")
+        items.bind(BIND_INSTANT).bind(BIND_N)
         return self._in_order(self._select_ids(items, order_by or NEWEST_FIRST, limit))
 
     def allergies(self, patient_id: int, *, words: Sequence[str] = (), visible_only: bool,

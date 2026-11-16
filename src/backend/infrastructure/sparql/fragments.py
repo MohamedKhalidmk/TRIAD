@@ -113,6 +113,16 @@ def local_date(variable: str) -> str:
     return f"SUBSTR(STR({variable}), 1, 10)"
 
 
+def instant(variable: str) -> str:
+    """A time for ORDER BY by the instant (as SQLite julianday): xsd:dateTime(STR(?t)). Put it in a BIND.
+
+    Virtuoso 7.2 orders a STORED xsd:dateTime by its local time (the text), not by the instant: 16:05-04:00 came
+    before 14:30-07:00. Its comparisons (<, =), MAX and MIN, and the order of a cast value use the instant.
+    Oxigraph uses the instant in all cases, so the cast changes nothing there.
+    """
+    return f"xsd:dateTime(STR({variable}))"
+
+
 def lower(text_expression: str) -> str:
     """The text in lower case: LCASE(STR(...)).
 
