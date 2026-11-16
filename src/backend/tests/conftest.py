@@ -95,3 +95,13 @@ def all_items(client, url: str, user: str | None = None, **params) -> list[dict]
         if not page["items"] or len(items) >= page["total"]:
             assert len(items) == page["total"]
             return items
+
+
+@pytest.fixture
+def planted_db(scenario_db, tmp_path) -> Path:
+    """A copy of the scenario database (cheap: no onboarding) with the planted rows of tests/fixtures/plant.py."""
+    from tests.fixtures.plant import plant
+    path = tmp_path / "planted.db"
+    shutil.copy(scenario_db, path)
+    plant(path)
+    return path
