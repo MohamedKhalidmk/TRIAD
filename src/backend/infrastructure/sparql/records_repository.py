@@ -10,9 +10,9 @@ How the reads work:
   details run only for the rows of the page, not for all items of the chart.
 - `_Items` builds the WHERE text of step 1 from the filters of the chart (the SQLite `_item_filters`). It adds a
   pattern only when a filter or the order needs it.
-- The patient-visible rule (Q12) and the author name of the text search use EXISTS in the FILTER, not the
-  OPTIONAL staff pattern of fragments.PATIENT_VISIBLE: the store then reads the message and the staff member
-  only for the rows that need them (on the largest chart: 223 ms, not 738 ms). The rule is the same.
+- The patient-visible rule (Q12) and the author name of the text search read the message and its issuer in one
+  OPTIONAL pattern, then a FILTER with no EXISTS (VISIBLE). An OR of EXISTS is faster on Oxigraph, but Virtuoso
+  7.2 cannot run it (see VISIBLE).
 - A chart page: one GROUP BY query gives the number of items of each category (the total). The page query then
   reads only the categories that the page touches, with the OFFSET from the first of them: the chart order is
   the category first, so these rows are the same rows. The first page of the largest chart sorts some hundred
@@ -33,8 +33,8 @@ buffer first (read your writes): three new entries of one message get three iden
 prescriptions with the same new medication code use one new Medication.
 
 Known differences from SQLite (see also README.md, section 8):
-- D11: Virtuoso orders xsd:dateTime by the text, not by the instant (the chart order, the lookups, the head of a
-  care team). The order differs only for two times with different offsets that are less than 7 hours apart.
+- D11: Virtuoso orders a stored xsd:dateTime by the text, not by the instant. The chart order, the lookups and the
+  head of a care team order by fragments.instant (a cast of the text), which is the instant on both stores.
 - The text search uses CONTAINS(LCASE(...)): "%" and "_" are not wildcards (SQLite LIKE), and LCASE lowers all
   letters (SQLite lower() lowers only ASCII letters).
 - recommendations: SQLite orders by the text of AssertedAt (not julianday). The KG orders by STR(?at), the text of
@@ -82,44 +82,27 @@ def _iris(values: Iterable[str]) -> Term:
 # ---------------------------------------------------------------------------------------------
 # Step 1: the WHERE text of an item query (the SPARQL form of SqliteRecordRepository._item_filters)
 
-# The patient-visible rule of query Q12 (fragments.PATIENT_VISIBLE, SQLite PATIENT_VISIBLE) and the text search
-# (SQLite: lower(e.Display) LIKE ? OR lower(a.Statement) LIKE ? OR lower(AUTHOR_NAME) LIKE ?) have two forms. Both
-# give the same rows on both stores; the form depends on the other parts of the query, not on the store:
-# - The EXISTS form (VISIBLE, _Authors.condition): an OR of EXISTS that start from ?a. It is the fast form on
-#   Oxigraph (the visible items of the largest chart: 300 ms, not 570 ms).
-# - The issuer form (VISIBLE_BY_ISSUER, _Authors.issuer_condition): the message, and its issuer in one OPTIONAL,
-#   then a FILTER with no EXISTS. A query uses it when the visible rule is not its only filter (a text search, a
-#   date, a filter of a lookup, an OPTIONAL pattern). Virtuoso 7.2 refuses the EXISTS form there ("SQ200: Stack
-#   Overflow in cost model"), and it cannot compile an OPTIONAL inside an EXISTS (SP031).
-# In the EXISTS form, each condition of the OR is an EXISTS: on Virtuoso, "(?type IN (...) && ...) || EXISTS
-# {...}" did not end in 120 s on the planted data (2,000 triples); "EXISTS {...} || EXISTS {...}" takes 6 ms.
-# One EXISTS with a UNION of the cases is not a solution: Oxigraph 0.3 then takes 14 s on the largest chart.
+# The patient-visible rule of query Q12 (fragments.PATIENT_VISIBLE, SQLite PATIENT_VISIBLE) and the author name of
+# the text search use the message of the assertion and its issuer: the required pattern "message" and ONE OPTIONAL
+# "issuer" of _Items (SPARQL writing rule 17), then a FILTER with no EXISTS.
+# Measured: an OR of EXISTS (one EXISTS for each case) is faster on Oxigraph (the visible items of the largest
+# chart: 340 ms, not 570 ms), but Virtuoso 7.2 cannot run it: "(?type IN (...) && ...) || EXISTS { ... }" did not
+# end in 120 s on the planted data (2,000 triples); "EXISTS {...} || EXISTS {...}" gave "SQ200: Stack Overflow in
+# cost model" with a date filter, an OPTIONAL pattern or the text search, and on the full graph also alone; an
+# OPTIONAL inside an EXISTS gives "SP031" (an internal error of the compiler). One EXISTS with a UNION of the cases
+# runs on Virtuoso, but Oxigraph 0.3 then takes 14 s on the largest chart.
 
 # The three cases: "a confirmed observation or lab report", "a doctor decision by a person" (s.Role = 'Doctor')
-# and "a report that the patient sent" (m.StaffId IS NULL AND m.Origin = 'Patient'). It includes CURRENT.
-VISIBLE = f"""{fragments.CURRENT}
-  FILTER (?verification != "EnteredInError" && (
-      EXISTS {{ ?a triad:verification ?cVerification .
-               FILTER (?type IN (triad:Observation, triad:LabReport) && ?cVerification = "Confirmed") }}
-      || EXISTS {{ ?a triad:intent ?vIntent ; triad:source ?vSource . ?vMessage triad:contains ?a .
-                  ?vStaff triad:issues ?vMessage ; a ?vRole .
-                  FILTER (?vIntent = "Decision" && ?vSource = "Human" && ?vRole = triad:Doctor) }}
-      || EXISTS {{ ?pMessage triad:contains ?a ; triad:origin ?pOrigin .
-                  FILTER (?pOrigin = "Patient")
-                  FILTER NOT EXISTS {{ ?pStaff triad:issues ?pMessage }} }}))"""
-# The issuer form: the patterns "verification", "intent", "source", "message" and the OPTIONAL "issuer" (or
-# "issuerName") of _Items.
-VISIBLE_BY_ISSUER = """FILTER ((?type IN (triad:Observation, triad:LabReport) && ?verification = "Confirmed")
+# and "a report that the patient sent" (m.StaffId IS NULL AND m.Origin = 'Patient'). The patterns: "verification",
+# "intent", "source", "message" and "issuer" (or "issuerName"). The query also has CURRENT.
+VISIBLE = """FILTER ((?type IN (triad:Observation, triad:LabReport) && ?verification = "Confirmed")
           || (?intent = "Decision" && ?source = "Human" && BOUND(?issuer) && ?issuerRole = triad:Doctor)
           || (!BOUND(?issuer) && ?origin = "Patient"))"""
 
-# The author name is the staff member, or the patient for a message with no issuer. In the EXISTS form, one small
-# query first finds the authors whose name has the text (`_Authors`), so the filter of each row compares IRIs.
+# The text search: the display, the statement, or the author name: the name of the issuer, or the name of the
+# patient for a message with no issuer (SQLite AUTHOR_NAME). One small query first finds whether a staff name and
+# the name of the patient have the text (`_Authors`); a part that cannot match is not in the FILTER.
 TEXT = f"{fragments.contains('?display', 'q')} || {fragments.contains('?statement', 'q')}"
-BY_STAFF = "EXISTS { ?tMessage triad:contains ?a . ?tStaff triad:issues ?tMessage . FILTER (?tStaff IN ($authors)) }"
-BY_STAFF_NAME = f"""EXISTS {{ ?tMessage triad:contains ?a . ?tStaff triad:issues ?tMessage ; triad:name ?tName .
-                  FILTER ({fragments.contains("?tName", "q")}) }}"""
-BY_PATIENT = "NOT EXISTS { ?uMessage triad:contains ?a . ?uStaff triad:issues ?uMessage }"
 BY_ISSUER_NAME = f"(BOUND(?issuer) && {fragments.contains('?issuerName', 'q')})"
 AUTHORS = f"""
 SELECT ?author FROM $abox WHERE {{
@@ -128,7 +111,6 @@ SELECT ?author FROM $abox WHERE {{
   {{ $patient triad:name ?name . BIND ($patient AS ?author) }}
   FILTER ({fragments.contains("?name", "q")})
 }}"""
-MAX_AUTHORS = 40          # more staff names with the text: compare the names in each row
 
 
 @dataclass(frozen=True)
@@ -138,18 +120,7 @@ class _Authors:
     patient: bool = False
 
     def condition(self) -> str:
-        """The text condition of the EXISTS form."""
-        parts = [TEXT]
-        if len(self.staff) > MAX_AUTHORS:
-            parts.append(BY_STAFF_NAME)
-        elif self.staff:
-            parts.append(BY_STAFF)
-        if self.patient:
-            parts.append(BY_PATIENT)
-        return " || ".join(parts)
-
-    def issuer_condition(self) -> str:
-        """The text condition of the issuer form (the OPTIONAL "issuerName" gives ?issuer and ?issuerName)."""
+        """The text condition (the OPTIONAL "issuerName" gives ?issuer and ?issuerName)."""
         parts = [TEXT]
         if self.staff:
             parts.append(BY_ISSUER_NAME)
@@ -229,23 +200,16 @@ class _Items:
               authors: _Authors = _Authors(), date_from: Optional[str] = None,
               date_to: Optional[str] = None) -> "_Items":
         """The filters of the chart. A patient-visible item is always current (Q12)."""
-        # The issuer form (see VISIBLE) when the visible rule is not the only filter of the query.
-        by_issuer = visible_only and bool(text or date_from or date_to or self.optional or self.filters or self.late)
-        if by_issuer:
-            self.need("verification", "intent", "source", "message", "issuerName" if text else "issuer")
-            self.filters += [fragments.CURRENT, 'FILTER (?verification != "EnteredInError")']
-            self.late.append(VISIBLE_BY_ISSUER)
-        elif visible_only:
-            self.need("verification")
-            self.filters.append(VISIBLE)
-        elif current_only:
+        if visible_only or current_only:
             self.filters.append(fragments.CURRENT)
-        if text and by_issuer:
-            self.need("display", "statement").filter(authors.issuer_condition(), late=True, q=text.lower())
-        elif text:
-            self.need("display", "statement").filter(authors.condition(), q=text.lower())
-            if authors.staff and len(authors.staff) <= MAX_AUTHORS:       # FILTER (?tStaff IN (...))
-                self.bindings["authors"] = terms.term_list(Term(f"<{s}>") for s in authors.staff)
+        by_author = bool(text) and (bool(authors.staff) or authors.patient)
+        if visible_only or by_author:
+            self.need("message", "issuerName" if by_author else "issuer")  # see VISIBLE
+        if visible_only:
+            self.need("verification", "intent", "source").filter('?verification != "EnteredInError"')
+            self.late.append(VISIBLE)
+        if text:
+            self.need("display", "statement").filter(authors.condition(), late=by_author, q=text.lower())
         if date_from:
             self.need("at").filter(f"{fragments.local_date('?at')} >= $dateFrom", dateFrom=date_from)
         if date_to:
