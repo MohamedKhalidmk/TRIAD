@@ -4,6 +4,7 @@ The store fixtures (Milestone 5; tests/fixtures/stores.py) run one test on each 
     store          the scenario data (fast)
     planted_store  the planted data (tests/fixtures/plant.py; fast)
     full_store     the full data (the marker "slow")
+    module_full_store  the full data, one copy for all tests of a module (the journey; "slow")
 Each one is parametrized over TRIAD_TEST_STORES (default: sqlite,oxigraph; add virtuoso for a running Virtuoso).
 A test that needs only some stores has @pytest.mark.stores("oxigraph"). The KG parameters have the marker "kg",
 so -m "not kg" runs only SQLite. Example (the pattern of tests/integration/test_store_users.py):
@@ -161,7 +162,7 @@ def built_oxigraph(db: Path, kg_cache: Path, tmp_path_factory) -> Path:
     return built
 
 
-STORE_FIXTURES = ("store", "planted_store", "full_store")
+STORE_FIXTURES = ("store", "planted_store", "full_store", "module_full_store")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -212,5 +213,18 @@ def planted_store(request, planted_db, tmp_path, kg_cache, tmp_path_factory):
 def full_store(request, full_db, tmp_path, kg_cache, tmp_path_factory):
     """The full data (the onboarding) on each store ("slow"). The first run builds the full graph (about 15 s)."""
     handle = open_store_handle(request, full_db, tmp_path, kg_cache, tmp_path_factory, seed=False)
+    yield handle
+    handle.close()
+
+
+@pytest.fixture(scope="module", params=store_params(pytest.mark.slow))
+def module_full_store(request, full_db, kg_cache, tmp_path_factory):
+    """The full data on each store, ONE copy for all tests of a module ("slow"). For tests that share their data:
+    the use cases of the journey, or read tests that need no new copy each. pytest runs the tests of the module in
+    their order for one store, then for the next store.
+
+    Do not use full_store in the same module: on Virtuoso (one store), its load would replace the module data."""
+    folder = tmp_path_factory.mktemp(f"module-{request.param}")
+    handle = open_store_handle(request, full_db, folder, kg_cache, tmp_path_factory, seed=False)
     yield handle
     handle.close()

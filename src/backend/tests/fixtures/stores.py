@@ -155,36 +155,49 @@ class Probe:
     A value of an FK term is the integer id of the target (the parent for a reverse-direction term, for example
     "issues" of a message is the staff id). A time is the text of the store (compare times as instants).
     Example: store.probe.count("audit-event", auditOutcome="Denied").
+    count(kind) with no match is one COUNT, and row(kind, id) reads one subject: use them on the full data.
     """
 
     def rows(self, kind: str, **match: Any) -> list[dict]:
-        raise NotImplementedError
+        return [row for row in self._rows(kind) if all(row.get(term) == value for term, value in match.items())]
 
     def count(self, kind: str, **match: Any) -> int:
-        return len(self.rows(kind, **match))
+        return len(self.rows(kind, **match)) if match else self._count(kind)
 
     def row(self, kind: str, id_: int) -> Optional[dict]:
-        found = [r for r in self.rows(kind) if r["id"] == id_]
+        found = self._rows(kind, id_)
         return found[0] if found else None
 
     def last(self, kind: str) -> Optional[dict]:
         found = self.rows(kind)
         return found[-1] if found else None
 
+    def _rows(self, kind: str, id_: Optional[int] = None) -> list[dict]:
+        """All rows of a kind by id, or only the row with this id."""
+        raise NotImplementedError
+
+    def _count(self, kind: str) -> int:
+        return len(self._rows(kind))
+
 
 class SqliteProbe(Probe):
     def __init__(self, db_path: Path):
         self.db_path = db_path
 
-    def rows(self, kind: str, **match: Any) -> list[dict]:
+    def _connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _rows(self, kind: str, id_: Optional[int] = None) -> list[dict]:
         from infrastructure.sparql.ids import KIND_TABLE
         from models.semantic import vocabulary as V
         table, voc = KIND_TABLE[kind], vocabulary_of(kind)
-        conn = sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
-        conn.row_factory = sqlite3.Row
+        conn = self._connect()
         try:
             out = []
-            for r in conn.execute(f'SELECT * FROM "{table}" ORDER BY Id'):
+            where, args = ("WHERE Id = ?", (id_,)) if id_ is not None else ("", ())
+            for r in conn.execute(f'SELECT * FROM "{table}" {where} ORDER BY Id', args):
                 row = {"id": r["Id"]}
                 for term, column in voc.columns.items():
                     value = r[column]
@@ -195,9 +208,16 @@ class SqliteProbe(Probe):
                     if isinstance(value, int) and term == "active":
                         value = bool(value)
                     row[term] = value
-                if all(row.get(term) == value for term, value in match.items()):
-                    out.append(row)
+                out.append(row)
             return out
+        finally:
+            conn.close()
+
+    def _count(self, kind: str) -> int:
+        from infrastructure.sparql.ids import KIND_TABLE
+        conn = self._connect()
+        try:
+            return conn.execute(f'SELECT COUNT(*) FROM "{KIND_TABLE[kind]}"').fetchone()[0]
         finally:
             conn.close()
 
@@ -206,12 +226,18 @@ class KgProbe(Probe):
     def __init__(self, client: Any):
         self.client = client
 
-    def rows(self, kind: str, **match: Any) -> list[dict]:
+    ROWS = "SELECT ?x ?p ?o ?in FROM $abox WHERE { ?x a $class . { ?x ?p ?o } UNION { ?o ?p ?x . BIND (1 AS ?in) } }"
+    ONE = ("SELECT ?x ?p ?o ?in FROM $abox WHERE { VALUES ?x { $x } ?x a $class . "
+           "{ ?x ?p ?o } UNION { ?o ?p ?x . BIND (1 AS ?in) } }")
+    COUNT = "SELECT (COUNT(?x) AS ?n) FROM $abox WHERE { ?x a $class }"
+
+    def _rows(self, kind: str, id_: Optional[int] = None) -> list[dict]:
         from infrastructure.sparql import terms
         voc = vocabulary_of(kind)
-        rows = self.client.select(
-            "SELECT ?x ?p ?o ?in FROM $abox WHERE { ?x a $class . { ?x ?p ?o } UNION { ?o ?p ?x . BIND (1 AS ?in) } }",
-            {"class": terms.class_term(terms.CLASS_OF_KIND[kind])})
+        bindings = {"class": terms.class_term(terms.CLASS_OF_KIND[kind])}
+        if id_ is not None:
+            bindings["x"] = terms.iri(kind, id_)
+        rows = self.client.select(self.ROWS if id_ is None else self.ONE, bindings)
         found: dict[str, dict] = {}
         for r in rows:
             row = found.setdefault(r["x"], {"id": terms.id_of(r["x"]), **dict.fromkeys(voc.columns)})
@@ -224,8 +250,12 @@ class KgProbe(Probe):
             if term in voc.fk_kind:
                 value = terms.id_of(value)
             row[term] = value
-        out = [row for _, row in sorted(found.items(), key=lambda item: item[1]["id"])]
-        return [row for row in out if all(row.get(term) == value for term, value in match.items())]
+        return [row for _, row in sorted(found.items(), key=lambda item: item[1]["id"])]
+
+    def _count(self, kind: str) -> int:
+        from infrastructure.sparql import terms
+        rows = self.client.select(self.COUNT, {"class": terms.class_term(terms.CLASS_OF_KIND[kind])})
+        return int(rows[0]["n"])
 
 
 # ---------------------------------------------------------------------------------------------
