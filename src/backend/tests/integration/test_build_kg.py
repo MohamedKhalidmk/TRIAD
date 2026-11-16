@@ -261,6 +261,8 @@ def test_validate_kg_calls_the_shacl_module(no_env, monkeypatch, capsys):
     fake = types.ModuleType("infrastructure.rdf.shacl")
     fake.main = lambda argv: calls.append(argv) or 0
     monkeypatch.setitem(sys.modules, "infrastructure.rdf.shacl", fake)
+    import infrastructure.rdf as rdf_package
+    monkeypatch.setattr(rdf_package, "shacl", fake, raising=False)          # an earlier import set this name
     with pytest.raises(SystemExit) as stop:
         main.main(["validate-kg"])
     assert stop.value.code == 0 and calls == [[str(SEED_PATH)]]
@@ -273,6 +275,8 @@ def test_validate_kg_calls_the_shacl_module(no_env, monkeypatch, capsys):
 def test_validate_kg_without_the_shacl_module(no_env, monkeypatch):
     import main
     monkeypatch.setitem(sys.modules, "infrastructure.rdf.shacl", None)     # an import of it fails
+    import infrastructure.rdf as rdf_package
+    monkeypatch.delattr(rdf_package, "shacl", raising=False)                # an earlier import set this name
     with pytest.raises(SystemExit, match="SHACL check is not available"):
         main.main(["validate-kg"])
 
