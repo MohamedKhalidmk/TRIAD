@@ -174,13 +174,17 @@ def department_pattern(subject: str = "?d") -> str:
 
 DEPARTMENT_ORDER = ["?name", fragments.id_order("?d", "department")]
 DEPARTMENT_ONE = f"SELECT {DEPARTMENT_SELECT} FROM $abox WHERE {{{department_pattern('$d')}\n}}"
+# The name filters compare fragments.lower(?name) (LCASE(STR(...))) with the name in lower case ($lower, made in
+# Python: str.lower() is the Unicode lower case, as LCASE). On Virtuoso, LCASE(?name) with this ORDER BY gives the
+# name of another department in the row, and LCASE(STR("Équipe")) of a constant is "" (a stored value is correct).
 DEPARTMENT_BY_NAME = (f"SELECT {DEPARTMENT_SELECT} FROM $abox WHERE {{{department_pattern()}\n"
-                      f"  FILTER (LCASE(?name) = LCASE($name))\n}}\nORDER BY {fragments.id_order('?d', 'department')}")
-DEPARTMENT_NAMES = """
-SELECT ?d ?name FROM $abox WHERE {
+                      f"  FILTER ({fragments.lower('?name')} = $lower)\n}}\n"
+                      f"ORDER BY {fragments.id_order('?d', 'department')}")
+DEPARTMENT_NAMES = f"""
+SELECT ?d ?name FROM $abox WHERE {{
   ?d a triad:Department ; triad:name ?name .
-  FILTER (LCASE(?name) = LCASE($name))
-}"""
+  FILTER ({fragments.lower('?name')} = $lower)
+}}"""
 DEPARTMENT_KEYS = """
 SELECT ?d ?name ?value FROM $abox WHERE {
   ?d a triad:Department ; triad:name ?name ; triad:identifierValue ?value .
@@ -349,13 +353,13 @@ class SparqlDirectoryRepository:
 
     def department_by_name(self, name: str) -> Optional[DepartmentView]:
         """The department with this name (case is not important), the first by id."""
-        rows = [r for r in self.session.select(DEPARTMENT_BY_NAME, {"name": name})
+        rows = [r for r in self.session.select(DEPARTMENT_BY_NAME, {"lower": name.lower()})
                 if ascii_lower(r["name"]) == ascii_lower(name)]
         return self._department_views(rows[:1])[0] if rows else None
 
     def department_name_exists(self, name: str, except_id: Optional[int] = None) -> bool:
         return any(ascii_lower(r["name"]) == ascii_lower(name) and id_of(r["d"], "department") != except_id
-                   for r in self.session.select(DEPARTMENT_NAMES, {"name": name}))
+                   for r in self.session.select(DEPARTMENT_NAMES, {"lower": name.lower()}))
 
     def add_department(self, values: dict) -> int:
         buf = self.session.write_buffer()

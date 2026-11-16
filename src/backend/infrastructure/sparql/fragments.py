@@ -113,9 +113,21 @@ def local_date(variable: str) -> str:
     return f"SUBSTR(STR({variable}), 1, 10)"
 
 
+def lower(text_expression: str) -> str:
+    """The text in lower case: LCASE(STR(...)).
+
+    STR is necessary on Virtuoso 7.2. With FILTER (LCASE(?name) = "x") (also UCASE, STRLEN) and an ORDER BY that
+    does not have ?name, Virtuoso gives the correct rows but a wrong ?name: the value of one other row, in all rows
+    (department_by_name("Inpatient Medicine") gave the name "Emergency"). LCASE(STR(?name)) gives the correct value.
+    Use it on a variable. Compare it with a text that Python lowers (str.lower(), the Unicode lower case, as LCASE):
+    on Virtuoso, LCASE(STR("ÉQUIPE")) of a constant is "" (an empty text) when the text has a non-ASCII letter.
+    """
+    return f"LCASE(STR({text_expression}))"
+
+
 def contains(text_expression: str, placeholder: str) -> str:
     """A case-free text search (rule 7). Give the binding in lower case: {"q": text.lower()}."""
-    return f"CONTAINS(LCASE({text_expression}), ${placeholder})"
+    return f"CONTAINS({lower(text_expression)}, ${placeholder})"
 
 
 # ---------------------------------------------------------------------------------------------
