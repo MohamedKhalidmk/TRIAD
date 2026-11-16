@@ -5,6 +5,10 @@ Commands:
     python src/backend/main.py ensure-db  [--db PATH] [--reset-db]  build and load the database if it is missing
     python src/backend/main.py onboard    [--db PATH]               load the FHIR data into an empty schema
     python src/backend/main.py export-sql [--db PATH] [--out FILE]  write dml/02_insert_seed.sql (the scenario data)
+    python src/backend/main.py export-kg  [--db PATH] [--scope all|scenarios] [--out DIR]
+                                                                    write the knowledge graph (R2RML, Morph-KGC):
+                                                                    triad_kg.nt.gz, triad_kg.rdf.gz, kg_report.json
+                                                                    (default DIR: TRIAD_KG_DIR or src/backend/data/kg)
     python src/backend/main.py serve      [--db PATH] [--reset-db]  run ensure-db, then serve the API on port 8000
 
 The API server can also start with uvicorn (the dev.sh script does this):
@@ -123,12 +127,15 @@ def build_database(conn: sqlite3.Connection) -> None:
 def main(argv: list[str] | None = None) -> None:
     config.load_env_file()
     parser = argparse.ArgumentParser(description="TRIAD backend commands")
-    parser.add_argument("command", choices=["init-db", "ensure-db", "onboard", "export-sql", "serve"])
+    parser.add_argument("command", choices=["init-db", "ensure-db", "onboard", "export-sql", "export-kg", "serve"])
     parser.add_argument("--db", type=Path, default=None,
                         help="Path of the SQLite database (default: TRIAD_DB_PATH or src/backend/data/triad.db).")
     parser.add_argument("--reset-db", action="store_true", help="Build the database again (ensure-db).")
-    parser.add_argument("--out", type=Path, default=config.DML_DIR / "02_insert_seed.sql",
-                        help="Output file of export-sql.")
+    parser.add_argument("--out", type=Path, default=None,
+                        help="Output file of export-sql (default: dml/02_insert_seed.sql), or output folder of "
+                             "export-kg (default: TRIAD_KG_DIR or src/backend/data/kg).")
+    parser.add_argument("--scope", choices=["all", "scenarios"], default="all",
+                        help="The rows of export-kg: all rows (default), or only the scenario data of export-sql.")
     args = parser.parse_args(argv)
     args.db = args.db or config.env_db_path()
 
@@ -152,9 +159,23 @@ def main(argv: list[str] | None = None) -> None:
         uvicorn.run(create_app(config.Settings.from_env(db_path=args.db)), host="127.0.0.1", port=port)
     elif args.command == "export-sql":
         from infrastructure.sqlite.sql_export import export_scenarios
+        out = args.out or config.DML_DIR / "02_insert_seed.sql"
         conn = connect(args.db)
-        count = export_scenarios(conn, args.out)
-        print(f"Wrote {count} INSERT statements to {args.out}.")
+        count = export_scenarios(conn, out)
+        print(f"Wrote {count} INSERT statements to {out}.")
+    elif args.command == "export-kg":
+        # The KG packages (morph-kgc, pyoxigraph) load only here, so the other commands do not need them.
+        from infrastructure.rdf.kg_export import ExportError, export_kg, summary
+        out = args.out or config.env_kg_dir()
+        print(f"Exporting the knowledge graph of {args.db} (scope: {args.scope}) ...", flush=True)
+        try:
+            report = export_kg(args.db, out, args.scope)
+        except ExportError as error:
+            raise SystemExit(f"ERROR: {error}") from None
+        print(f"Wrote {', '.join(report['files'])} and kg_report.json to {out} in {report['seconds']} s.")
+        print(f"The knowledge graph has {summary(report)}.")
+        print(f"The counts per predicate and per class equal the SQL counts ({len(report['per_predicate'])} "
+              f"predicates, {len(report['per_class'])} classes).")
 
 
 if __name__ == "__main__":
