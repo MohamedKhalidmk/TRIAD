@@ -4,11 +4,17 @@
 # Usage (from any folder):
 #     ./src/scripts/dev.sh              start the API and the frontend
 #     ./src/scripts/dev.sh --reset-db   build the database again first
+#     ./src/scripts/dev.sh --store STORE   the data store: sqlite, oxigraph or virtuoso
+#                                       (default: TRIAD_STORE of the shell or of src/backend/.env, else sqlite)
+#     ./src/scripts/dev.sh --reset-kg   build the knowledge graph again (this deletes the writes of KG mode)
 #
 # The script:
 #   1. makes src/backend/.env and src/frontend/.env from their .env.example files, if they are missing;
 #   2. makes .venv with uv if it is missing, and installs requirements.txt (uv skips the packages that are current);
 #   3. runs "main.py ensure-db" (it builds the database only if it is missing);
+#      for a knowledge-graph store it then runs "main.py ensure-kg --store STORE" (it builds the graph only if
+#      the build marker is not current). For virtuoso it first runs "kg.sh up" and "kg.sh init" if Virtuoso
+#      does not answer. A rebuild of the graph deletes the writes that the app made in KG mode;
 #   4. starts uvicorn with --reload on src/backend (log prefix [api]);
 #   5. if src/frontend/package.json exists: runs npm install if node_modules is missing,
 #      then starts the Vite dev server (log prefix [web]). Vite sends /api to the API (TRIAD_API_URL).
@@ -23,12 +29,45 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
 RESET=""
+RESET_KG=""
+STORE=""
+NEXT_IS_STORE=""
 for arg in "$@"; do
     case "$arg" in
         --reset-db) RESET="yes" ;;
-        *) echo "Unknown option: $arg. Use --reset-db or no option." >&2; exit 2 ;;
+        --reset-kg) RESET_KG="yes" ;;
+        --store) NEXT_IS_STORE="yes" ;;
+        --store=*) STORE="${arg#--store=}" ;;
+        *)
+            if [ -n "$NEXT_IS_STORE" ]; then
+                STORE="$arg"
+                NEXT_IS_STORE=""
+            else
+                echo "Unknown option: $arg. Use --store, --reset-db or --reset-kg." >&2
+                exit 2
+            fi ;;
     esac
 done
+if [ -n "$NEXT_IS_STORE" ]; then
+    echo "--store needs a value: sqlite, oxigraph or virtuoso." >&2
+    exit 2
+fi
+
+# The store: --store, else TRIAD_STORE of the shell, else TRIAD_STORE of src/backend/.env (read below), else sqlite.
+STORE="${STORE:-${TRIAD_STORE:-}}"
+if [ -z "$STORE" ] && [ -f src/backend/.env ]; then
+    STORE="$(sed -n 's/^TRIAD_STORE=//p' src/backend/.env | tail -n 1 | tr -d ' "'"'"'')"
+fi
+STORE="${STORE:-sqlite}"
+case "$STORE" in
+    sqlite|oxigraph|virtuoso) ;;
+    *) echo "Unknown store: $STORE. Use --store sqlite, --store oxigraph or --store virtuoso." >&2; exit 2 ;;
+esac
+if [ "$STORE" = sqlite ] && [ -n "$RESET_KG" ]; then
+    echo "--reset-kg does not work with the store sqlite." >&2
+    exit 2
+fi
+export TRIAD_STORE="$STORE"
 
 PORT="${PORT:-8000}"
 VITE_PORT="${VITE_PORT:-5173}"
@@ -96,6 +135,20 @@ elif [ ! -x .venv/bin/uvicorn ]; then
 fi
 
 .venv/bin/python src/backend/main.py ensure-db ${RESET:+--reset-db}
+
+echo "Data store: $STORE."
+if [ "$STORE" != sqlite ]; then
+    if [ "$STORE" = virtuoso ]; then
+        QUERY_URL="$(.venv/bin/python src/scripts/kg_settings.py | sed -n 's/^KG_QUERY_URL=//p')"
+        if ! curl -fsS --max-time 3 -o /dev/null --get --data-urlencode "query=ASK{}" "$QUERY_URL" 2>/dev/null; then
+            echo "Virtuoso does not answer on $QUERY_URL. The script starts it (Docker is necessary) ..."
+            ./src/scripts/kg.sh up
+            ./src/scripts/kg.sh init
+        fi
+    fi
+    # ensure-kg builds the graph only if its build marker is not current. A rebuild deletes the KG-mode writes.
+    .venv/bin/python src/backend/main.py ensure-kg --store "$STORE" ${RESET_KG:+--reset-kg}
+fi
 
 export PYTHONUNBUFFERED=1
 echo "The API starts on http://127.0.0.1:${PORT} (documentation: http://127.0.0.1:${PORT}/docs)."
