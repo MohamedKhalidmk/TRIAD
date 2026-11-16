@@ -6,8 +6,8 @@ a time in each row), and a date is not an xsd:dateTime. So the use case keeps ea
 offset is UTC; a text in the full form does not change. Both stores then keep the same text, the knowledge graph
 types it as xsd:dateTime, and the export of SQLite and the graph of the store conform to the SHACL shapes.
 
-The known limit: a SQLite row with a short form that an earlier version wrote gives an ill-typed literal in the
-export, and the shapes report it (the last test records this).
+The known limit: a SQLite row with a date that an earlier version wrote gives an ill-typed literal in the export,
+and the shapes do not report it (the last test records this).
 """
 from __future__ import annotations
 
