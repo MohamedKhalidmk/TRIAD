@@ -233,7 +233,7 @@ def test_a_new_entry_of_each_category(pair):
     views = pair.kg.records.assertions_by_id(ids)
     assert [views[i].category for i in ids] == ["Diagnosis", "Procedure", "Allergy", "LabOrder", "LabReport",
                                                 "Observation"]
-    assert views[ids[0]].details["onsetDate"] == "2026-09-01"            # the text of SQLite
+    assert views[ids[0]].details["onsetDate"] == "2026-09-01T00:00:00+00:00"   # the full form (midnight UTC)
     assert views[ids[4]].details["issuedDate"] is not None               # the time of the write
 
 

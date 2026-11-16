@@ -16,7 +16,7 @@ from typing import Optional
 from domain.access import Actor, record_intents, supersede_denial
 from domain.enums import CHANNELS, ENTRY_CATEGORIES, INTENTS, VERIFICATIONS
 from domain.errors import Invalid, NotFound
-from domain.rules import check_head, parse_time
+from domain.rules import check_head, full_time
 from domain.views import AssertionView, PatientView, RecordResult
 
 from application.context import AppContext
@@ -327,11 +327,13 @@ def text_value(value) -> Optional[str]:
 
 
 def check_time(details: dict, key: str, errors: dict) -> Optional[str]:
+    """A date or time of the details, in the full ISO 8601 form (domain.rules.full_time). The record form sends a
+    date (YYYY-MM-DD); both stores keep the same full text, and the knowledge graph types it as xsd:dateTime."""
     value = text_value(details.get(key))
     if value is None:
         return None
     try:
-        parse_time(value)
+        return full_time(value)
     except ValueError:
         errors[f"details.{key}"] = "Use an ISO 8601 date or time."
     return value

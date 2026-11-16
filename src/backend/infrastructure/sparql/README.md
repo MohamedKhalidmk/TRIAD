@@ -239,6 +239,13 @@ hash of the code. `GET /api/health` gives `store` and `ontologyVersion` (doc/api
   uses `MAX`, so it has the same limit on Virtuoso.
 - **Times:** a stored time comes back with `+00:00` for `Z`, and with no trailing zeros of the seconds
   (`.100` becomes `.1`). The offset does not change. The API thus can give another text of the same instant.
+- **The times of the details** (`onsetDate`, `abatementDate`, `performedDate`, `issuedDate`; range `xsd:dateTime`):
+  the use case keeps each one in the full ISO 8601 form on both stores (`domain.rules.full_time`; a date of the
+  record form is midnight UTC; doc/api.md section 3.4). So the export, the graph of a KG store and the shapes agree,
+  and a short form gives 201 with the same text on both stores. A time in another form is `Invalid` (422) in the
+  write buffer. The limit: a SQLite database that an earlier version changed can hold a date-only text in these
+  columns. Its export has `"2026-09-01"^^xsd:dateTime`, which is not a valid `xsd:dateTime`; pyshacl (rdflib reads
+  the text with Python `fromisoformat`) and check C8 do not report it (`test_store_detail_times.py`).
 - **Text search:** `CONTAINS(LCASE(...))` is literal: `%` and `_` are not wildcards as in SQLite `LIKE`, and LCASE
   lowers all letters (SQLite `lower()` lowers only ASCII).
 - **One writer process for each store.** The lock is in the process. A second process can mint the same IRI; the

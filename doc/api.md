@@ -317,6 +317,10 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
   - LabReport: `issuedDate`, `conclusion`
   - Prescription: `medicationCode`, `medicationSystem`, `medicationName`, `dosage`, `frequency`, `status` (`active`, `draft`, `stopped`, `completed`).
     The backend finds the Medication by (code, system). If it does not exist, the backend adds it.
+- **The dates of the details** (`onsetDate`, `abatementDate`, `performedDate`, `issuedDate`) are ISO 8601. The backend keeps each one in the full form (the date, the time with seconds, the offset), on each store:
+  a date-only value (`YYYY-MM-DD`, from the date field of the record form) becomes midnight UTC (`2026-09-01` → `2026-09-01T00:00:00+00:00`), a time with no seconds gets `:00`, and a time with no offset is UTC.
+  A value in the full form does not change. The date (the first 10 characters) and the instant do not change. A value that is not ISO 8601 gives 422 (`fields` names the detail).
+  The knowledge graph keeps these values as `xsd:dateTime` (the range of the ontology), and a date-only value is not an `xsd:dateTime`.
 - In an `AssertionView`, `details` of a Prescription has `medication` (the name), `dosage`, `frequency` and `status`.
   `details` of a CareTeam has `name`, `status` and `members` (the member names, separated by commas).
 

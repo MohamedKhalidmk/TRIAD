@@ -43,7 +43,6 @@ Known differences from SQLite (see also README.md, section 8):
 """
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from typing import Iterable, Optional, Sequence
 
@@ -62,7 +61,6 @@ NOT_REFUTED = ("Refuted", "EnteredInError")
 ACTIVE_DIAGNOSIS = ("active", "recurrence", "relapse")
 CURRENT_PRESCRIPTION = ("active", "draft")
 CHUNK = 500                                    # the IRIs of one VALUES block (SQLite reads 500 ids at a time)
-DATE_ONLY = re.compile(r"\d{4}-\d{2}-\d{2}")
 
 # The subtype columns of a new entry (SQLite SUBTYPE_COLUMNS) -> the ontology property (vocabulary.COLUMNS).
 SUBTYPE_PROPERTIES: dict[str, dict[str, str]] = {}
@@ -354,14 +352,6 @@ def _to_view(r: dict, members: dict[str, Optional[str]]) -> AssertionView:
         patient_id=id_of(r["p"], "patient"))
 
 
-def _subtype_value(prop: str, value):
-    """The value of a subtype property of a new entry. A date-only value of a time property (the date fields of
-    the record form send YYYY-MM-DD) becomes an xsd:date: the text stays as SQLite keeps it."""
-    if isinstance(value, str) and terms.DATATYPES.get(prop) == "dateTime" and DATE_ONLY.fullmatch(value):
-        return terms.date(value)
-    return value
-
-
 class SparqlRecordRepository:
     """The RecordRepository port on SPARQL."""
 
@@ -648,8 +638,11 @@ class SparqlRecordRepository:
         values = {"identifierSystem": system, "identifierValue": value, "during": iri("visit", entry.visit_id),
                   "code": entry.code, "codeSystem": entry.code_system, "display": entry.display, "text": entry.text,
                   "recordedAt": entry.recorded_at}
+        # A time of the details (onsetDate, abatementDate, performedDate, issuedDate) is an xsd:dateTime, as in the
+        # ontology, the R2RML mapping and the shapes. The use case gives the full ISO 8601 form (a date of the record
+        # form is midnight UTC: domain.rules.full_time), so the text is the text of SQLite. Another form is Invalid.
         for column, prop in properties.items():
-            values[prop] = _subtype_value(prop, entry.details.get(column))
+            values[prop] = entry.details.get(column)
         if entry.category == "Prescription" and entry.medication_id is not None:
             values["prescribes"] = iri("medication", entry.medication_id)
         entry_id = buf.create("clinical-entry", values, types=(entry.category,))
