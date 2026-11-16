@@ -259,15 +259,15 @@ def test_validate_kg_calls_the_shacl_module(no_env, monkeypatch, capsys):
     from infrastructure.rdf.kg_store import SEED_PATH
     calls = []
     fake = types.ModuleType("infrastructure.rdf.shacl")
-    fake.validate = lambda data, shapes=None: calls.append(data) or (True, None, "")
+    fake.main = lambda argv: calls.append(argv) or 0
     monkeypatch.setitem(sys.modules, "infrastructure.rdf.shacl", fake)
     with pytest.raises(SystemExit) as stop:
         main.main(["validate-kg"])
-    assert stop.value.code == 0 and calls == [SEED_PATH] and "conforms" in capsys.readouterr().out
-    fake.validate = lambda data, shapes=None: (False, None, "Constraint Violation in MinCountConstraintComponent")
+    assert stop.value.code == 0 and calls == [[str(SEED_PATH)]]
+    fake.main = lambda argv: calls.append(argv) or 1
     with pytest.raises(SystemExit) as stop:
         main.main(["validate-kg", "--file", "x.rdf"])
-    assert stop.value.code == 1 and "MinCount" in capsys.readouterr().out
+    assert stop.value.code == 1 and calls[-1] == ["x.rdf"]
 
 
 def test_validate_kg_without_the_shacl_module(no_env, monkeypatch):

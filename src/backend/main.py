@@ -292,15 +292,7 @@ def validate_kg(path: Optional[Path]) -> int:
     except ImportError as error:
         raise SystemExit(f"The SHACL check is not available ({error}). It needs infrastructure/rdf/shacl.py and "
                          "the KG packages (requirements-kg.txt).") from None
-    target = path or SEED_PATH
-    print(f"Checking {target} with the SHACL shapes ...", flush=True)
-    result = shacl.validate(target)
-    conforms = getattr(result, "conforms", result[0] if isinstance(result, tuple) else result)
-    text = getattr(result, "text", result[-1] if isinstance(result, tuple) and len(result) > 1 else "")
-    if text and not conforms:
-        print(text)
-    print("The graph conforms to the shapes." if conforms else "The graph does not conform to the shapes.")
-    return 0 if conforms else 1
+    return shacl.main([str(path or SEED_PATH)])
 
 
 def main(argv: list[str] | None = None) -> None:
