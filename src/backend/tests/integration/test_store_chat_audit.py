@@ -414,7 +414,6 @@ def test_an_ask_turn_on_each_store(store, twin, record_reads):
         assert instants(store.probe.rows(kind)) == instants(reference.rows(kind)), kind
 
 
-@pytest.mark.skip(reason="needs the record repository")
 def test_a_tell_turn_on_each_store(store, twin):
     """A patient "tell" writes a report visit, a message, an entry and an assertion, and the reply cites it."""
     status, session = both(store, twin, "post", "/api/patients/1/chat/sessions", ELENA)
@@ -429,7 +428,6 @@ def test_a_tell_turn_on_each_store(store, twin):
         assert instants(store.probe.rows(kind)) == instants(reference.rows(kind)), kind
 
 
-@pytest.mark.skip(reason="needs the record repository")
 def test_a_full_chat_on_each_store(store, twin):
     """A session, two "ask" turns, a "tell" turn of a doctor with no open visit, the session and the list."""
     status, session = both(store, twin, "post", "/api/patients/1/chat/sessions", OKAFOR)
