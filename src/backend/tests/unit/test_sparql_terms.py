@@ -127,3 +127,14 @@ def test_the_injection_strings_go_into_a_store_and_come_back_unchanged(text):
                            {"q": text.lower()})
     assert len(search) == 1
     assert client.select("SELECT (COUNT(*) AS ?n) FROM $abox WHERE { ?s ?p ?o }")[0]["n"] == 2   # nothing else changed
+
+
+def test_a_values_block_of_one_iri_gets_a_second_iri_that_matches_nothing():
+    """terms.iri_values: Virtuoso compiles a query with one value in VALUES much more slowly (300 ms, not 50 ms)."""
+    one = terms.iri_values([f"{KG}assertion/7"])
+    assert one == f"<{KG}assertion/7> <{KG}assertion/0>"
+    assert terms.iri_values([f"<{KG}visit/2>", f"{KG}visit/3"]) == f"<{KG}visit/2> <{KG}visit/3>"
+    with pytest.raises(TermError):
+        terms.iri_values(["https://example.org/x/1"])        # only the IRIs of TRIAD individuals
+    with pytest.raises(TermError):
+        terms.iri_values([])

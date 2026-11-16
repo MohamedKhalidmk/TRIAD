@@ -107,8 +107,9 @@ def page_slice(rows: Sequence[T], page: PageRequest) -> list[T]:
 
 def iri_list(values) -> Term:
     """The IRIs of the rows for a VALUES block. A value is the text of an IRI of a client row (no angle brackets);
-    each one is made again from its kind and id (terms.iri), so only the IRI of a TRIAD individual can go in."""
-    return Term(" ".join(terms.iri(*terms.split_iri(v)) for v in values))
+    each one is made again from its kind and id (terms.iri), so only the IRI of a TRIAD individual can go in.
+    One IRI gets a second IRI that matches nothing (terms.iri_values: Virtuoso compiles one value slowly)."""
+    return terms.iri_values(values)
 
 
 class SparqlVisitRepository:

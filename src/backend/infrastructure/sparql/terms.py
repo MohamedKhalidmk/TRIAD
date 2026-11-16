@@ -229,6 +229,22 @@ def term_list(values: Iterable[Any], datatype: Optional[str] = None) -> Term:
     return Term(", ".join(items))
 
 
+def iri_values(iris: Iterable[str]) -> Term:
+    """The IRIs of individuals for a VALUES block: <a> <b> ... (VALUES has no commas). The values are IRI texts,
+    with or without the angle brackets; each one is made again from its kind and id (only TRIAD individuals).
+
+    A block with ONE IRI also gets the IRI of id 0 of the same kind (no individual has id 0, so it matches no
+    triple). Virtuoso 7.2 compiles each new query text, and with one value in VALUES it puts the constant into
+    the plan: the assertion view of one assertion took about 300 ms to compile, with two values 50 ms. The
+    pattern after VALUES must need a triple of the variable (then the padding IRI gives no row)."""
+    found = [iri(*split_iri(v)) for v in iris]
+    if not found:
+        raise TermError("A list of SPARQL values cannot be empty.")
+    if len(found) == 1:
+        found.append(iri(split_iri(found[0])[0], 0))
+    return Term(" ".join(found))
+
+
 # The graph placeholders that each template can use without a binding.
 GRAPH_BINDINGS: dict[str, Term] = {
     "abox": Term(f"<{ABOX_GRAPH}>"), "tbox": Term(f"<{TBOX_GRAPH}>"), "meta": Term(f"<{META_GRAPH}>"),

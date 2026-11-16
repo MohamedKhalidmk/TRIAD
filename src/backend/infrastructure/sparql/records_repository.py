@@ -75,8 +75,9 @@ NEWEST_FIRST = ["DESC(?instant)", "DESC(?n)"]
 
 
 def _iris(values: Iterable[str]) -> Term:
-    """The text of a VALUES block of IRIs (with or without the angle brackets)."""
-    return Term(" ".join(v if v.startswith("<") else f"<{v}>" for v in values))
+    """The text of a VALUES block of IRIs (with or without the angle brackets). terms.iri_values: one IRI gets a
+    second IRI that matches nothing (Virtuoso compiles the query with one value much more slowly)."""
+    return terms.iri_values(values)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -398,7 +399,7 @@ class SparqlRecordRepository:
         rows: list[dict] = []
         for start in range(0, len(unique), CHUNK):
             part = unique[start:start + CHUNK]
-            rows += self.session.select(VIEW, {"ids": Term(" ".join(iri("assertion", i) for i in part))})
+            rows += self.session.select(VIEW, {"ids": _iris(iri("assertion", i) for i in part)})
         teams = sorted({r["e"] for r in rows if fragments.category_of(r["type"]) == "CareTeam"})
         members = self._member_texts(teams)
         out: dict[int, AssertionView] = {}
