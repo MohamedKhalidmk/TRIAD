@@ -2346,3 +2346,14 @@ s {
   padding: 6px 12px;
   border-bottom: 1px solid var(--border);
 }
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.filter-row .field-inline input[type='date'] {
+  min-width: 0;
+}

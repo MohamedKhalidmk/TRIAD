@@ -184,8 +184,11 @@ class SqliteRecordRepository:
 
     @staticmethod
     def _item_filters(patient_id: int, current_only: bool, visit_id: Optional[int], category: Optional[str],
-                      text: Optional[str], visible_only: bool) -> tuple[list[str], list]:
-        """The WHERE conditions of the chart. A patient-visible item is always current (Q12)."""
+                      text: Optional[str], visible_only: bool, date_from: Optional[str] = None,
+                      date_to: Optional[str] = None) -> tuple[list[str], list]:
+        """The WHERE conditions of the chart. A patient-visible item is always current (Q12).
+
+        The dates are the local date of AssertedAt, the first 10 characters (not the UTC date)."""
         clauses, args = ["v.PatientId = ?"], [patient_id]
         if visible_only:
             clauses.append(PATIENT_VISIBLE)
@@ -202,24 +205,35 @@ class SqliteRecordRepository:
         if text:
             clauses.append(f"(lower(e.Display) LIKE ? OR lower(a.Statement) LIKE ? OR lower({AUTHOR_NAME}) LIKE ?)")
             args += [f"%{text.lower()}%"] * 3
+        if date_from:
+            clauses.append("substr(a.AssertedAt, 1, 10) >= ?")
+            args.append(date_from)
+        if date_to:
+            clauses.append("substr(a.AssertedAt, 1, 10) <= ?")
+            args.append(date_to)
         return clauses, args
 
     def items_page(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
                    category: Optional[str] = None, text: Optional[str] = None, visible_only: bool = False,
+                   date_from: Optional[str] = None, date_to: Optional[str] = None,
                    page: PageRequest) -> Page[AssertionView]:
         """One page of the chart (query Q14), in the order of the chart.
 
         `text` searches the display, the statement and the author name (case is not important).
         `visible_only` keeps only the items that the patient can see (the predicate of Q12).
+        `date_from` and `date_to` (`YYYY-MM-DD`, both included) limit the local date of AssertedAt.
         """
-        clauses, args = self._item_filters(patient_id, current_only, visit_id, category, text, visible_only)
+        clauses, args = self._item_filters(patient_id, current_only, visit_id, category, text, visible_only,
+                                           date_from, date_to)
         return fetch_page(self.conn, ASSERTION_COLUMNS, ASSERTION_FROM + where(clauses), args, CHART_ORDER, page,
                           each_row(to_view))
 
     def category_counts(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
-                        text: Optional[str] = None, visible_only: bool = False) -> dict[str, int]:
+                        text: Optional[str] = None, visible_only: bool = False,
+                        date_from: Optional[str] = None, date_to: Optional[str] = None) -> dict[str, int]:
         """The number of items of each category for the filters of the chart. A category with no item is not in it."""
-        clauses, args = self._item_filters(patient_id, current_only, visit_id, None, text, visible_only)
+        clauses, args = self._item_filters(patient_id, current_only, visit_id, None, text, visible_only,
+                                           date_from, date_to)
         rows = self.conn.execute(f"SELECT e.Category, COUNT(*) {ASSERTION_FROM}{where(clauses)} "
                                  f"GROUP BY e.Category ORDER BY {CATEGORY_RANK}", args)
         return {r[0]: r[1] for r in rows}

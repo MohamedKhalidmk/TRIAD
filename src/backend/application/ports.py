@@ -145,15 +145,18 @@ class VisitRepository(Protocol):
 class RecordRepository(Protocol):
     def items_page(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
                    category: Optional[str] = None, text: Optional[str] = None, visible_only: bool = False,
+                   date_from: Optional[str] = None, date_to: Optional[str] = None,
                    page: PageRequest) -> Page[AssertionView]:
         """One page of the chart, in the order of the chart (the category, the newest first, the Id).
 
         `text` searches the display, the statement and the author name. `visible_only` keeps only the
         patient-visible items (the predicate of query Q12, in SQL).
+        `date_from` and `date_to` (`YYYY-MM-DD`, both included) limit the local date of AssertedAt.
         """
         ...
     def category_counts(self, patient_id: int, *, current_only: bool = True, visit_id: Optional[int] = None,
-                        text: Optional[str] = None, visible_only: bool = False) -> dict[str, int]:
+                        text: Optional[str] = None, visible_only: bool = False,
+                        date_from: Optional[str] = None, date_to: Optional[str] = None) -> dict[str, int]:
         """The number of items of each category for the same filters (no category filter)."""
         ...
     # The lookups of the Care Assistant tools. Each one is one query with a WHERE clause on the patient and the

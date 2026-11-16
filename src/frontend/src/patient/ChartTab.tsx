@@ -38,15 +38,23 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
   const isPatient = user.role === 'Patient';
   const [history, setHistory] = useState(false);
   const [filter, setFilter] = useState('');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [category, setCategory] = useState<Category | 'all'>('all');
   const [chainOf, setChainOf] = useState<number | null>(null);
   const q = useDebounced(filter.trim(), 300);
   const withHistory = history && !isPatient;
-  const page = usePage([patient.id, withHistory, q, category]);
+  // A From date after the To date is not sent. The server would give 422, and the chart would show an error.
+  const rangeBad = from !== '' && to !== '' && from > to;
+  const fromSent = rangeBad ? '' : from;
+  const toSent = rangeBad ? '' : to;
+  const page = usePage([patient.id, withHistory, q, category, fromSent, toSent]);
   const listRef = useRef<HTMLDivElement>(null);
   const chart = useChart(patient.id, {
     history: withHistory || undefined,
     q: q || undefined,
+    from: fromSent || undefined,
+    to: toSent || undefined,
     category: category === 'all' ? undefined : category,
     ...page.params,
   });
@@ -60,7 +68,7 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
   const counts = chart.data?.counts ?? {};
   const countOf = (cat: Category) => counts[cat] ?? 0;
   const allCount = CATEGORY_ORDER.reduce((sum, cat) => sum + countOf(cat), 0);
-  const filtered = q !== '' || category !== 'all';
+  const filtered = q !== '' || category !== 'all' || fromSent !== '' || toSent !== '';
   // The groups of this page. The server sends the items in the category order, so a group can go on to the next page.
   const groups = CATEGORY_ORDER.map((cat) => ({ category: cat, items: items.filter((item) => item.category === cat) })).filter(
     (group) => group.items.length > 0,
@@ -189,18 +197,33 @@ export function ChartTab({ patient, user, onRecord }: ChartTabProps) {
         <ErrorPanel error={chart.error} onRetry={() => chart.refetch()} />
       ) : (
         <>
-          {(filtered || filter !== '' || allCount > 0) && (
+          {(filtered || filter !== '' || from !== '' || to !== '' || allCount > 0) && (
             <div className="filter-bar">
-              <div className="field field-inline">
-                <label htmlFor="chart-filter">Find in the chart</label>
-                <input
-                  id="chart-filter"
-                  type="search"
-                  value={filter}
-                  onChange={(event) => setFilter(event.target.value)}
-                  placeholder="For example metformin"
-                  autoComplete="off"
-                />
+              <div className="filter-row">
+                <div className="field field-inline">
+                  <label htmlFor="chart-filter">Find in the chart</label>
+                  <input
+                    id="chart-filter"
+                    type="search"
+                    value={filter}
+                    onChange={(event) => setFilter(event.target.value)}
+                    placeholder="For example metformin"
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="field field-inline">
+                  <label htmlFor="chart-from">From</label>
+                  <input id="chart-from" type="date" value={from} max={to || undefined} onChange={(event) => setFrom(event.target.value)} />
+                </div>
+                <div className="field field-inline">
+                  <label htmlFor="chart-to">To</label>
+                  <input id="chart-to" type="date" value={to} min={from || undefined} onChange={(event) => setTo(event.target.value)} />
+                </div>
+                {rangeBad && (
+                  <p className="field-error" role="alert">
+                    The From date is after the To date. The chart does not use the dates now.
+                  </p>
+                )}
               </div>
               <div className="chips" role="group" aria-label="Category">
                 <button type="button" className={category === 'all' ? 'chip chip-selected' : 'chip'} aria-pressed={category === 'all'} onClick={() => setCategory('all')}>

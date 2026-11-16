@@ -8,7 +8,9 @@ The backend never changes a ClinicalEntry row or a subtype row after the insert.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Optional
 
 from domain.access import Actor, record_intents, supersede_denial
@@ -81,24 +83,53 @@ class Chain(Page[AssertionView]):
 
 
 def chart(ctx: AppContext, actor: Actor, patient_id: int, visit_id: Optional[int], category: Optional[str],
-          history: bool, text: Optional[str] = None, page: PageRequest = PageRequest()) -> Chart:
+          history: bool, text: Optional[str] = None, page: PageRequest = PageRequest(),
+          date_from: Optional[str] = None, date_to: Optional[str] = None) -> Chart:
     """One page of the chart, in the order of the chart. A patient gets the patient-visible items only.
 
-    `text` searches the display, the statement and the author name. Each page read writes one audit record.
+    `text` searches the display, the statement and the author name. `date_from` and `date_to` (`YYYY-MM-DD`,
+    both included) limit the local date of the assertion time. Each page read writes one audit record.
     """
     patient = load_patient(ctx, patient_id)
     path = "/api/patients/{patient}/chart"
     require(ctx, actor, patient, "view_chart", "read", path)
     if category and category not in ENTRY_CATEGORIES:
         raise Invalid("The category is not correct.", {"category": f"Use one of {', '.join(ENTRY_CATEGORIES)}."})
+    date_from, date_to = check_dates(date_from, date_to)
     filters = dict(current_only=actor.is_patient or not history, visit_id=visit_id,
-                   text=(text or "").strip() or None, visible_only=actor.is_patient)
+                   text=(text or "").strip() or None, visible_only=actor.is_patient,
+                   date_from=date_from, date_to=date_to)
     found = ctx.records.items_page(patient.id, category=category or None, page=page, **filters)
     counts = ctx.records.category_counts(patient.id, **filters)
     with ctx.uow.write() as now:
         ctx.audit.add(now, "read", "Allowed", actor, subject_of(patient), path)
     return Chart(items=found.items, total=found.total, limit=found.limit, offset=found.offset,
                  patient_id=patient.id, counts=counts)
+
+
+def check_date(value: Optional[str], name: str, errors: dict) -> Optional[str]:
+    """A date-only value `YYYY-MM-DD`, or None when the value is missing or blank."""
+    value = (value or "").strip()
+    if not value:
+        return None
+    try:
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+            raise ValueError(value)
+        date.fromisoformat(value)
+    except ValueError:
+        errors[name] = "Use a date in the form YYYY-MM-DD."
+        return None
+    return value
+
+
+def check_dates(date_from: Optional[str], date_to: Optional[str]) -> tuple[Optional[str], Optional[str]]:
+    errors: dict = {}
+    first, last = check_date(date_from, "from", errors), check_date(date_to, "to", errors)
+    if first and last and first > last:
+        errors["from"] = "The From date must not be after the To date."
+    if errors:
+        raise Invalid("The date filter is not correct.", errors)
+    return first, last
 
 
 def chain(ctx: AppContext, actor: Actor, assertion_id: int, page: PageRequest = PageRequest()) -> Chain:

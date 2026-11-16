@@ -52,6 +52,8 @@ export type ChartParams = PageParams & {
   category?: Category;
   history?: boolean;
   q?: string; // finds the text in the display, the statement and the author name
+  from?: string; // the first day (YYYY-MM-DD, included), on the local date of assertedAt
+  to?: string; // the last day (YYYY-MM-DD, included)
 };
 
 export interface NewPatientBody {

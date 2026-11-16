@@ -273,7 +273,7 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/patients/{id}/chart?visitId=&category=&history=false&q=&limit=&offset=` | — | `Chart` (one page) | self (patient-visible items only), care team |
+| `GET /api/patients/{id}/chart?visitId=&category=&history=false&q=&from=&to=&limit=&offset=` | — | `Chart` (one page) | self (patient-visible items only), care team |
 | `GET /api/assertions/{id}/chain?limit=&offset=` | — | `Chain` (one page, newest first) | self (head only), care team |
 | `POST /api/messages` | `NewMessage` | 201 `RecordResult` | see USER_FLOWS.md section 2 |
 
@@ -281,7 +281,11 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 - **Chart order.** The category in this order: Allergy, Diagnosis, Prescription, Observation, LabOrder, LabReport, Procedure, CareTeam.
   Then the newest first, then the Id. So the items of one category stay together across pages.
 - **Chart search.** `q` searches part of the display, the statement and the author name (case is not important). A blank `q` is no search.
-- **Chart counts.** `counts` uses the same filters as the page (`visitId`, `history`, `q` and the patient-visible rule), but not `category`.
+- **Chart dates.** `from` and `to` are date-only values (`YYYY-MM-DD`). Both are optional and both include their day.
+  The chart keeps an item when the local date of its `assertedAt` (the first 10 characters, as written) is not before `from` and not after `to`.
+  The filter works on the page, on `total` and on `counts`. A value in another format, or a date that does not exist, gives 422 with `fields.from` or `fields.to`.
+  A `from` after `to` also gives 422 (`fields.from`).
+- **Chart counts.** `counts` uses the same filters as the page (`visitId`, `history`, `q`, `from`, `to` and the patient-visible rule), but not `category`.
   `total` also uses `category`. For a patient, the patient-visible rule is in the SQL WHERE clause (the predicate of query Q12), so `total` and the pages are correct.
 - **Visit of a new entry.** The default is the open visit. A staff user must have an open visit (else 422). For a patient report about a new fact with no open visit, the backend makes a VR visit that ends at once (EndDate = StartDate).
 - **The entry and version rule.** A new claim about the same fact (confirm, refute, a report on the item) is a new assertion on the same entry (`entryId`).
