@@ -5,11 +5,16 @@
 // - a patient page has a patient key, and that key is a demo patient;
 // - the use cases are 0 to 9 of USER_FLOWS.md section 3, in order. Each use case has a title, one or more steps
 //   and an expected result. Each step has actions.
+// - src/demo/sparql_queries.json is the same as the data that scripts/build-sparql-queries.mjs builds from
+//   03_select_queries.sparql, and each query ID of a use case is in it;
+// - the function of the "Run in Virtuoso" link (src/demo/sparql_link.mjs) gives the expected URL.
 // Run it with: npm run check:demo
 
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sparqlPageUrl } from '../src/demo/sparql_link.mjs';
+import { expectedJson, JSON_FILE } from './build-sparql-queries.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const frontend = resolve(here, '..');
@@ -59,6 +64,34 @@ if (useCases.length !== 10) {
   problem('useCases', `has ${useCases.length} use cases; USER_FLOWS.md section 3 has 10 (Use case 0 to Use case 9)`);
 }
 
+// The committed SPARQL data must agree with the .sparql file.
+const queryIds = new Set();
+{
+  let committed = '';
+  try {
+    committed = readFileSync(JSON_FILE, 'utf8');
+  } catch {
+    // The problem shows below.
+  }
+  if (committed !== expectedJson()) {
+    problem('src/demo/sparql_queries.json', 'does not agree with 03_select_queries.sparql. Run: npm run build:sparql');
+  }
+  for (const query of JSON.parse(committed || '{"queries":[]}').queries) queryIds.add(query.id);
+}
+
+// The link function: qtxt opens the editor, query runs the query. The query text must come back unchanged.
+{
+  const text = 'PREFIX a: <http://x/a#>\nASK { ?s a:p "v&w=1#" }';
+  const base = 'http://127.0.0.1:8890/sparql';
+  for (const [run, name] of [[false, 'qtxt'], [true, 'query']]) {
+    const url = new URL(sparqlPageUrl(base, text, run));
+    if (url.origin + url.pathname !== base) problem('sparqlPageUrl', `changes the base URL (${url.origin}${url.pathname})`);
+    if (url.searchParams.get(name) !== text || [...url.searchParams.keys()].join() !== name) {
+      problem('sparqlPageUrl', `does not give the query text unchanged in the parameter "${name}"`);
+    }
+  }
+}
+
 let stepCount = 0;
 useCases.forEach((useCase, index) => {
   const where = `Use case ${useCase.id ?? index}`;
@@ -66,6 +99,9 @@ useCases.forEach((useCase, index) => {
   if (!useCase.title) problem(where, 'has no title');
   if (!Array.isArray(useCase.expected) || useCase.expected.length === 0) problem(where, 'has no expected result');
   if (!Array.isArray(useCase.steps) || useCase.steps.length === 0) problem(where, 'has no step');
+  for (const id of useCase.queries ?? []) {
+    if (!queryIds.has(id)) problem(where, `the query "${id}" is not in src/demo/sparql_queries.json`);
+  }
   (useCase.steps ?? []).forEach((step, stepIndex) => {
     stepCount += 1;
     const at = `${where}, Step ${stepIndex + 1}`;
@@ -102,5 +138,5 @@ if (problems.length > 0) {
 console.log(
   `Demo guide check passed: ${useCases.length} use cases, ${stepCount} steps, ` +
     `${new Set(useCases.flatMap((u) => u.steps.map((s) => s.user))).size} users. ` +
-    `All users are demo users of doc/api.md section 1.1, and all pages are routes.`,
+    `All users are demo users of doc/api.md section 1.1, all pages are routes, and sparql_queries.json has ${queryIds.size} queries.`,
 );

@@ -63,6 +63,7 @@ class Health(Model):
     clock: Literal["system", "fixed"]
     store: Literal["sqlite", "virtuoso", "oxigraph"]
     ontology_version: Optional[str]
+    sparql_url: Optional[str] = None
 
 
 # ----- users and patients -----

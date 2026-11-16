@@ -85,7 +85,8 @@ def context_factory(settings: config.Settings) -> Callable:
         else:
             llm, mode, model = litellm_client.LiteLlmLanguageModel(settings.llm_model), "llm", settings.llm_model
     common = dict(llm=llm, fallback_llm=fake, chat_mode=mode, chat_model=model, schema_version=config.SCHEMA_VERSION,
-                  identity=Identity(), clock_mode=clock.mode, store=settings.store)
+                  identity=Identity(), clock_mode=clock.mode, store=settings.store,
+                  sparql_url=settings.sparql_query_url if settings.store == "virtuoso" else None)
     if settings.store == "sqlite":
         return sqlite_context_factory(settings, clock, common)
     return kg_context_factory(settings, clock, common)

@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router-dom';
-import { api, queryKeys, type Health } from '../api/endpoints';
+import { api, queryKeys, type Health, type StoreName } from '../api/endpoints';
 import type { Role } from '../api/types';
 import { directoryPath, patientPath, patientsPath, ROUTES } from '../app/routes';
 import { useActingUser } from '../app/session';
@@ -106,6 +106,23 @@ function Clock({ health }: { health: Health }) {
   );
 }
 
+const STORE_LABELS: Record<StoreName, string> = {
+  sqlite: 'SQLite',
+  virtuoso: 'Knowledge graph (Virtuoso)',
+  oxigraph: 'Knowledge graph (Oxigraph)',
+};
+
+/** The badge of the data store: "SQLite", "Knowledge graph (Virtuoso)" or "Knowledge graph (Oxigraph)". */
+function StoreBadge({ health }: { health: Health }) {
+  const store = health.store ?? 'sqlite';
+  const version = health.ontologyVersion ? ` Ontology version: ${health.ontologyVersion}.` : '';
+  return (
+    <span className={`store-badge store-badge-${store === 'sqlite' ? 'sqlite' : 'kg'}`} title={`The data store of the server.${version}`}>
+      {STORE_LABELS[store]}
+    </span>
+  );
+}
+
 /** Keeps the CSS variable --topbar-height equal to the height of the top bar. The height changes with the width. */
 function useTopBarHeight() {
   const ref = useRef<HTMLElement>(null);
@@ -161,7 +178,10 @@ export function TopBar({ onOpenDemoGuide }: { onOpenDemoGuide: () => void }) {
 
         <div className="topbar-tools">
           {health.data ? (
-            <Clock health={health.data} />
+            <>
+              <StoreBadge health={health.data} />
+              <Clock health={health.data} />
+            </>
           ) : health.isError ? (
             <span className="clock clock-offline" title="GET /api/health failed">
               Server offline

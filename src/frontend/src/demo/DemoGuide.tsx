@@ -4,11 +4,14 @@
 // A patient page needs the patient id: the guide gets it from GET /api/users/{key} (patientId).
 
 import { useEffect, useRef, useState } from 'react';
-import { api } from '../api/endpoints';
+import { useQuery } from '@tanstack/react-query';
+import { api, queryKeys } from '../api/endpoints';
 import { ROUTES } from '../app/routes';
 import { useActingUser } from '../app/session';
 import { Dialog } from '../components/Dialog';
 import { errorMessage } from '../components/ErrorView';
+import { sparqlPageUrl } from './sparql_link.mjs';
+import sparql from './sparql_queries.json';
 import guide from './steps.json';
 
 interface DemoStep {
@@ -24,9 +27,17 @@ interface DemoUseCase {
   id: number;
   title: string;
   steps: DemoStep[];
+  queries?: string[];
   expected: string[];
 }
 
+interface SparqlQuery {
+  id: string;
+  title: string;
+  text: string;
+}
+
+const QUERIES = new Map((sparql.queries as SparqlQuery[]).map((query) => [query.id, query]));
 const USERS = guide.users as Record<string, string>;
 const USE_CASES = guide.useCases as DemoUseCase[];
 // The id of a step is "<use case id>.<step index>", for example "1.0" for Step 1 of Use case 1.
@@ -76,12 +87,56 @@ async function pathOf(step: DemoStep): Promise<string> {
   return search ? `${path}?${search}` : path;
 }
 
+/**
+ * The SPARQL queries of a use case (the file 03_select_queries.sparql). "Show the SPARQL" shows the text for each store.
+ * "Run in Virtuoso" shows only for the store Virtuoso: it opens the SPARQL page with the query in the editor.
+ */
+function UseCaseQueries({ ids, sparqlUrl }: { ids: string[]; sparqlUrl: string | null }) {
+  const [shown, setShown] = useState<string | null>(null);
+  return (
+    <div className="demo-queries">
+      <span className="eyebrow">SPARQL of this use case</span>
+      <ul>
+        {ids.map((id) => {
+          const query = QUERIES.get(id);
+          if (!query) return null;
+          return (
+            <li key={id} className="demo-query">
+              <div className="demo-query-links">
+                <span>
+                  <strong>{id}.</strong> {query.title}
+                </span>
+                {sparqlUrl && (
+                  <a href={sparqlPageUrl(sparqlUrl, query.text)} target="_blank" rel="noreferrer">
+                    Run in Virtuoso
+                  </a>
+                )}
+                <button
+                  type="button"
+                  className="button button-small"
+                  aria-expanded={shown === id}
+                  onClick={() => setShown(shown === id ? null : id)}
+                >
+                  {shown === id ? 'Hide the SPARQL' : 'Show the SPARQL'}
+                </button>
+              </div>
+              {shown === id && <pre>{query.text}</pre>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export function DemoGuide({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { switchUser, userKey } = useActingUser();
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<{ step: string; message: string } | null>(null);
   const [lastStep, setLastStep] = useState<string | null>(readLastStep);
   const listRef = useRef<HTMLOListElement>(null);
+  const health = useQuery({ queryKey: queryKeys.health, queryFn: ({ signal }) => api.health(signal), staleTime: 60_000, retry: false });
+  const sparqlUrl = health.data?.store === 'virtuoso' ? (health.data.sparqlUrl ?? null) : null;
 
   useEffect(() => {
     if (!open || !lastStep) return;
@@ -162,6 +217,7 @@ export function DemoGuide({ open, onClose }: { open: boolean; onClose: () => voi
                 </div>
               );
             })}
+            {useCase.queries && useCase.queries.length > 0 && <UseCaseQueries ids={useCase.queries} sparqlUrl={sparqlUrl} />}
             <div className="demo-expected">
               <span className="eyebrow">Expected result</span>
               <ul>

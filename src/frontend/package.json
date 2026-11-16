@@ -13,9 +13,12 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b",
     "preview": "vite preview",
+    "build:sparql": "node scripts/build-sparql-queries.mjs",
     "check:demo": "node scripts/check-demo.mjs && node scripts/check-logo.mjs",
     "e2e": "playwright test",
-    "e2e:screens": "TRIAD_SCREENS=1 playwright test"
+    "e2e:screens": "TRIAD_SCREENS=1 playwright test",
+    "e2e:kg": "TRIAD_E2E_STORE=oxigraph TRIAD_E2E_PORT=8124 playwright test",
+    "e2e:kg:screens": "TRIAD_SCREENS=1 TRIAD_E2E_STORE=oxigraph TRIAD_E2E_PORT=8124 playwright test"
   },
   "dependencies": {
     "@tanstack/react-query": "5.105.1",

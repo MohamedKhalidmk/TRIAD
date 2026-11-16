@@ -26,6 +26,7 @@
           ]
         }
       ],
+      "queries": ["Q2", "QA"],
       "expected": [
         "The answer is: \"No. A physician ruled it out with an allergy test on Oct 2, 2026.\"",
         "The card shows the current assertion.",
@@ -206,6 +207,7 @@
           "actions": ["In the Care Assistant, ask: \"What is my plan?\""]
         }
       ],
+      "queries": ["Q12"],
       "expected": [
         "The answer gives the heart-failure work-up and furosemide.",
         "The answer does not give asthma or the inhaler.",
@@ -238,6 +240,7 @@
           "actions": ["Look at the audit log."]
         }
       ],
+      "queries": ["Q11"],
       "expected": [
         "A 403 panel shows: \"You are not on this patient's care team. This attempt is in the audit log.\"",
         "Patient B sees the denied attempt (a red row) in the Audit tab."

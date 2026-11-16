@@ -26,8 +26,12 @@ def test_health_names_the_store_and_the_ontology(store, reference):
     expected = reference.get("/api/health").json()
     assert health["store"] == store.name
     assert health["ontologyVersion"] == ("5.0.0" if store.is_kg else None)
-    assert {k: v for k, v in health.items() if k not in ("store", "ontologyVersion")} == \
-           {k: v for k, v in expected.items() if k not in ("store", "ontologyVersion")}
+    if store.name == "virtuoso":
+        assert health["sparqlUrl"].startswith("http") and health["sparqlUrl"].endswith("/sparql")
+    else:
+        assert health["sparqlUrl"] is None
+    ignored = ("store", "ontologyVersion", "sparqlUrl")
+    assert {k: v for k, v in health.items() if k not in ignored} == {k: v for k, v in expected.items() if k not in ignored}
     assert health["now"] == "2026-10-30T09:00:00-04:00"       # the fixed demo time is after the data
 
 

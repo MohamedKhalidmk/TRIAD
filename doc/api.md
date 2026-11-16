@@ -95,6 +95,9 @@ Each GET that gives a list of rows gives one page of the list.
 - `GET /api/health` gives `store` (the value of `TRIAD_STORE`) and `ontologyVersion`: the version of the TRIAD ontology
   of the knowledge graph (for example `'5.0.0'`), or `null` for `sqlite`. `schemaVersion` stays: the knowledge graph is
   built from a database of that schema version.
+- `GET /api/health` also gives `sparqlUrl`: the value of `TRIAD_SPARQL_QUERY_URL` (for example
+  `'http://127.0.0.1:8890/sparql'`) when `store` is `virtuoso`, and `null` for the other stores. The Demo guide uses it
+  to link to the SPARQL page of Virtuoso, so the frontend has no fixed port.
 - Health reads no triple count. The frontend reads health after each write, so it must stay fast.
 - With a knowledge-graph store, a time can come back with a different text form of the same instant: the stores drop
   the trailing zeros of the seconds (`09:00:00.100-04:00` becomes `09:00:00.1-04:00`). The offset does not change.
@@ -247,7 +250,7 @@ interface Medication { id: number; code: string; codeSystem: string; name: strin
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed', store: 'sqlite' \| 'virtuoso' \| 'oxigraph', ontologyVersion: string \| null }` (section 1.6) | all, no header |
+| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed', store: 'sqlite' \| 'virtuoso' \| 'oxigraph', ontologyVersion: string \| null, sparqlUrl: string \| null }` (section 1.6) | all, no header |
 | `GET /api/users?role=&q=&limit=&offset=` | — | `Page<UserView>` (the demo users first, in the order of section 1.1; then by name, then key) | all, no header |
 | `GET /api/users/{key}` | — | `UserView` | all, no header |
 | `GET /api/me` | — | `UserView` | any user |
