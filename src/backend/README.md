@@ -331,7 +331,7 @@ Run the tests from the root folder of the repository:
 
 ```sh
 .venv/bin/python -m pytest -q                                   # all tests (about 1,500, about 6 min); the Virtuoso tests are skipped
-.venv/bin/python -m pytest -q -m "not slow and not virtuoso"    # the fast tests (about 1,200, about 75 s; quickstart.sh runs these)
+.venv/bin/python -m pytest -q -m "not slow and not virtuoso"    # the fast tests (about 1,200, about 1.5 min; quickstart.sh runs these)
 .venv/bin/python -m pytest -q -m "not kg"                       # SQLite only
 .venv/bin/python -m pytest -q -k oxigraph src/backend/tests/integration/test_store_users.py   # one file, Oxigraph only
 ```

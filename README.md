@@ -619,7 +619,7 @@ after a seed load.
 
 ```sh
 .venv/bin/python -m pytest -q                                  # all backend tests: about 1,500, about 6 min (the Virtuoso tests are skipped)
-.venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests only (about 1,200 tests, about 75 s)
+.venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests only (about 1,200 tests, about 1.5 min)
 .venv/bin/python -m pytest -q -m "not kg"                      # the SQLite tests only
 TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso .venv/bin/python -m pytest -q -m virtuoso   # also on Virtuoso (kg.sh up, init first)
 npm --prefix src/frontend run build                            # type-check and build the frontend into src/frontend/dist/
