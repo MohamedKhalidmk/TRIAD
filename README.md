@@ -177,7 +177,8 @@ The other options:
 
 **The time.** Measured on one laptop (macOS on arm64) with Oxigraph: the first run takes 2 min 27 s (the
 graph build is 31 s of it), and a second run takes 1 min 37 s (most of it is the fast tests). With Virtuoso,
-the first run also pulls the image and loads the graph: TODO-MEASURE. A second run builds nothing again: the
+the first run takes 1 min 59 s when the image is on the computer (the graph build and load is 22 s of it; the
+image pull of 51 MB comes on top the first time), and a second run takes 1 min 20 s. A second run builds nothing again: the
 build marker of the store is current. A rebuild of the graph (a changed database, or `--reset-kg`) deletes
 the writes of KG mode. To use another port: `PORT=9000 ./src/scripts/quickstart.sh`.
 
@@ -641,14 +642,20 @@ npm --prefix src/frontend run e2e:kg                           # the Playwright 
 The Virtuoso tests replace the TRIAD graphs of the container. After them, run
 `.venv/bin/python src/backend/main.py ensure-kg --store virtuoso`.
 
-### Screenshots (pending)
+### Screenshots
 
-The screenshots of Milestone 5 go into `doc/screenshots/m5/`. They are not made yet.
+The screenshots of Milestone 5 are in `doc/screenshots/m5/`.
 
+- [x] The app on Virtuoso, with the store badge: [the chart](doc/screenshots/m5/app_chart_virtuoso.png),
+  [the date filter of the chart](doc/screenshots/m5/app_chart_date_filter.png) and
+  [the SPARQL of a use case in the Demo guide](doc/screenshots/m5/app_demo_guide_sparql.png)
+- [x] The Virtuoso SPARQL page: [Q2 in the editor](doc/screenshots/m5/virtuoso_sparql_q2_editor.png) (the link
+  **Run in Virtuoso**) and [the result of Q2](doc/screenshots/m5/virtuoso_sparql_q2_result.png)
 - [ ] Protégé: the class hierarchy, the ontology metrics and the HermiT result (pending)
 - [ ] Conductor: the graphs list, Quad Store Upload and the User Accounts page (pending)
-- [ ] Conductor SPARQL page: `02` INSERT DATA with its result line, the `04` update and delete with their result lines, Q2 with its result, B.1 (pending)
-- [ ] The app on Virtuoso: the slide answer with the store badge, a record form, the date filter of the chart, the directory 409 (pending)
+- [ ] Conductor SPARQL page: `02` INSERT DATA with its result line, the `04` update and delete with their result
+  lines, B.1 (pending)
+- [ ] The app on Virtuoso: a record form and the directory 409 (pending)
 
 ## Design choice: user switching instead of a login
 
