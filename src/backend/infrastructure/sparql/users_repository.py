@@ -54,12 +54,15 @@ def patient_users(subject: str = "?u") -> str:
 
 
 def staff_users(subject: str = "?u") -> str:
-    """The pattern of the staff users: ?u ?role ?name ?key ?n (the detail comes from a second query)."""
+    """The pattern of the staff users: ?u ?role ?name ?key ?n (the detail comes from a second query).
+
+    The BIND of ?key writes the expression of ?role again (SPARQL writing rule 10): on Virtuoso, a BIND that
+    reads the variable of another BIND of the same group sees no value, with no error (the key was ":E1001")."""
     return f"""
     {subject} a triad:Staff ; a ?roleClass ; triad:name ?name ; triad:identifierValue ?value .
     {fragments.classes_in("?roleClass", fragments.STAFF_ROLES)}
     BIND (STRAFTER(STR(?roleClass), "#") AS ?role)
-    BIND (CONCAT(?role, ":", ?value) AS ?key)
+    BIND (CONCAT(STRAFTER(STR(?roleClass), "#"), ":", ?value) AS ?key)
     {fragments.bind_id(subject, "staff", "?n")}"""
 
 
