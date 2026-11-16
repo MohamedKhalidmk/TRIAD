@@ -68,6 +68,7 @@ CURRENT = current()
 
 # PATIENT_VISIBLE: the predicate of query Q12 (USER_FLOWS.md section 2.1). It includes CURRENT.
 # It needs the variables of the assertion view. A patient report has no issuer (?s is not bound).
+# Two IRIs compare with "=", not with sameTerm() (SPARQL writing rule 11: false on Virtuoso for equal IRIs).
 PATIENT_VISIBLE = CURRENT + """
 FILTER (?verification != "EnteredInError" && (
     (?intent = "Decision" && ?source = "Human" && BOUND(?staffRole) && ?staffRole = triad:Doctor)
@@ -96,8 +97,8 @@ def bind_id(subject: str, kind: str, target: str = "?n") -> str:
 def rank(variable: str, classes: Sequence[str]) -> str:
     """The place of a class IRI in a list, for ORDER BY: IF(?x = triad:A, 0, IF(..., 1, ... n)).
 
-    The IRIs compare with "=", not with sameTerm(): on Virtuoso, sameTerm(?type, triad:Allergy) is false also when
-    ?type is triad:Allergy (writing rule 11 of models/semantic/sparql/README.md)."""
+    The IF compares the IRIs with "=" (SPARQL writing rule 11): on Virtuoso 7.2, sameTerm(?type, triad:Allergy) in
+    a BIND has no value, so all items got the last place, and the chart order was the time only."""
     text = str(len(classes))
     for index in range(len(classes) - 1, -1, -1):
         text = f"IF({variable} = {terms.class_term(classes[index])}, {index}, {text})"
