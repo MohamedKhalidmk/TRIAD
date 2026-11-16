@@ -19,7 +19,7 @@ ports as `infrastructure/sqlite/` (`application/ports.py`), so the API, the use 
 | `guards.py` | The guard framework and the guards of agent A. `guards_records.py` (B), `guards_chat.py` (C), `guards_directory.py` (D) hold the other guards. |
 | `sparql_log.py` | The SPARQL log (`TRIAD_SPARQL_LOG`): the template of each request, not the values. |
 | `users_repository.py` | `SparqlUserRepository`: complete. It is the worked example below. |
-| `*_repository.py` | The other repositories (agents B, C and D): the same methods and results as `infrastructure/sqlite/`. |
+| `*_repository.py` | The other repositories: patients, visits, records, chat, audit and directory (section 2). |
 
 The build of the graph is in `application/semantic/build_kg.py` (the use case and its ports) and
 `infrastructure/rdf/kg_store.py`, `infrastructure/rdf/logical_hash.py` (the adapters).
@@ -223,10 +223,53 @@ TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso .venv/bin/python -m pytest -q -m virt
 - The built Oxigraph store stays in `.pytest_cache/d/triad-kg/<marker>/`. Each test gets a new copy (pyoxigraph
   `backup()`). A change of the data, the mapping or the ontology version gives a new marker, and a new build.
   Remove the folder to build again.
-- **Virtuoso:** the tests use the one store of the container and REPLACE its TRIAD graphs (the seed graph for
-  `store`; the export of the data for `planted_store` and `full_store`, which writes into `TRIAD_KG_DIR`). The
-  fixture loads the data again when the marker differs or when the last test wrote. After the tests, run
-  `python src/backend/main.py ensure-kg --store virtuoso` to build the graph of your database again.
+- **Virtuoso:** see section 6.1.
+
+### 6.1 The tests on Virtuoso
+
+The Virtuoso tests are opt-in: add `virtuoso` to `TRIAD_TEST_STORES`. They are skipped when
+`TRIAD_SPARQL_QUERY_URL` does not answer. The commands (from the root folder of the repository):
+
+```
+./src/scripts/kg.sh up && ./src/scripts/kg.sh init          # one time: the container and the user triad (10 s)
+TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso .venv/bin/python -m pytest -q -m virtuoso        # all Virtuoso tests
+TRIAD_TEST_STORES=virtuoso .venv/bin/python -m pytest -q -m "virtuoso and not slow"         # the fast ones
+TRIAD_TEST_STORES=virtuoso .venv/bin/python -m pytest -q src/backend/tests/integration/test_store_users.py
+python src/backend/main.py ensure-kg --store virtuoso       # after the tests: the graph of your database again
+./src/scripts/kg.sh reset                                   # at the end: no container and no volume stay
+```
+
+**What the tests do to the container.** They REPLACE the TRIAD graphs: the TBox, the ABox and the meta graph get
+the data of the tests (the seed graph for `store`, the export of the planted data for `planted_store`, the export of
+a new onboarding for `full_store`). `test_kg_queries.py` and `test_kg_virtuoso.py` also write the scratch graph and
+empty it again. The export goes into `TRIAD_KG_DIR` (`triad_kg.nt.gz`, `kg_report.json`), because the container
+reads files only there: set `TRIAD_KG_DIR` to another folder before the first `kg.sh up` if you want to keep the
+export of your own database. After the tests, the graphs hold the data of the last data set. The marker of
+`full_store` is the marker of a new onboarding, so `ensure-kg` on a new onboarding then says "current".
+
+**How the fixtures load the data** (`tests/fixtures/stores.py`: `VirtuosoSession`, `WriteJournal`):
+- A test session loads each data set one time, at its first use, with the bulk loader (`kg.sh load`). It does not
+  trust the graphs that it finds: another process (an earlier test run, the app) can have written in them. The
+  load times (one laptop): the seed graph 1 s (9 s if the ABox held the full graph: the CLEAR of 1.3 million
+  triples), the planted data 2.5 s, the full data 18 s the first time and 6 s after. The export of each data set
+  stays in `.pytest_cache/d/triad-kg/virtuoso-export/<marker>/`; a later session copies it into `TRIAD_KG_DIR` and
+  runs only the bulk load.
+- `conftest.py` runs the Virtuoso tests after all other tests, in the order `store`, `planted_store`, `full_store`,
+  then the other Virtuoso tests (`test_kg_queries.py` reads the full graph). So a session loads each data set at
+  most one time.
+- A test does not load the data again after a write. The journal sees each update request of the test: during
+  the test it replaces `HttpSparqlClient._update`, so it also sees the clients that the app makes. Before the first
+  request that names an individual, it keeps the stored triples of that individual (as subject and as object). An
+  `INSERT DATA` only adds triples, so for it the journal only notes the new individuals (an id above the counter
+  of the load). After the test, it deletes the triples of the new and of the changed individuals, and inserts the
+  kept triples again. The meta graph gets the triples of the load again. This takes some milliseconds.
+- A check after the undo: the number of ABox triples and the build marker must equal the values of the load. If
+  not, or if an update named the ABox graph and no individual (for example the CLEAR of a rebuild), the next test
+  loads the data again. `test_kg_virtuoso.py` tests the journal: each write form, then the same triples again.
+- The time of `-m virtuoso` with `TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso` (one laptop): see section 9.
+- `test_kg_queries.py` runs its Virtuoso tests also without `virtuoso` in `TRIAD_TEST_STORES`, when the ABox holds
+  the graph of a new onboarding (its own check; see that file). After a test run with Virtuoso, the ABox holds
+  that graph. So stop the container (`kg.sh down`) before `pytest -q` if the run must not use Virtuoso.
 
 ## 7. The commands
 
@@ -247,14 +290,17 @@ hash of the code. `GET /api/health` gives `store` and `ontologyVersion` (doc/api
 
 ## 8. Known limits
 
-- **Virtuoso is not tested here.** The HTTP client is tested against a fake endpoint that answers like Virtuoso
-  7.2 (digest, HTTP 500, `X-SPARQL-MaxRows`). The Virtuoso load path (`kg.sh load --no-export`) is tested only with
-  a fake runner.
-- **D11:** Virtuoso orders and compares `xsd:dateTime` by the text, not by the instant. The order differs only
-  for two times with different offsets that are less than 7 hours apart. The latest time of the store (the clock)
-  uses `MAX`, so it has the same limit on Virtuoso.
-- **Times:** a stored time comes back with `+00:00` for `Z`, and with no trailing zeros of the seconds
-  (`.100` becomes `.1`). The offset does not change. The API thus can give another text of the same instant.
+- **Virtuoso** runs the same tests as Oxigraph (section 6.1), and the app gives the same responses as SQLite on
+  the main paths (section 9). The default test run (`sqlite,oxigraph`) tests the HTTP client only against a fake
+  endpoint that answers like Virtuoso 7.2 (digest, HTTP 500, `X-SPARQL-MaxRows`).
+- **D11:** Virtuoso orders a stored `xsd:dateTime` by its text (its comparisons, `MAX` and `MIN` use the instant).
+  Each order by time that SQLite makes with `julianday` is by the instant on both stores: `fragments.instant` in
+  SPARQL, or Python (the visits, the audit log, the chat sessions). `recommendations` orders by the text, as SQLite.
+- **Times:** a stored time comes back with `+00:00` for `Z`. Oxigraph drops the trailing zeros of the seconds
+  (`.100` becomes `.1`); Virtuoso keeps them. The offset does not change. The API thus can give another text of
+  the same instant.
+- **Virtuoso compiles each new query text** (section 9, V9): a request with new values costs some 10 to 50 ms
+  more than the same request again.
 - **The times of the details** (`onsetDate`, `abatementDate`, `performedDate`, `issuedDate`; range `xsd:dateTime`):
   the use case keeps each one in the full ISO 8601 form on both stores (`domain.rules.full_time`; a date of the
   record form is midnight UTC; doc/api.md section 3.4). So the export, the graph of a KG store and the shapes agree,
@@ -270,3 +316,59 @@ hash of the code. `GET /api/health` gives `store` and `ontologyVersion` (doc/api
   half change. A timeout of the one `INSERT DATA` gives an unknown state (the store can hold the new triples).
 - **The meta graph** holds `triad:issued`, `triad:dataHash`, ... (plan 5.3). These terms are not in the ontology.
 - `next_identifier` reads all identifier values of a system with the prefix (the SQLite version reads them too).
+
+## 9. Virtuoso 7.2: what the store changes
+
+Measured on Virtuoso 7.2.17 (the image of decision D3) with the full graph (1,298,482 triples) and with the test
+data, on 2026-11-15. Each difference is a query that failed or gave a wrong answer on Virtuoso, and passed on
+Oxigraph. Each fix keeps one query text for both stores (standard SPARQL 1.1).
+
+| # | What Virtuoso does | Where it showed | The fix |
+|---|---|---|---|
+| V1 | A `BIND` that reads the variable of another `BIND` of the same group sees no value, with no error. `CONCAT` of an unbound value gives the other parts. | The key of each staff user was `:E1001`, not `MOA:E1001`. | Write the expression again (SPARQL writing rule 10), `users_repository.staff_users`. |
+| V2 | `sameTerm(?type, triad:Allergy)` in a `BIND` (or an `IF` of `ORDER BY`) has no value. | All chart items got the last category: the chart order was by time only. | Compare IRIs with `=` (rule 11): `fragments.rank`, `fragments.PATIENT_VISIBLE`. |
+| V3 | A stored `xsd:dateTime` in `ORDER BY` is ordered by its text (the local time), not by the instant: `16:05-04:00` (20:05 UTC) came before `14:30-07:00` (21:30 UTC). Comparisons (`<`, `=`), `MAX`, `MIN` and the order of a CAST value use the instant. | The chart, the lookups and the care-team head differed from SQLite (`julianday`) on the planted data with mixed offsets. | `ORDER BY` a `BIND (xsd:dateTime(STR(?at)) AS ?instant)` (`fragments.instant`). The clock (`MAX`) and `latest_observations` (`MAX`) were correct already. `recommendations` keeps the text order of SQLite (`STR(?at)`). |
+| V4 | With `FILTER (LCASE(?name) = "...")` (also `UCASE`, `STRLEN`, `CONTAINS(LCASE(?name), ...)`) and an `ORDER BY` without `?name`, the rows are correct but `?name` is the value of one other row, in all rows. | `department_by_name("Inpatient Medicine")` gave the name "Emergency"; a new location got 422. | `LCASE(STR(?name))` (`fragments.lower`, also in `fragments.contains`). |
+| V5 | `LCASE(STR("ÉQUIPE"))` of a constant with a non-ASCII letter is `""`. A stored value is correct. | The second department "ÉQUIPE ÜNIT" was not a conflict (201, not 409). | Python lowers the constant (`str.lower()`, the Unicode lower case, as `LCASE`): `$lower` in `directory_repository`. |
+| V6 | An OR of a condition with no `EXISTS` and an `EXISTS` (`(?type IN (...) && ...) \|\| EXISTS { ... }`) did not end in 120 s on 2,000 triples. The query goes on in the server after the client timeout. | The patient-visible chart (`visible_only`). | No `EXISTS` in an OR (see V7). |
+| V7 | An OR of `EXISTS` ("SQ200: Stack Overflow in cost model") with a date filter, an `OPTIONAL` pattern or the text search; on the full graph also alone. An `OPTIONAL` inside an `EXISTS` gives "SP031: SPARQL compiler: Internal error". | The patient-visible chart with dates or a search, the assistant lookups of a patient. | The patient-visible rule and the author name of the search read the message and its issuer in ONE `OPTIONAL`, then a `FILTER` with no `EXISTS` (`records_repository.VISIBLE`). One `EXISTS` with a `UNION` of the cases runs on Virtuoso, but takes 14 s on Oxigraph 0.3. |
+| V8 | `FILTER (?system = $system)` in a `UNION` branch with `OPTIONAL` patterns: "SP031: ... sparp_gp_deprecate(): equiv replaces filter but under deprecation". | The actor names of the audit log. | `FILTER (STR(?system) = $system)` (`audit_repository.ACTOR_NAME`). |
+| V9 | Virtuoso compiles each new query text (the SPARQL protocol has no parameters, so each new value is a new text). With ONE value in `VALUES`, it puts the constant into the plan, and the compile of the assertion view (22 `OPTIONAL`) takes about 300 ms (with two values: 50 ms; the same text again: 3 ms). | A record write with one assertion took 430 ms, with two 110 ms. | A block of one IRI gets a second IRI that matches nothing (`terms.iri_values`; id 0 is never used). |
+| V10 | A boolean expression in the projection comes back as an integer (`0` or `1`), not as `xsd:boolean`. `TZ()` of `+05:30` gives `05:30` (no sign). | — (no repository uses them) | Do not project a boolean expression; do not use `TZ()`. |
+
+These forms work on Virtuoso as on Oxigraph (each one in a test that passes): the digest login (realm `SPARQL`);
+`WITH <meta> DELETE ... WHERE` and `INSERT DATA` as the user `triad`; `DELETE/INSERT ... WHERE` with `OPTIONAL`
+(the replace of the unit of work); the escape of `"`, `\`, a line break and non-ASCII text; `?head
+triad:supersedes* $start` (a path with only the object bound; the longest chain, 222 assertions, in 0.6 s);
+`COUNT(DISTINCT ...)` over a `UNION`; `VALUES` of up to 500 IRIs at the start of a group; `xsd:date` constants in
+triple patterns and in `FILTER`; the order of non-ASCII names (by code point, as SQLite `BINARY`); `STR(?at)` and
+`SUBSTR(STR(?at), 1, 10)` (Virtuoso writes `+00:00` as `Z` and keeps the digits of the fraction, for example
+`.100`; Oxigraph drops the trailing zeros); two joined sub-selects with `GROUP BY` (`latest_observations`); a
+result of 13,756 rows with no `X-SPARQL-MaxRows` header (kg.sh does not set `ResultSetMaxRows`).
+
+**Times** (the API on the full data, a new onboarding, the fixed demo clock, the fake chat mode; the median of 9
+requests with `TRIAD_SPARQL_LOG=off`; one laptop, macOS on arm64; Virtuoso in Docker over HTTP, Oxigraph in the
+process):
+
+| Request | SQLite | Oxigraph | Virtuoso |
+|---|---|---|---|
+| A chart page of Patient A (50 items, the same page again) | 9 ms | 30 ms | 22 ms |
+| A chart page of Patient A (20 items, a new page each time: a new query text) | 8 ms | 27 ms | 26 ms |
+| A chat turn ("Is she allergic to penicillin?", fake mode) | 15 ms | 39 ms | 63 ms |
+| A record write (one heart rate, by a nurse of the care team) | 8 ms | 5 ms | 85 ms |
+| The largest chart (12,471 items): a page and the counts (the repository) | — | 200 ms | 29 ms (a new text: 109 ms) |
+| The largest chart, `visible_only` | — | 460 ms | 44 ms |
+| The largest chart, the search "park" with `visible_only` and a date | — | 610 ms | 57 ms |
+
+The limit of the tests for a chart page is 0.9 s on Oxigraph and 3 s on Virtuoso (`StoreHandle.time_limit`). A
+record write on Virtuoso sends about 14 requests: the reads of the use case and of the guards, one ASK, one
+`INSERT DATA` (with the digest login: one more round trip) and the read of the new assertions.
+
+**The test run** (`TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso`, `-m virtuoso`, 389 tests): 387 tests pass in about
+130 s, with the loads of the three data sets. The 2 tests of C16 of `05_constraint_checks.sparql` fail: each one
+waits for the timeout of 600 s (see below).
+
+**Open: C16 on Virtuoso.** The check C16 (an inverse-functional property with two subjects for one object) took
+0.2 s once and more than 600 s (the test timeout) at other times, on the same full graph: Virtuoso chose another
+plan. A form with `GROUP BY ?object ?property HAVING (COUNT(DISTINCT ?subject) > 1)` (no self-join) took 0.7 s.
+The script is in `models/semantic/sparql/`; its owner must change it and its tests.
