@@ -194,6 +194,37 @@ def test_a_failure_of_the_insert_undoes_the_changes_and_the_deletes(store):
     assert store.probe.row("location", 19) == before and store.probe.row("patient", 1)["phoneNumber"] != "+1-555-0199"
 
 
+class RefusedRecorder(Recorder):
+    """The n-th update goes to a graph that the user triad cannot write, so the STORE refuses it (not the test)."""
+
+    def update(self, template, bindings=None):
+        self.updates.append(template)
+        if len(self.updates) == self.fail_on:
+            template = template.replace("$abox", "<urn:triad:test:no-write>")
+        self.client.update(template, bindings)
+
+
+@pytest.mark.stores("virtuoso")
+def test_virtuoso_refuses_the_second_operation_and_the_inverse_undoes_the_first(store):
+    """Virtuoso has no transaction over two requests (plan 5.3): the first replace stays when the second one fails.
+    The commit sends the inverse of the first one. The refusal is the real answer of Virtuoso (HTTP 500)."""
+    import main
+    before = store.probe.row("patient", 1)
+    recorder = RefusedRecorder(main.kg_client(store.settings), fail_on=2)
+    session = KgSession(recorder)
+    uow = SparqlUnitOfWork(session, DemoClock(DEMO_NOW))
+    with pytest.raises(SparqlStoreError) as refused:
+        with uow.write():
+            buf = session.write_buffer()
+            buf.replace(iri("patient", 1), "phoneNumber", '+1-555-0199 "quoted" \\ é')
+            buf.replace(iri("patient", 1), "city", "Victoria")
+            buf.create("medication", MEDICATION)
+    assert refused.value.status == 500                          # the store refused the write to the graph
+    assert len(recorder.updates) == 3                           # replace, refused replace, the inverse of the first
+    assert store.probe.row("patient", 1) == before              # the first change is undone
+    assert store.probe.count("medication", code="T-1") == 0
+
+
 # ----- the ids -----
 
 def test_an_id_is_never_used_again(store):
