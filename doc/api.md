@@ -398,6 +398,9 @@ The search `q` (case is not important):
 - staff: part of the name, or the exact identifier value;
 - medications: part of the name, or the exact code.
 
+The `languages` of a `Staff` are in alphabetical order (by the text, for example `["de", "en"]`), on each store.
+Milestone 4 gave them in the order of entry (Milestone 5 changes this, because the knowledge graph has no order of entry).
+
 The backend makes the identifier of a new row when the body has none
 (system `https://triad.example/fhir/sid/<organization|location|employee>`, a new value).
 
