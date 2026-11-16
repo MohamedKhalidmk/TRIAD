@@ -38,9 +38,12 @@ SELECT (MAX(?n) AS ?max) FROM $abox WHERE {
   BIND (xsd:integer(STRAFTER(STR(?x), $base)) AS ?n)
 }"""
 
+# The system comes first: the app makes values only in its own systems, which few individuals have. Oxigraph starts
+# with the first of two patterns that have two constants. Measured on the full graph: clinical-entry 148 ms with
+# "?x a $class" first, 0.03 ms with the system first; visit 12 ms -> 0.04 ms; message 12 ms -> 0.3 ms.
 IDENTIFIER_VALUES = """
 SELECT ?value FROM $abox WHERE {
-  ?x a $class ; triad:identifierSystem $system ; triad:identifierValue ?value .
+  ?x triad:identifierSystem $system ; a $class ; triad:identifierValue ?value .
   FILTER (STRSTARTS(?value, $start))
 }"""
 
