@@ -215,9 +215,10 @@ def test_the_assistant_lookups(both, visible_only, limit):
                same(ref.prescriptions(1, current_status=flag, **args))
         assert same(kg.diagnoses(1, active_only=flag, **args)) == same(ref.diagnoses(1, active_only=flag, **args))
     for visit in [r["id"] for r in store.probe.rows("visit")]:
-        for categories in (PLAN_ORDER, ("Allergy",), ("CareTeam", "Allergy", "Procedure"), ("Nothing",)):
+        for categories in (PLAN_ORDER, ("Allergy",), ("CareTeam", "Allergy", "Procedure"), ("Nothing",), ()):
             assert same(kg.visit_items(1, visit, categories, **args)) == \
                    same(ref.visit_items(1, visit, categories, **args)), (visit, categories)
+        assert kg.visit_items(1, visit, (), **args) == ref.visit_items(1, visit, (), **args) == []   # no category
         for role in (None, "Nurse", "Doctor", "MOA", "Admin"):
             assert same(kg.recommendations(1, visit, author_role=role, **args)) == \
                    same(ref.recommendations(1, visit, author_role=role, **args)), (visit, role)

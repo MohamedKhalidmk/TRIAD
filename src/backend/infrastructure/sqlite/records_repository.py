@@ -276,6 +276,8 @@ class SqliteRecordRepository:
 
     def visit_items(self, patient_id: int, visit_id: int, categories: Sequence[str], *, visible_only: bool,
                     limit: int) -> list[AssertionView]:
+        if not categories:                 # no category: no item (a CASE with no WHEN is not valid SQL)
+            return []
         marks = ",".join("?" * len(categories))
         rank = "CASE e.Category " + " ".join(f"WHEN ? THEN {i}" for i in range(len(categories))) + " END"
         return self._lookup(patient_id, [f"+e.Category IN ({marks})"], categories, visit_id=visit_id,
