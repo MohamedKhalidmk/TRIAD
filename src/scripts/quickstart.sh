@@ -32,7 +32,7 @@
 # The number of steps is 7 for sqlite, 8 for oxigraph and 9 for virtuoso.
 # The first run downloads Python 3.12 and the packages (about 50 MB). With virtuoso it also pulls the Docker image.
 # It takes from some minutes to more minutes, with the speed of the network.
-# A second run skips the work that is done and takes some seconds.
+# A second run skips the work that is done. The fast tests (about 1.5 minutes) are then most of the time.
 # A rebuild of the knowledge graph (the first run, a changed database, or --reset-kg) deletes the writes that
 # the app made in KG mode. A second run with no change does not rebuild it.
 # The chat uses the fake LLM (no network, no key), unless src/backend/.env sets TRIAD_LLM=llm.
