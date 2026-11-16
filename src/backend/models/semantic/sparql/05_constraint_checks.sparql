@@ -1,0 +1,402 @@
+# TRIAD constraint checks (Milestone 5). Each check gives NO ROW on valid data.
+# A row is a violation: the node and the rule that it breaks.
+#
+# Why these checks (manual 5.1; plan 5, section 1.7): OWL uses the Open World Assumption. An OWL axiom is not a
+# database constraint. A missing value is unknown, not an error; two nodes with the same key are the same node
+# (owl:hasKey infers owl:sameAs); a link to a node with no type gives that node the type of the range. So the
+# ontology states the rules of the model, and these queries check the data under the closed world, as the keys,
+# CHECKs and triggers of SQLite do. C1, C2, C3, C6, C7, C15 and C16 read the rule from the ontology itself
+# (the TBox graph); the other checks state their rule in the query.
+#
+# Each check reads FROM <.../graph/abox> FROM <.../graph/scratch> (C1, C2, C3, C6, C7, C15, C16 also FROM
+# <.../graph/tbox>). Two FROM clauses make the default graph the merge of the graphs. The scratch graph is empty
+# on a clean store, so a check reads the data only. To see a check give its row, put the bad triples of a planted
+# example into the scratch graph (tests/integration/test_kg_queries.py has one example for each check), run the
+# check, then empty the scratch graph (U8 of 04_update_delete.sparql).
+#
+# A check that reads its rule from the TBox gets the rule in a sub-select first (some dozens of rows), then joins
+# the data to it. Measured on the full graph in Oxigraph 0.3: C1 7 s instead of 13 s, C2 1 s instead of 8 s,
+# C6 0.1 s instead of 10 s.
+#
+# Run: ./src/scripts/kg.sh sparql 05_constraint_checks.sparql   (each check: "(no rows)")
+#
+# Each check names the case of models/relational/sql/dml/05_constraint_violations.sql (the "SQL case") that it
+# replaces. These SQL cases have no check here, because a store has no update event:
+# - change or delete an assertion, change an audit record (the append-only triggers): the delete helper of the
+#   app refuses the class paths assertion and audit-event (plan 5.4). A deleted assertion shows in C2 when it was
+#   the last assertion of its entry or its message, and in C3 when a newer assertion or a citation points to it.
+# - change the key of a patient (the trigger TR_Patient_Key_NoUpdate): the use case and the adapter refuse it.
+
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX triad: <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#>
+
+# C1. NOT NULL: a node that has no value of a property that its class requires.
+#     The rule comes from the TBox: each owl:minCardinality, owl:cardinality or qualified cardinality restriction
+#     on a stored property (81 NOT NULL columns, 9 NOT NULL foreign keys, and "a message has an assertion").
+#     The restrictions on an inverse property are in C2. SQL: the NOT NULL columns (no case of their own).
+SELECT ?node ?class ?property
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { SELECT ?class ?property WHERE {
+      ?class rdfs:subClassOf ?restriction .
+      ?restriction owl:onProperty ?property ; ?kind ?number .
+      FILTER (?kind IN (owl:minCardinality, owl:cardinality, owl:minQualifiedCardinality, owl:qualifiedCardinality))
+      FILTER (isIRI(?property))
+      FILTER NOT EXISTS { ?property owl:inverseOf ?stored } } }
+  ?node a ?class .
+  FILTER NOT EXISTS { ?node ?property ?value }
+}
+
+# C2. A node with no owner: the link to it in the stored direction is missing.
+#     The rule comes from the TBox: each cardinality restriction on an inverse property. A visit needs its patient
+#     (triad:hasVisit), an assertion its message (triad:contains), a chat turn its session, a patient identifier its
+#     patient, a care-team member its care team, an entry an assertion (triad:about), a staff member a WorksIn node
+#     (triad:ofStaff). SQL: case "delete a patient who has visits" (the visits lose their patient).
+SELECT ?node ?class ?missingLink
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { SELECT ?class ?missingLink WHERE {
+      ?class rdfs:subClassOf ?restriction .
+      ?restriction owl:onProperty ?inverse ; ?kind ?number .
+      FILTER (?kind IN (owl:minCardinality, owl:cardinality, owl:minQualifiedCardinality, owl:qualifiedCardinality))
+      ?inverse owl:inverseOf ?missingLink . } }
+  ?node a ?class .
+  FILTER NOT EXISTS { ?owner ?missingLink ?node }
+}
+
+# C3. FOREIGN KEY: a link from a node that is not of its domain, or to a node that is not of its range.
+#     The object can be a dangling link, or a node of the wrong class. The rule comes from the TBox: rdfs:domain and
+#     rdfs:range of each object property. SQL: cases "a visit for a patient that does not exist" and
+#     "delete a department that has staff" (the WorksIn node then points to a node with no type).
+SELECT ?subject ?property ?object
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { SELECT ?property ?domain ?range WHERE {
+      ?property a owl:ObjectProperty ; rdfs:domain ?domain ; rdfs:range ?range .
+      FILTER (isIRI(?domain) && isIRI(?range)) } }
+  ?subject ?property ?object .
+  FILTER (NOT EXISTS { ?subject a ?domain } || NOT EXISTS { ?object a ?range })
+}
+
+# C4. ISA (disjoint and total): a staff member or an entry that does not have exactly one subtype.
+#     The subtypes of Staff are Doctor, Nurse and MOA; ClinicalEntry has 8 entry types. SQL: cases "ISA mismatch"
+#     and "a subtype row with the wrong role value" (both give a second subtype to one node). ?subtypes counts the
+#     bound ?subtype values: Oxigraph 0.3 counts an unbound value in COUNT(?subtype). Each node has each type once,
+#     so the OPTIONAL gives one row for each subtype, or one row with no subtype.
+SELECT ?node ?parent (SUM(IF(BOUND(?subtype), 1, 0)) AS ?subtypes)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  {
+    ?node a triad:Staff .
+    OPTIONAL { ?node a ?subtype . FILTER (?subtype IN (triad:Doctor, triad:Nurse, triad:MOA)) }
+    BIND (triad:Staff AS ?parent)
+  } UNION {
+    ?node a triad:ClinicalEntry .
+    OPTIONAL { ?node a ?subtype .
+               FILTER (?subtype IN (triad:Diagnosis, triad:Procedure, triad:Allergy, triad:Observation,
+                                    triad:LabOrder, triad:LabReport, triad:Prescription, triad:CareTeam)) }
+    BIND (triad:ClinicalEntry AS ?parent)
+  }
+}
+GROUP BY ?node ?parent
+HAVING (SUM(IF(BOUND(?subtype), 1, 0)) != 1)
+
+# C5. ISA: a node of a subtype that does not have the type of its parent class.
+#     The store does no OWL reasoning, so the data must hold both types (for example triad:Staff and triad:Nurse).
+SELECT ?node ?subtype
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?node a ?subtype .
+  FILTER (?subtype IN (triad:Doctor, triad:Nurse, triad:MOA, triad:Diagnosis, triad:Procedure, triad:Allergy,
+                       triad:Observation, triad:LabOrder, triad:LabReport, triad:Prescription, triad:CareTeam))
+  FILTER NOT EXISTS { ?node a ?parent . FILTER (?parent IN (triad:Staff, triad:ClinicalEntry)) }
+}
+
+# C6. Disjoint classes: a node with two of the classes of owl:AllDisjointClasses.
+#     These are the 12 top classes, the 3 association classes and the 2 value classes. The rule comes from the TBox:
+#     rdf:rest* from the bound start ?list gives each cell of the RDF list, and rdf:first gives its member. A typing
+#     error makes such a node (OWL has no Unique Name Assumption). ?classes is the number of these classes that the
+#     node has.
+SELECT ?node (COUNT(DISTINCT ?class) AS ?classes)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { SELECT ?class WHERE {
+      ?axiom a owl:AllDisjointClasses ; owl:members ?list .
+      ?list rdf:rest* ?cell .
+      ?cell rdf:first ?class . } }
+  ?node a ?class .
+}
+GROUP BY ?node
+HAVING (COUNT(DISTINCT ?class) > 1)
+
+# C7. CHECK ... IN: a value that is not in the closed value set of its property (owl:oneOf in the TBox).
+#     SQL: cases "a nurse designation that is not in the value set", "a channel that is not in the value set"
+#     and "a visit class that is not in the value set".
+#     The sub-select groups the triples by value (some dozens of groups), with the number of nodes and one example
+#     node. Then the path runs once for each value, not once for each of the 180,000 triples (Oxigraph: 0.06 s,
+#     not 10 s). The path is split: rdf:rest* ?cell, then ?cell rdf:first. On Virtuoso, the sequence path
+#     rdf:rest*/rdf:first inside FILTER NOT EXISTS gave no answer in 3 minutes.
+SELECT ?property ?value ?nodes ?example
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { SELECT ?property ?list ?value (COUNT(?node) AS ?nodes) (SAMPLE(?node) AS ?example)
+    WHERE {
+      ?property rdfs:range ?range .
+      ?range owl:oneOf ?list .
+      ?node ?property ?value .
+    }
+    GROUP BY ?property ?list ?value }
+  FILTER NOT EXISTS { ?list rdf:rest* ?cell . ?cell rdf:first ?value }
+}
+
+# C8. A value with the wrong datatype.
+#     A date that is not an xsd:date, a time that is not an xsd:dateTime, a sequence number or a rank that is not an
+#     integer of 1 or more, a flag that is not an xsd:boolean. SQL: case "a date of birth that is not a date" (the
+#     CHECK date(...) IS NOT NULL).
+SELECT ?node ?property ?value
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?node ?property ?value .
+  FILTER (?property IN (triad:dateOfBirth, triad:subjectDateOfBirth, triad:roleStartDate, triad:roleEndDate,
+                        triad:startDate, triad:endDate, triad:recordedAt, triad:onsetDate, triad:abatementDate,
+                        triad:performedDate, triad:issuedDate, triad:sentAt, triad:assertedAt, triad:startedAt,
+                        triad:createdAt, triad:at, triad:seq, triad:rank, triad:active))
+  FILTER (IF(?property IN (triad:dateOfBirth, triad:subjectDateOfBirth, triad:roleStartDate, triad:roleEndDate),
+             datatype(?value) != xsd:date,
+          IF(?property IN (triad:seq, triad:rank), datatype(?value) != xsd:integer || ?value < 1,
+          IF(?property = triad:active, datatype(?value) != xsd:boolean,
+             datatype(?value) != xsd:dateTime))))
+}
+
+# C9. A time pair in the wrong order: an end before its start (Visit, VisitLocation, WorksIn).
+#     SQL: case "a visit that ends before it starts".
+SELECT ?node ?start ?end
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { ?node triad:startDate ?start ; triad:endDate ?end . }
+  UNION
+  { ?node triad:roleStartDate ?start ; triad:roleEndDate ?end . }
+  FILTER (?end < ?start)
+}
+
+# C10. A message with no issuer that does not come from the patient.
+#      The CHECK of SQL: StaffId IS NOT NULL OR Origin = 'Patient'. SQL: case "a message with no issuer that does
+#      not come from the patient".
+SELECT ?message ?origin
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?message a triad:Message ; triad:origin ?origin .
+  FILTER (?origin != "Patient")
+  FILTER NOT EXISTS { ?staff triad:issues ?message }
+}
+
+# C11. UNIQUE (identifierSystem, identifierValue): two nodes of one class with the same identifier.
+#      SQL: case "duplicate patient identifier" (and the UNIQUE identifier of the other tables).
+SELECT ?class ?system ?value (COUNT(DISTINCT ?node) AS ?nodes)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?node a ?class ; triad:identifierSystem ?system ; triad:identifierValue ?value .
+  FILTER (?class IN (triad:Department, triad:Location, triad:Staff, triad:Visit, triad:ClinicalEntry,
+                     triad:Message, triad:ChatSession, triad:AuditEvent, triad:PatientIdentifier))
+}
+GROUP BY ?class ?system ?value
+HAVING (COUNT(DISTINCT ?node) > 1)
+
+# C12. UNIQUE keys of two values: two patients or two medications with the same key.
+#      The keys are (name, dateOfBirth) and (code, codeSystem). SQL: case "duplicate patient key (Name,
+#      DateOfBirth)".
+SELECT ?class ?key1 ?key2 (COUNT(DISTINCT ?node) AS ?nodes)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { ?node a triad:Patient ; triad:name ?key1 ; triad:dateOfBirth ?key2 . BIND (triad:Patient AS ?class) }
+  UNION
+  { ?node a triad:Medication ; triad:code ?key1 ; triad:codeSystem ?key2 . BIND (triad:Medication AS ?class) }
+}
+GROUP BY ?class ?key1 ?key2
+HAVING (COUNT(DISTINCT ?node) > 1)
+
+# C13. UNIQUE keys of the weak entities and the association classes (owl:hasKey with a link).
+#      Assertion (message, seq), ChatTurn (session, seq) and (session, clientTurnId), WorksIn (staff, department,
+#      roleCode), VisitLocation (visit, location, startDate), Citation (turn, assertion), CareTeamMember (care team,
+#      system, value). ?key3 is unbound for a key of two parts.
+SELECT ?class ?key1 ?key2 ?key3 (COUNT(DISTINCT ?node) AS ?nodes)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { ?key1 triad:contains ?node . ?node triad:seq ?key2 . BIND (triad:Assertion AS ?class) }
+  UNION
+  { ?key1 triad:includes ?node . ?node triad:seq ?key2 . BIND (triad:ChatTurn AS ?class) }
+  UNION
+  { ?key1 triad:includes ?node . ?node triad:clientTurnId ?key2 . BIND (triad:ChatTurn AS ?class) }
+  UNION
+  { ?node triad:ofStaff ?key1 ; triad:atDepartment ?key2 ; triad:roleCode ?key3 . BIND (triad:WorksIn AS ?class) }
+  UNION
+  { ?node triad:ofVisit ?key1 ; triad:atLocation ?key2 ; triad:startDate ?key3 .
+    BIND (triad:VisitLocation AS ?class) }
+  UNION
+  { ?node triad:byTurn ?key1 ; triad:citedAssertion ?key2 . BIND (triad:Citation AS ?class) }
+  UNION
+  { ?key1 triad:member ?node . ?node triad:memberSystem ?key2 ; triad:memberValue ?key3 .
+    BIND (triad:CareTeamMember AS ?class) }
+}
+GROUP BY ?class ?key1 ?key2 ?key3
+HAVING (COUNT(DISTINCT ?node) > 1)
+
+# C14. Supersedes: an assertion that supersedes itself, or a cycle in a revision chain (CHECK SupersedesId <> Id).
+#      OWL 2 DL cannot state "no cycle" (Irreflexive is not allowed on the transitive property). The start of the
+#      path triad:supersedes* is bound by the first triple pattern.
+SELECT DISTINCT ?assertion
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?assertion triad:supersedes ?older .
+  ?older triad:supersedes* ?assertion .
+}
+
+# C15. A Functional property with two values on one node.
+#      For example two dates of birth, or one assertion that supersedes two assertions. The rule comes from the TBox
+#      (owl:FunctionalProperty).
+SELECT ?node ?property ?value1 ?value2
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { SELECT ?property WHERE { ?property a owl:FunctionalProperty } }
+  ?node ?property ?value1 , ?value2 .
+  FILTER (STR(?value1) < STR(?value2))
+}
+
+# C16. An InverseFunctional property with two subjects for one object.
+#      For example two assertions that supersede the same assertion, or a visit of two patients. The rule comes from
+#      the TBox (owl:InverseFunctionalProperty). SQL: case "a second assertion that supersedes the same assertion"
+#      (UNIQUE SupersedesId).
+SELECT ?object ?property ?subject1 ?subject2
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  { SELECT ?property WHERE { ?property a owl:InverseFunctionalProperty } }
+  ?subject1 ?property ?object .
+  ?subject2 ?property ?object .
+  FILTER (STR(?subject1) < STR(?subject2))
+}
+
+# C17. One current assertion per entry: an entry with two assertions that nothing supersedes.
+#      SQL: case "a new claim about an entry that has a current assertion, without superseding it".
+SELECT ?entry (COUNT(DISTINCT ?assertion) AS ?currentAssertions)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?assertion triad:about ?entry .
+  FILTER NOT EXISTS { ?newer triad:supersedes ?assertion }
+}
+GROUP BY ?entry
+HAVING (COUNT(DISTINCT ?assertion) > 1)
+
+# C18. The superseded assertion is newer than the assertion that supersedes it.
+#      SQL: case "supersede an assertion that is newer than the new assertion".
+SELECT ?assertion ?assertedAt ?older ?olderAssertedAt
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?assertion triad:supersedes ?older ; triad:assertedAt ?assertedAt .
+  ?older triad:assertedAt ?olderAssertedAt .
+  FILTER (?olderAssertedAt > ?assertedAt)
+}
+
+# C19. The superseded assertion is about another patient. SQL: case "supersede an assertion of another patient".
+SELECT ?assertion ?patient ?older ?olderPatient
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?assertion triad:supersedes ?older ; triad:about ?entry .
+  ?entry triad:during ?visit .
+  ?patient triad:hasVisit ?visit .
+  ?older triad:about ?olderEntry .
+  ?olderEntry triad:during ?olderVisit .
+  ?olderPatient triad:hasVisit ?olderVisit .
+  FILTER (?patient != ?olderPatient)
+}
+
+# C20. One patient per message: a message with assertions about two patients.
+#      SQL: case "one message with assertions about two patients".
+SELECT ?message (COUNT(DISTINCT ?patient) AS ?patients)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?message triad:contains ?assertion .
+  ?assertion triad:about ?entry .
+  ?entry triad:during ?visit .
+  ?patient triad:hasVisit ?visit .
+}
+GROUP BY ?message
+HAVING (COUNT(DISTINCT ?patient) > 1)
+
+# C21. A care-team member that is not a staff member: no staff node has the key (memberSystem, memberValue).
+#      SQL: case "a care-team member that is not a staff member".
+SELECT ?member ?system ?value
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?member a triad:CareTeamMember ; triad:memberSystem ?system ; triad:memberValue ?value .
+  FILTER NOT EXISTS { ?staff a triad:Staff ; triad:identifierSystem ?system ; triad:identifierValue ?value }
+}
+
+# C22. A citation from a turn that is not an assistant turn (only the assistant cites).
+#      SQL: case "a citation from a user turn".
+SELECT ?citation ?turn ?speaker
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?citation triad:byTurn ?turn .
+  ?turn triad:speaker ?speaker .
+  FILTER (?speaker != "Assistant")
+}
+
+# C23. A citation of an assertion that is not about the patient of the chat session.
+#      The session keeps the patient key as values: subjectName, subjectDateOfBirth. SQL: case "a citation of an
+#      assertion about another patient".
+SELECT ?citation ?assertion ?subjectName
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?citation triad:byTurn ?turn ; triad:citedAssertion ?assertion .
+  ?session triad:includes ?turn ; triad:subjectName ?subjectName ; triad:subjectDateOfBirth ?subjectDateOfBirth .
+  FILTER NOT EXISTS {
+    ?assertion triad:about ?entry .
+    ?entry triad:during ?visit .
+    ?patient triad:hasVisit ?visit ; triad:name ?subjectName ; triad:dateOfBirth ?subjectDateOfBirth .
+  }
+}
+
+# C24. An audit record of a chat turn whose subject is not the patient of the chat session.
+#      SQL: case "an audit record of a chat turn with another patient as subject".
+SELECT ?auditEvent ?turn ?subjectName
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+WHERE {
+  ?auditEvent triad:inTurn ?turn ; triad:subjectName ?subjectName ; triad:subjectDateOfBirth ?subjectDateOfBirth .
+  FILTER NOT EXISTS {
+    ?session triad:includes ?turn ; triad:subjectName ?subjectName ; triad:subjectDateOfBirth ?subjectDateOfBirth .
+  }
+}

@@ -1,0 +1,418 @@
+# TRIAD SELECT, ASK, CONSTRUCT and DESCRIBE queries (Milestone 5).
+# Q1 to Q14b are the SQL queries of models/relational/sql/dml/03_select_queries.sql, with the same numbers.
+# Each query gives the same rows as its SQL query (tests/integration/test_kg_queries.py compares them).
+# QA (ASK), QC (CONSTRUCT) and QD (DESCRIBE) show the other query forms of SPARQL 1.1.
+#
+# Run: ./src/scripts/kg.sh sparql 03_select_queries.sparql [--only Q1,Q2]
+#      or copy one query into the Conductor SPARQL page (http://127.0.0.1:8890/sparql).
+# Patient A is Elena Marsh (born 1971-05-14). Patient B is Marlin805 Reggie481 Nienow652 (born 1966-02-18);
+# Patient B is in the full graph only (kg.sh load). The seed graph (kg.sh load --seed) has Patient A only.
+#
+# The rules of these queries (plan 5, "SPARQL writing rules"):
+# - Each query reads the data graph with a dataset clause (FROM <.../graph/abox>), not with GRAPH <iri> { }.
+# - A property path (supersedes*) starts at a bound node.
+# - Text values are simple literals. The date of a time is SUBSTR(STR(?t), 1, 10): the local date.
+# - "The current assertion" is the assertion that nothing supersedes: FILTER NOT EXISTS { ?n triad:supersedes ?a }.
+#   Under the Open World Assumption, "no triple" does not mean "false", so the query states the closed rule itself.
+# - The discriminators Staff.Role and ClinicalEntry.Category are the types of the node (triad:Nurse, triad:Allergy).
+#   STRAFTER(STR(?type), "#") gives the name of the type.
+# - A NULL of SQL is an unbound variable. COALESCE gives "Patient" when a message has no issuer.
+
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX triad: <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#>
+
+# Q1. The current record of Patient A: each assertion that nothing supersedes.
+#     It gives the entry, the visit, the message and the author of each current assertion.
+#     SQL: Q1 of 03_select_queries.sql. The path Assertion -> ClinicalEntry -> Visit -> Patient is
+#     triad:about, triad:during and triad:hasVisit (the stored direction of each link).
+SELECT ?category ?display ?verification ?intent ?author ?origin ?visitDate ?statement
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?v triad:startDate ?visitStart .
+  ?e triad:during ?v ; triad:display ?display ; a ?type .
+  FILTER (?type IN (triad:Diagnosis, triad:Procedure, triad:Allergy, triad:Observation,
+                    triad:LabOrder, triad:LabReport, triad:Prescription, triad:CareTeam))
+  ?a triad:about ?e ; triad:verification ?verification ; triad:intent ?intent ;
+     triad:statement ?statement ; triad:assertedAt ?at .
+  ?m triad:contains ?a ; triad:origin ?origin .
+  OPTIONAL { ?s triad:issues ?m ; triad:name ?staffName }
+  FILTER NOT EXISTS { ?newer triad:supersedes ?a }
+  BIND (STRAFTER(STR(?type), "#") AS ?category)
+  BIND (COALESCE(?staffName, "Patient") AS ?author)
+  BIND (SUBSTR(STR(?visitStart), 1, 10) AS ?visitDate)
+}
+ORDER BY ?category ?at
+
+# Q2. The revision chain of the penicillin fact of Patient A: start at the current assertion and go back.
+#     SQL: Q2 (a recursive WITH). SPARQL has no recursion; the path triad:supersedes* replaces it.
+#     ?depth = the number of steps from the current assertion (?head, depth 0) back to ?a.
+#     For each ?a, ?mid takes each assertion from ?head to ?a (both included), so COUNT(?mid) - 1 is the depth.
+#     ?role is the subtype of the issuer (Doctor, Nurse, MOA). It is unbound for a message with no issuer.
+SELECT ((COUNT(?mid) - 1) AS ?depth) ?date ?author ?role ?origin ?verification ?statement
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v ; a triad:Allergy ; triad:substance ?substance .
+  FILTER (CONTAINS(LCASE(?substance), "penicillin"))
+  ?head triad:about ?e .
+  FILTER NOT EXISTS { ?n triad:supersedes ?head }
+  ?head triad:supersedes* ?mid .
+  ?mid triad:supersedes* ?a .
+  ?a triad:assertedAt ?at ; triad:verification ?verification ; triad:statement ?statement .
+  ?m triad:contains ?a ; triad:origin ?origin .
+  OPTIONAL { ?s triad:issues ?m ; triad:name ?staffName ; a ?roleType .
+             FILTER (?roleType IN (triad:Doctor, triad:Nurse, triad:MOA)) }
+  BIND (COALESCE(?staffName, "Patient") AS ?author)
+  BIND (STRAFTER(STR(?roleType), "#") AS ?role)
+  BIND (SUBSTR(STR(?at), 1, 10) AS ?date)
+}
+GROUP BY ?a ?date ?author ?role ?origin ?verification ?statement
+ORDER BY ?depth
+
+# Q3. The 3MT slide question: "Is she allergic to penicillin?" The answer comes from the current assertion.
+#     SQL: Q3. The two CASE expressions become nested IF expressions. The author label follows the slide:
+#     Physician, Front desk, Other clinic.
+#     The IF tests the type ?roleType itself. Virtuoso does not see the value of a variable of another BIND in
+#     the same group (it is unbound there, with no error), so a BIND must not use ?role of a BIND before it.
+SELECT ?answer ?authorLabel ?date ?statement
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v ; a triad:Allergy ; triad:substance ?substance .
+  FILTER (CONTAINS(LCASE(?substance), "penicillin"))
+  ?a triad:about ?e ; triad:verification ?verification ; triad:assertedAt ?at ; triad:statement ?statement .
+  ?m triad:contains ?a ; triad:origin ?origin .
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+  OPTIONAL { ?s triad:issues ?m ; a ?roleType . FILTER (?roleType IN (triad:Doctor, triad:Nurse, triad:MOA)) }
+  BIND (IF(?verification = "Refuted", "No", IF(?verification = "Confirmed", "Yes", "Possibly")) AS ?answer)
+  BIND (IF(?origin = "OtherClinic", "Other clinic",
+        IF(?origin = "PharmaNet", "PharmaNet",
+        IF(!BOUND(?s), "Patient",
+        IF(?roleType = triad:Doctor, "Physician",
+        IF(?roleType = triad:MOA, "Front desk", STRAFTER(STR(?roleType), "#")))))) AS ?authorLabel)
+  BIND (SUBSTR(STR(?at), 1, 10) AS ?date)
+}
+
+# Q4. Nurse recommendations by outcome (accepted, revised, open).
+#     "accepted": a doctor decision on the same entry confirms it and supersedes it. "revised": another assertion
+#     supersedes it. "open": nothing supersedes it. SQL: Q4. The LEFT JOIN on the newer assertion becomes an
+#     OPTIONAL. BOUND() gives the false branch when the newer assertion has no doctor as issuer (an unbound value in
+#     a comparison is an error in SPARQL).
+SELECT ?outcome (COUNT(*) AS ?recommendations)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?r triad:intent "Recommendation" ; triad:about ?entry .
+  ?rm triad:contains ?r .
+  ?nurse triad:issues ?rm ; a triad:Nurse .
+  OPTIONAL {
+    ?n triad:supersedes ?r ; triad:about ?nEntry ; triad:intent ?nIntent ; triad:verification ?nVerification .
+    ?nm triad:contains ?n .
+    OPTIONAL { ?doctor triad:issues ?nm ; a triad:Doctor }
+  }
+  BIND (IF(!BOUND(?n), "open",
+        IF(?nEntry = ?entry && ?nIntent = "Decision" && ?nVerification = "Confirmed" && BOUND(?doctor),
+           "accepted", "revised")) AS ?outcome)
+}
+GROUP BY ?outcome
+ORDER BY ?outcome
+
+# Q5. The visit timeline of Patient A, with the locations (the M:N relationship TakesPlaceIn).
+#     SQL: Q5. The association class triad:VisitLocation holds the dates of each stay.
+#     Location.Type (triad:locationType) gives the department of the location.
+SELECT ?visitDate ?class ?reason ?location ?department ?arrivedAt ?leftAt
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?v triad:startDate ?visitStart ; triad:visitClass ?class .
+  ?vl triad:ofVisit ?v ; triad:atLocation ?l ; triad:startDate ?arrivedAt .
+  ?l triad:name ?location .
+  OPTIONAL { ?v triad:reason ?reason }
+  OPTIONAL { ?l triad:locationType ?department }
+  OPTIONAL { ?vl triad:endDate ?leftAt }
+  BIND (SUBSTR(STR(?visitStart), 1, 10) AS ?visitDate)
+}
+ORDER BY ?arrivedAt
+
+# Q6. The messages about Patient A, with the number of assertions of each source.
+#     The sender is a staff member, or the patient. The source is human or agent.
+#     SQL: Q6. SUM(a.Source = 'Human') becomes SUM(IF(?source = "Human", 1, 0)). Each column that is not an
+#     aggregate is in GROUP BY.
+SELECT ?message ?sender ?channel ?origin
+       (SUM(IF(?source = "Human", 1, 0)) AS ?humanAssertions) (SUM(IF(?source = "Agent", 1, 0)) AS ?agentAssertions)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v .
+  ?a triad:about ?e ; triad:source ?source .
+  ?m triad:contains ?a ; triad:identifierValue ?message ; triad:channel ?channel ; triad:origin ?origin ;
+     triad:sentAt ?sentAt .
+  OPTIONAL { ?s triad:issues ?m ; triad:name ?staffName }
+  BIND (COALESCE(?staffName, "Patient") AS ?sender)
+}
+GROUP BY ?m ?message ?sender ?channel ?origin ?sentAt
+ORDER BY ?sentAt
+
+# Q7. The current active medications of Patient A.
+#     SQL: Q7. The prescription is the entry (triad:Prescription); triad:prescribes links it to the medication.
+SELECT ?medication ?dosage ?frequency ?status ?author ?date
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v ; a triad:Prescription ; triad:prescriptionStatus ?status ; triad:prescribes ?med .
+  FILTER (?status = "active")
+  ?med triad:name ?medication .
+  ?a triad:about ?e ; triad:verification ?verification ; triad:assertedAt ?at .
+  FILTER (?verification NOT IN ("Refuted", "EnteredInError"))
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+  ?m triad:contains ?a .
+  OPTIONAL { ?e triad:dosage ?dosage }
+  OPTIONAL { ?e triad:frequency ?frequency }
+  OPTIONAL { ?s triad:issues ?m ; triad:name ?staffName }
+  BIND (COALESCE(?staffName, "Patient") AS ?author)
+  BIND (SUBSTR(STR(?at), 1, 10) AS ?date)
+}
+
+# Q8. Staff by department and role (ISA: each staff member has one subtype).
+#     SQL: Q8. The association class triad:WorksIn links a staff member to a department. The subtype is the
+#     type of the staff node. SQL gives NULL for ?registeredNurses in a group with no nurse: the SUM of NULL
+#     values is NULL. A doctor or an MOA has no triad:designation, so the IF gives the unbound ?designation, and the
+#     SUM of such a group is unbound on both stores. The short form SUM(IF(?designation = "RN", 1, 0)) is unbound
+#     on Oxigraph (an error in the IF) but 0 on Virtuoso (it gives the else branch for an unbound value).
+SELECT ?department ?role (COUNT(*) AS ?staff)
+       (SUM(IF(BOUND(?designation), IF(?designation = "RN", 1, 0), ?designation)) AS ?registeredNurses)
+       (SUM(IF(BOUND(?certification), 1, 0)) AS ?certifiedMOAs)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?w triad:atDepartment ?d ; triad:ofStaff ?s .
+  ?d triad:name ?department .
+  ?s a ?roleType .
+  FILTER (?roleType IN (triad:Doctor, triad:Nurse, triad:MOA))
+  OPTIONAL { ?s triad:designation ?designation }
+  OPTIONAL { ?s triad:certificationNumber ?certification }
+  BIND (STRAFTER(STR(?roleType), "#") AS ?role)
+}
+GROUP BY ?d ?department ?role
+ORDER BY ?department ?role
+
+# Q9a. The most common current diagnoses (over all patients).
+#      SQL: Q9a. SQL groups by (Code, CodeSystem) and shows a bare Display; SPARQL takes SAMPLE(?display).
+SELECT (SAMPLE(?display) AS ?diagnosis) (COUNT(DISTINCT ?p) AS ?patients)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?e a triad:Diagnosis ; triad:clinicalStatus "active" ; triad:code ?code ; triad:codeSystem ?codeSystem ;
+     triad:display ?display ; triad:during ?v .
+  ?p triad:hasVisit ?v .
+  ?a triad:about ?e .
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+}
+GROUP BY ?code ?codeSystem
+ORDER BY DESC(?patients) ?diagnosis
+LIMIT 10
+
+# Q9b. The longest revision chains (for example, the renewals of one medication).
+#      SQL: Q9b (a recursive WITH). ?h is the current assertion of a chain (it supersedes an assertion, and
+#      nothing supersedes it). triad:supersedes* from ?h gives each assertion of the chain, ?h included.
+#      The sub-select finds the 235 heads first, so the path starts only at a head. With the same patterns in
+#      one flat group, Oxigraph 0.3 walks the path from each of the 2,517 assertions that supersede another one,
+#      and the query takes 8 s instead of 0.06 s on the full graph.
+SELECT ?currentFact ?patient (COUNT(?x) AS ?chainLength)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  { SELECT ?h WHERE { ?h triad:supersedes ?first . FILTER NOT EXISTS { ?n triad:supersedes ?h } } }
+  ?h triad:supersedes* ?x .
+  ?h triad:about ?e .
+  ?e triad:display ?currentFact ; triad:during ?v .
+  ?p triad:hasVisit ?v ; triad:name ?patient .
+}
+GROUP BY ?h ?currentFact ?patient
+ORDER BY DESC(?chainLength)
+LIMIT 5
+
+# Q10. Trace an answer of the Care Assistant: chat turn -> citations -> assertion -> message -> author.
+#      SQL: Q10. The association class triad:Citation holds the rank. The order uses the Id of the session,
+#      which is the last part of its IRI.
+SELECT ?session ?turn ?answer ?rank ?fact ?verification ?author ?origin ?date
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?cs triad:includes ?t ; triad:identifierValue ?session .
+  ?t triad:speaker "Assistant" ; triad:seq ?turn ; triad:text ?answer .
+  ?c triad:byTurn ?t ; triad:citedAssertion ?a ; triad:rank ?rank .
+  ?a triad:about ?e ; triad:verification ?verification ; triad:assertedAt ?at .
+  ?e triad:display ?fact .
+  ?m triad:contains ?a ; triad:origin ?origin .
+  OPTIONAL { ?s triad:issues ?m ; triad:name ?staffName }
+  BIND (COALESCE(?staffName, "Patient") AS ?author)
+  BIND (SUBSTR(STR(?at), 1, 10) AS ?date)
+  BIND (xsd:integer(STRAFTER(STR(?cs), "/chat-session/")) AS ?sessionId)
+}
+ORDER BY ?sessionId ?turn ?rank
+
+# Q11. The access log of Patient A on a fixed date: who read the record, and the denied attempts.
+#      SQL: Q11. The audit event keeps the patient key and the actor key as values (no link). The OPTIONAL
+#      joins the actor to a staff member on two variables (the identifier system and the value).
+#      The date is the local date of the time.
+SELECT ?at ?action ?outcome ?actorRole ?actor ?path
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?ae a triad:AuditEvent ; triad:subjectName "Elena Marsh" ; triad:subjectDateOfBirth "1971-05-14"^^xsd:date ;
+      triad:at ?at ; triad:action ?action ; triad:auditOutcome ?outcome ; triad:actorRole ?actorRole ;
+      triad:actorSystem ?actorSystem ; triad:actorValue ?actorValue ; triad:path ?path .
+  FILTER (SUBSTR(STR(?at), 1, 10) = "2026-10-29")
+  OPTIONAL { ?s a triad:Staff ; triad:identifierSystem ?actorSystem ; triad:identifierValue ?actorValue ;
+                triad:name ?staffName }
+  BIND (COALESCE(?staffName, ?actorValue) AS ?actor)
+}
+ORDER BY ?at
+
+# Q12. What Patient A can see (the patient-visible rule).
+#      An item is visible when it is current, it is not entered in error, and it is a doctor decision by a person, a
+#      confirmed observation or lab result, or a report that the patient sent. SQL: Q12. !BOUND(?issuer) replaces
+#      "m.StaffId IS NULL", and BOUND(?doctor) replaces "s.Role = 'Doctor'". Each OPTIONAL binds its own variable. A
+#      second OPTIONAL { ?issuer a ... } would bind ?issuer to any staff member when the message has no issuer. Do
+#      not use EXISTS { ?issuer a triad:Doctor } either: it is true when ?issuer is unbound.
+SELECT ?category ?display ?verification ?date ?statement
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v ; triad:display ?display ; a ?type .
+  FILTER (?type IN (triad:Diagnosis, triad:Procedure, triad:Allergy, triad:Observation,
+                    triad:LabOrder, triad:LabReport, triad:Prescription, triad:CareTeam))
+  ?a triad:about ?e ; triad:verification ?verification ; triad:intent ?intent ; triad:source ?source ;
+     triad:statement ?statement ; triad:assertedAt ?at .
+  FILTER (?verification != "EnteredInError")
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+  ?m triad:contains ?a ; triad:origin ?origin .
+  OPTIONAL { ?issuer triad:issues ?m }
+  OPTIONAL { ?doctor triad:issues ?m ; a triad:Doctor }
+  FILTER ((?intent = "Decision" && ?source = "Human" && BOUND(?doctor))
+          || (?type IN (triad:Observation, triad:LabReport) && ?verification = "Confirmed")
+          || (!BOUND(?issuer) && ?origin = "Patient"))
+  BIND (STRAFTER(STR(?type), "#") AS ?category)
+  BIND (SUBSTR(STR(?at), 1, 10) AS ?date)
+}
+ORDER BY ?category ?at
+
+# Q13. The current care team of Patient A, with its members.
+#      The care-team entries that nothing supersedes and that are active, with the members joined to Staff by
+#      their identifier values.
+#      SQL: Q13. triad:member links the care-team entry to each member node (CareTeam.Member, multivalued).
+SELECT ?visitDate ?careTeam ?member ?role ?teamRole
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?v triad:startDate ?visitStart .
+  ?e triad:during ?v ; a triad:CareTeam ; triad:careTeamStatus "active" ; triad:member ?ctm .
+  ?a triad:about ?e .
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+  ?ctm triad:memberSystem ?memberSystem ; triad:memberValue ?memberValue .
+  ?s a triad:Staff ; triad:identifierSystem ?memberSystem ; triad:identifierValue ?memberValue ;
+     triad:name ?member ; a ?roleType .
+  FILTER (?roleType IN (triad:Doctor, triad:Nurse, triad:MOA))
+  OPTIONAL { ?e triad:name ?careTeam }
+  OPTIONAL { ?ctm triad:memberRole ?teamRole }
+  BIND (STRAFTER(STR(?roleType), "#") AS ?role)
+  BIND (SUBSTR(STR(?visitStart), 1, 10) AS ?visitDate)
+}
+ORDER BY ?visitDate ?member
+
+# Q14a. One page of the current chart of Patient B: the items 26 to 50.
+#       Patient B is Marlin805 Reggie481 Nienow652, born 1966-02-18. The page has 25 items. The order is the order
+#       of the chart: the category, then the newest first, then the Id (the last part of the IRI of the assertion).
+#       The Id is the last key, so the order is stable: an item cannot show on two pages. SQL: Q14a. The CASE of the
+#       category becomes a nested IF on the type. The IF compares the IRIs with "=": on Virtuoso, sameTerm(?type,
+#       triad:Allergy) is false also when ?type is triad:Allergy. Patient B is in the full graph only; on the seed
+#       graph the page is empty.
+SELECT ?category ?display ?verification ?date ?author
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Marlin805 Reggie481 Nienow652" ; triad:dateOfBirth "1966-02-18"^^xsd:date ;
+     triad:name ?patientName ; triad:hasVisit ?v .
+  ?e triad:during ?v ; triad:display ?display ; a ?type .
+  FILTER (?type IN (triad:Diagnosis, triad:Procedure, triad:Allergy, triad:Observation,
+                    triad:LabOrder, triad:LabReport, triad:Prescription, triad:CareTeam))
+  ?a triad:about ?e ; triad:verification ?verification ; triad:assertedAt ?at .
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+  ?m triad:contains ?a .
+  OPTIONAL { ?s triad:issues ?m ; triad:name ?staffName }
+  BIND (STRAFTER(STR(?type), "#") AS ?category)
+  BIND (SUBSTR(STR(?at), 1, 10) AS ?date)
+  BIND (COALESCE(?staffName, ?patientName) AS ?author)
+  BIND (IF(?type = triad:Allergy, 0, IF(?type = triad:Diagnosis, 1, IF(?type = triad:Prescription, 2,
+        IF(?type = triad:Observation, 3, IF(?type = triad:LabOrder, 4, IF(?type = triad:LabReport, 5,
+        IF(?type = triad:Procedure, 6, IF(?type = triad:CareTeam, 7, 8)))))))) AS ?categoryRank)
+  BIND (xsd:integer(STRAFTER(STR(?a), "/assertion/")) AS ?id)
+}
+ORDER BY ?categoryRank DESC(?at) DESC(?id)
+LIMIT 25 OFFSET 25
+
+# Q14b. The number of items on all pages of Q14a: the same pattern, with COUNT(*).
+#       SQL: Q14b.
+SELECT (COUNT(*) AS ?items)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Marlin805 Reggie481 Nienow652" ; triad:dateOfBirth "1966-02-18"^^xsd:date ;
+     triad:hasVisit ?v .
+  ?e triad:during ?v ; a ?type .
+  FILTER (?type IN (triad:Diagnosis, triad:Procedure, triad:Allergy, triad:Observation,
+                    triad:LabOrder, triad:LabReport, triad:Prescription, triad:CareTeam))
+  ?a triad:about ?e .
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+  ?m triad:contains ?a .
+}
+
+# QA. ASK: is Patient A allergic to penicillin now?
+#     True if a current assertion of a penicillin allergy entry says that it is true or that it can be true
+#     (it is not Refuted and not EnteredInError).
+#     The expected answer is false: the current assertion is the "Refuted" decision of the allergy test (Q3).
+ASK
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v ; a triad:Allergy ; triad:substance ?substance .
+  FILTER (CONTAINS(LCASE(?substance), "penicillin"))
+  ?a triad:about ?e ; triad:verification ?verification .
+  FILTER (?verification NOT IN ("Refuted", "EnteredInError"))
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+}
+
+# QC. CONSTRUCT: the PROV-O view of the slide chain (the penicillin assertions of Patient A).
+#     Each assertion is a prov:Entity. triad:supersedes becomes prov:wasRevisionOf, and the issuer of the message
+#     becomes prov:wasAttributedTo (the property chain triad:assertedBy = inMessage o issuedBy, made by hand,
+#     because the store does no OWL reasoning). An assertion of a message with no issuer gets no agent.
+CONSTRUCT {
+  ?a a prov:Entity ;
+     prov:generatedAtTime ?at ;
+     prov:value ?statement ;
+     prov:wasRevisionOf ?old ;
+     prov:wasAttributedTo ?staff .
+  ?staff a prov:Person ;
+         rdfs:label ?staffName .
+}
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v ; a triad:Allergy ; triad:substance ?substance .
+  FILTER (CONTAINS(LCASE(?substance), "penicillin"))
+  ?a triad:about ?e ; triad:assertedAt ?at ; triad:statement ?statement .
+  ?m triad:contains ?a .
+  OPTIONAL { ?a triad:supersedes ?old }
+  OPTIONAL { ?staff triad:issues ?m ; triad:name ?staffName }
+}
+
+# QD. DESCRIBE the current penicillin assertion of Patient A (the triples of the store about it).
+#     The form of the result depends on the store: Virtuoso and Oxigraph give the triples that have the
+#     assertion as their subject. The keyword WHERE is optional in SPARQL 1.1; Oxigraph 0.3 refuses it after a
+#     FROM clause of a DESCRIBE query, so this query has no WHERE.
+DESCRIBE ?a
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+{
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date ; triad:hasVisit ?v .
+  ?e triad:during ?v ; a triad:Allergy ; triad:substance ?substance .
+  FILTER (CONTAINS(LCASE(?substance), "penicillin"))
+  ?a triad:about ?e .
+  FILTER NOT EXISTS { ?n triad:supersedes ?a }
+}

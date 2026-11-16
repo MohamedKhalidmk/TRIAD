@@ -1,0 +1,153 @@
+# TRIAD UPDATE and DELETE examples (Milestone 5). They do what models/relational/sql/dml/04_update_delete.sql
+# does (U1, U2, U3, U5, U6), and U4 deletes the patient of 02_insert_data.sparql.
+# This file changes the data. Run it on a copy, or load the graph again after it: ./src/scripts/kg.sh load
+#
+# Run: ./src/scripts/kg.sh sparql 04_update_delete.sparql
+#      or copy each operation into the Conductor SPARQL page (the account SPARQL can write the ABox graph and
+#      the scratch graph).
+#
+# UPDATE: SPARQL 1.1 has no UPDATE keyword. The UPDATE of SQL is DELETE/INSERT ... WHERE: the DELETE template
+# removes the old value and the INSERT template adds the new value, for each solution of WHERE.
+# The forms of this file:
+# - WITH <g> DELETE { } INSERT { } WHERE { }   (U1, U2, U5): WITH names the graph of the templates and of WHERE.
+# - WITH <g> DELETE { } WHERE { }               (U3, U4): a delete with a condition (FILTER NOT EXISTS).
+# - INSERT DATA, DELETE DATA                    (U5): triples with no variables.
+# - DELETE WHERE { }                            (U5): the short form. Its pattern is also its template, so it
+#                                                cannot hold a FILTER. Use it only for a delete with no condition.
+# - WITH <g> INSERT { } WHERE { }               (U6): an insert that reads the data.
+# - CLEAR SILENT GRAPH                          (U8): empty the scratch graph.
+# Virtuoso does not run the updates of one request (separated by ";") as one transaction. If one of them fails,
+# the updates before it stay.
+
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX triad: <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#>
+
+# U1. UPDATE (SPARQL 1.1 has no UPDATE keyword: DELETE/INSERT ... WHERE): Patient A gets a new phone number.
+#     Journey Use case 1. SQL: case 1 of 04_update_delete.sql. The key (name, dateOfBirth) does not change.
+#     The old value is in an OPTIONAL: without it, a patient with no phone number gets no new number.
+WITH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+DELETE { ?p triad:phoneNumber ?old }
+INSERT { ?p triad:phoneNumber "+1-508-555-0199" }
+WHERE {
+  ?p a triad:Patient ; triad:name "Elena Marsh" ; triad:dateOfBirth "1971-05-14"^^xsd:date .
+  OPTIONAL { ?p triad:phoneNumber ?old }
+}
+
+# U2. UPDATE (SPARQL 1.1 has no UPDATE keyword: DELETE/INSERT ... WHERE): a staff member gets a new phone number.
+#     Journey Use case 8. SQL: case 2. The staff member is found by the key (identifierSystem, identifierValue).
+WITH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+DELETE { ?s triad:phoneNumber ?old }
+INSERT { ?s triad:phoneNumber "+1-508-555-2999" }
+WHERE {
+  ?s a triad:Staff ; triad:identifierSystem "https://triad.example/fhir/sid/employee" ;
+     triad:identifierValue "E1001" .
+  OPTIONAL { ?s triad:phoneNumber ?old }
+}
+
+# U3. DELETE: remove a location that no visit uses (journey Use case 8). SQL: case 3.
+#     The rule of the foreign key: delete the location only if no triple points to it. A location that a
+#     visit uses stays (the SQL DELETE gives "FOREIGN KEY constraint failed", and the app shows 409).
+WITH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+DELETE { ?l ?p ?o }
+WHERE {
+  ?l a triad:Location ; triad:identifierSystem "https://triad.example/fhir/sid/location" ;
+     triad:identifierValue "STORE-OLD" .
+  FILTER NOT EXISTS { ?ref ?link ?l }
+  ?l ?p ?o .
+}
+
+# U4. DELETE: remove a person, the patient of 02_insert_data.sparql (manual 5.4: "delete a person").
+#     The form of the manual: DELETE { ?s ?p ?o } WHERE { ... FILTER NOT EXISTS { ?s triad:hasVisit ?v } }.
+#     A patient with a visit stays, as in SQL ("delete a patient who has visits" fails; the app shows 409).
+#     Before 02 runs, this update deletes nothing.
+WITH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+DELETE { ?s ?p ?o }
+WHERE {
+  ?s a triad:Patient ; triad:name "Noah Fielding" ; triad:dateOfBirth "1990-03-14"^^xsd:date .
+  FILTER NOT EXISTS { ?s triad:hasVisit ?v }
+  ?s ?p ?o .
+}
+
+# U5. INSERT DATA, UPDATE, DELETE DATA and DELETE WHERE of a medication that no prescription uses. SQL: case 4.
+#     1. INSERT DATA adds the medication. It has no form yet (the SQL row has Form NULL).
+#     2. UPDATE (DELETE/INSERT ... WHERE) sets the form. The medication is found by its key (code, codeSystem).
+#     3. DELETE DATA removes one triple: it must give the exact value ("Tablet").
+#     4. DELETE WHERE removes the other triples of the medication, by its key. It has no condition, because the
+#        medication is new: no prescription can use it. To delete an old medication, use the form of U3.
+INSERT DATA {
+  GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox> {
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/medication/900001> a triad:Medication ;
+        triad:code "00000000" ;
+        triad:codeSystem "http://hl7.org/fhir/NamingSystem/ca-hc-din" ;
+        triad:name "Test medication 10 mg tablet" .
+  }
+} ;
+WITH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+DELETE { ?m triad:form ?old }
+INSERT { ?m triad:form "Tablet" }
+WHERE {
+  ?m a triad:Medication ; triad:code "00000000" ; triad:codeSystem "http://hl7.org/fhir/NamingSystem/ca-hc-din" .
+  OPTIONAL { ?m triad:form ?old }
+} ;
+DELETE DATA {
+  GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox> {
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/medication/900001> triad:form "Tablet" .
+  }
+} ;
+DELETE WHERE {
+  GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox> {
+    ?m triad:code "00000000" ; triad:codeSystem "http://hl7.org/fhir/NamingSystem/ca-hc-din" ; ?p ?o .
+  }
+}
+
+# U6. INSERT ... WHERE (TRIAD): Patient A reports a fact through the app. SQL: case 5.
+#     The message has no issuer (origin "Patient"). The new assertion is about the amlodipine entry, and it
+#     supersedes the current assertion of that entry, which WHERE finds. The old assertion stays: nothing is
+#     overwritten. The last FILTER makes the update safe to run again: it adds nothing if the message exists.
+WITH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+INSERT {
+  <https://github.com/MohamedKhalidmk/TRIAD/kg/message/900002> a triad:Message ;
+      triad:identifierSystem "https://triad.example/fhir/sid/message" ;
+      triad:identifierValue "MSG-ELENA-APP-0001" ;
+      triad:channel "App" ;
+      triad:origin "Patient" ;
+      triad:sentAt "2026-10-30T08:30:00-04:00"^^xsd:dateTime ;
+      triad:text "I take amlodipine every morning." ;
+      triad:contains <https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/900002> .
+  <https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/900002> a triad:Assertion ;
+      triad:seq 1 ;
+      triad:about ?e ;
+      triad:supersedes ?head ;
+      triad:assertedAt "2026-10-30T08:30:00-04:00"^^xsd:dateTime ;
+      triad:intent "Report" ;
+      triad:source "Human" ;
+      triad:verification "Unconfirmed" ;
+      triad:statement "I take amlodipine every morning." .
+}
+WHERE {
+  ?e triad:identifierSystem "https://triad.example/fhir" ;
+     triad:identifierValue "MedicationRequest/mr-elena-amlodipine" .
+  ?head triad:about ?e .
+  FILTER NOT EXISTS { ?n triad:supersedes ?head }
+  FILTER NOT EXISTS { <https://github.com/MohamedKhalidmk/TRIAD/kg/message/900002> ?anyProperty ?anyValue }
+}
+
+# U7. Check the result of U6: the amlodipine entry now has a chain of two assertions. SQL: case 6.
+#     ?supersedes is unbound for the first assertion of the chain.
+SELECT ?a ?assertedAt ?author ?intent ?verification ?supersedes ?statement
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE {
+  ?e triad:identifierSystem "https://triad.example/fhir" ;
+     triad:identifierValue "MedicationRequest/mr-elena-amlodipine" .
+  ?a triad:about ?e ; triad:assertedAt ?assertedAt ; triad:intent ?intent ; triad:verification ?verification ;
+     triad:statement ?statement .
+  ?m triad:contains ?a .
+  OPTIONAL { ?a triad:supersedes ?supersedes }
+  OPTIONAL { ?s triad:issues ?m ; triad:name ?staffName }
+  BIND (COALESCE(?staffName, "Patient") AS ?author)
+}
+ORDER BY ?assertedAt
+
+# U8. CLEAR: empty the scratch graph (the planted triples of 05_constraint_checks.sparql go there).
+#     SILENT: a missing graph is not an error.
+CLEAR SILENT GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>

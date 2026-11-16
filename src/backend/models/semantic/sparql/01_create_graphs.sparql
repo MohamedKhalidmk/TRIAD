@@ -1,0 +1,50 @@
+# TRIAD: make the named graphs and load the ontology into the TBox graph (Milestone 5).
+#
+# Run: ./src/scripts/kg.sh sparql 01_create_graphs.sparql
+# kg.sh sends these updates to /sparql-auth as the user triad (digest login). Only this user can write the
+# TBox graph and LOAD into it (kg.sh init gives it the permission 7 on the TBox graph).
+# This file does NOT run on the Conductor SPARQL page: that page uses the account SPARQL (/sparql, no login),
+# which can write only the ABox and the scratch graphs, and which cannot LOAD. For the manual path, use
+# Conductor -> Linked Data -> Quad Store Upload (see README.md, "Load the graphs by hand").
+#
+# The graphs (plan 5, section 1.1):
+#   .../graph/tbox      the ontology (TBox): triad.owl
+#   .../graph/abox      the data (ABox): kg.sh load (the bulk loader) or the Quad Store Upload of the seed graph
+#   .../graph/scratch   the scratch graph of the scripts 04 and 05 and of the planted checks
+#   .../graph/meta      the id counters and the build marker of the app
+#
+# G3 loads triad.owl from the main branch on GitHub. The file is on main only after the Milestone 5 merge.
+# Before the merge, G3 fails (HTTP 404). Then use "kg.sh load", which loads the local triad.owl.
+
+# G1. CREATE SILENT GRAPH: make the four TRIAD graphs. SILENT: a graph that exists already is not an error.
+CREATE SILENT GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox> ;
+CREATE SILENT GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox> ;
+CREATE SILENT GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch> ;
+CREATE SILENT GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/meta>
+
+# G2. CLEAR GRAPH: remove all triples of the TBox graph and of the scratch graph before the load.
+#     The ABox graph does not change: kg.sh load (or the Quad Store Upload) fills it.
+CLEAR GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox> ;
+CLEAR GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+
+# G3. LOAD: read the ontology (RDF/XML) from GitHub into the TBox graph.
+#     GitHub sends the file as text/plain; Virtuoso finds the RDF/XML form itself.
+LOAD <https://raw.githubusercontent.com/MohamedKhalidmk/TRIAD/main/src/backend/models/semantic/triad.owl>
+INTO GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+
+# G4. Check: the number of triples in each TRIAD graph.
+#     After kg.sh load, the TBox graph has the triples of triad.owl and the ABox graph has the triples of
+#     kg_report.json. An empty graph shows 0. SUM(IF(BOUND(?s), 1, 0)), not COUNT(?s): Oxigraph 0.3 counts the
+#     unbound ?s of an empty graph as 1.
+SELECT ?graph (SUM(IF(BOUND(?s), 1, 0)) AS ?triples)
+WHERE {
+  VALUES ?graph {
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/meta>
+  }
+  OPTIONAL { GRAPH ?graph { ?s ?p ?o } }
+}
+GROUP BY ?graph
+ORDER BY ?graph

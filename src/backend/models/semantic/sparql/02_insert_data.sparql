@@ -1,0 +1,96 @@
+# TRIAD INSERT DATA examples (Milestone 5): the example of the course manual (5.3), in the form of TRIAD.
+# I1 adds a new patient. I2 adds one new fact of Patient A with its provenance: a visit, a front-desk message,
+# a new allergy entry and one assertion. Both go into the ABox graph.
+# 04_update_delete.sparql (U4) deletes the patient of I1 again. The fact of I2 stays: an assertion is append-only.
+#
+# Run: ./src/scripts/kg.sh sparql 02_insert_data.sparql
+#      or copy each operation into the Conductor SPARQL page (the account SPARQL can write the ABox graph).
+# To get the loaded graph back after 02 and 04: ./src/scripts/kg.sh load (or kg.sh load --seed).
+#
+# The rules of an insert (plan 5, "SPARQL writing rules"):
+# - Each IRI is a full IRI. A prefixed name such as kg:patient/900001 is not valid SPARQL 1.1.
+# - Text values are simple literals (no ^^xsd:string). Dates are xsd:date, times are xsd:dateTime.
+# - The Ids 900001 and 900002 are for the SPARQL scripts only: the data and the app do not use them.
+#   The class path in the IRI (patient, visit, message, ...) keeps the IRIs apart.
+# - The links go in the stored direction of the ontology (ontology.md, section 3.1): the patient hasVisit the
+#   visit, the entry is during the visit, the staff member issues the message, the message contains the assertion,
+#   and the assertion is about the entry.
+# - The constraints of the relational schema hold for the new triples: each required value is there, each value
+#   is in its value set, and the new assertion is the only current assertion of its new entry.
+#   05_constraint_checks.sparql gives no row after this file.
+
+PREFIX xsd:   <http://www.w3.org/2001/XMLSchema#>
+PREFIX triad: <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#>
+
+# I1. INSERT DATA: a new patient, Noah Fielding (born 1990-03-14), with no visit.
+#     The front desk registers him before his first visit. U4 of 04_update_delete.sparql deletes him
+#     ("delete a person", manual 5.4).
+INSERT DATA {
+  GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox> {
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/patient/900001> a triad:Patient ;
+        triad:name "Noah Fielding" ;
+        triad:dateOfBirth "1990-03-14"^^xsd:date ;
+        triad:patientSex "male" ;
+        triad:phoneNumber "+1-508-555-0177" ;
+        triad:city "Worcester" ;
+        triad:region "MA" ;
+        triad:country "US" .
+  }
+}
+
+# I2. INSERT DATA: Patient A phones the front desk and reports a latex allergy.
+#     The triples are the visit (a phone call), its location (the Virtual Visit location, kg:location/14), the
+#     message of the front desk (Sofia Alvarez, kg:staff/1, an MOA), the new allergy entry and one assertion. The
+#     assertion is a "Report" that is "Unconfirmed": the front desk writes what the patient says. A doctor can
+#     confirm or refute it later with a new assertion that supersedes it.
+INSERT DATA {
+  GRAPH <https://github.com/MohamedKhalidmk/TRIAD/graph/abox> {
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/patient/1>
+        triad:hasVisit <https://github.com/MohamedKhalidmk/TRIAD/kg/visit/900001> .
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/visit/900001> a triad:Visit ;
+        triad:identifierSystem "https://triad.example/fhir/sid/encounter" ;
+        triad:identifierValue "ENC-ELENA-2026-11-02" ;
+        triad:visitClass "VR" ;
+        triad:visitType "Phone call" ;
+        triad:reason "Phone call" ;
+        triad:startDate "2026-11-02T09:00:00-05:00"^^xsd:dateTime ;
+        triad:endDate "2026-11-02T09:10:00-05:00"^^xsd:dateTime .
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/visit-location/900001> a triad:VisitLocation ;
+        triad:ofVisit <https://github.com/MohamedKhalidmk/TRIAD/kg/visit/900001> ;
+        triad:atLocation <https://github.com/MohamedKhalidmk/TRIAD/kg/location/14> ;
+        triad:startDate "2026-11-02T09:00:00-05:00"^^xsd:dateTime ;
+        triad:endDate "2026-11-02T09:10:00-05:00"^^xsd:dateTime .
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/900001> a triad:ClinicalEntry , triad:Allergy ;
+        triad:identifierSystem "https://triad.example/fhir" ;
+        triad:identifierValue "AllergyIntolerance/ai-elena-latex" ;
+        triad:during <https://github.com/MohamedKhalidmk/TRIAD/kg/visit/900001> ;
+        triad:code "300916003" ;
+        triad:codeSystem "http://snomed.info/sct" ;
+        triad:display "Latex allergy" ;
+        triad:text "Latex allergy" ;
+        triad:recordedAt "2026-11-02T09:05:00-05:00"^^xsd:dateTime ;
+        triad:substance "Latex" ;
+        triad:allergyType "allergy" ;
+        triad:allergyCategory "environment" ;
+        triad:criticality "low" ;
+        triad:clinicalStatus "active" .
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/staff/1>
+        triad:issues <https://github.com/MohamedKhalidmk/TRIAD/kg/message/900001> .
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/message/900001> a triad:Message ;
+        triad:identifierSystem "https://triad.example/fhir/sid/message" ;
+        triad:identifierValue "MSG-ELENA-2026-11-02" ;
+        triad:channel "Phone" ;
+        triad:origin "Patient" ;
+        triad:sentAt "2026-11-02T09:05:00-05:00"^^xsd:dateTime ;
+        triad:text "Phone call. The patient says that she had hives after contact with latex gloves." ;
+        triad:contains <https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/900001> .
+    <https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/900001> a triad:Assertion ;
+        triad:seq 1 ;
+        triad:about <https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/900001> ;
+        triad:assertedAt "2026-11-02T09:05:00-05:00"^^xsd:dateTime ;
+        triad:intent "Report" ;
+        triad:source "Human" ;
+        triad:verification "Unconfirmed" ;
+        triad:statement "Patient report: hives after contact with latex gloves." .
+  }
+}

@@ -18,8 +18,9 @@
 # up: the container triad-virtuoso listens on 127.0.0.1 only. The volume triad-virtuoso-db keeps the data.
 # init (manual 5.2.3): the account SPARQL (the user of /sparql, no login) gets SPARQL_SELECT and SPARQL_UPDATE.
 #     Graph permissions let it write only the ABox and the scratch graphs. The user triad (/sparql-auth,
-#     digest login) can write the four TRIAD graphs. "init --strict" removes SPARQL_UPDATE from the account
-#     SPARQL and the write permissions of the users with no login. You can run "init" and "init --strict" again.
+#     digest login) can write the four TRIAD graphs, and LOAD into the TBox and the scratch graphs.
+#     "init --strict" removes SPARQL_UPDATE from the account SPARQL and the write permissions of the users
+#     with no login. You can run "init" and "init --strict" again.
 # load: if main.py has the command export-kg, load first runs "main.py ensure-db" and "main.py export-kg".
 #     Then it clears the TBox and ABox graphs, loads models/semantic/triad.owl and TRIAD_KG_DIR/triad_kg.nt.gz
 #     with the bulk loader, and checks the result (the load list, and the counts of kg_report.json).
@@ -335,7 +336,7 @@ create procedure DB.DBA.TRIAD_INIT (in uname varchar, in pw varchar, in strict i
   DB.DBA.RDF_DEFAULT_USER_PERMS_SET (uname, 1);
   DB.DBA.RDF_GRAPH_USER_PERMS_SET ($(sql_text "$KG_TBOX"), uname, 7);
   DB.DBA.RDF_GRAPH_USER_PERMS_SET ($(sql_text "$KG_ABOX"), uname, 3);
-  DB.DBA.RDF_GRAPH_USER_PERMS_SET ($(sql_text "$KG_SCRATCH"), uname, 3);
+  DB.DBA.RDF_GRAPH_USER_PERMS_SET ($(sql_text "$KG_SCRATCH"), uname, 7);
   DB.DBA.RDF_GRAPH_USER_PERMS_SET ($(sql_text "$KG_META"), uname, 3);
   if (strict <> 0)
     {
