@@ -82,28 +82,45 @@ def _iris(values: Iterable[str]) -> Term:
 # ---------------------------------------------------------------------------------------------
 # Step 1: the WHERE text of an item query (the SPARQL form of SqliteRecordRepository._item_filters)
 
-# The patient-visible rule of query Q12 (fragments.PATIENT_VISIBLE, SQLite PATIENT_VISIBLE). It includes CURRENT.
-# It needs ?type and ?verification. The two EXISTS give "a doctor decision by a person" (s.Role = 'Doctor') and
-# "a report that the patient sent" (m.StaffId IS NULL AND m.Origin = 'Patient'); their FILTERs use only their own
-# variables, so the store runs them for each row with ?a bound.
+# The patient-visible rule of query Q12 (fragments.PATIENT_VISIBLE, SQLite PATIENT_VISIBLE) and the text search
+# (SQLite: lower(e.Display) LIKE ? OR lower(a.Statement) LIKE ? OR lower(AUTHOR_NAME) LIKE ?) have two forms. Both
+# give the same rows on both stores; the form depends on the other parts of the query, not on the store:
+# - The EXISTS form (VISIBLE, _Authors.condition): an OR of EXISTS that start from ?a. It is the fast form on
+#   Oxigraph (the visible items of the largest chart: 300 ms, not 570 ms).
+# - The issuer form (VISIBLE_BY_ISSUER, _Authors.issuer_condition): the message, and its issuer in one OPTIONAL,
+#   then a FILTER with no EXISTS. A query uses it when the visible rule is not its only filter (a text search, a
+#   date, a filter of a lookup, an OPTIONAL pattern). Virtuoso 7.2 refuses the EXISTS form there ("SQ200: Stack
+#   Overflow in cost model"), and it cannot compile an OPTIONAL inside an EXISTS (SP031).
+# In the EXISTS form, each condition of the OR is an EXISTS: on Virtuoso, "(?type IN (...) && ...) || EXISTS
+# {...}" did not end in 120 s on the planted data (2,000 triples); "EXISTS {...} || EXISTS {...}" takes 6 ms.
+# One EXISTS with a UNION of the cases is not a solution: Oxigraph 0.3 then takes 14 s on the largest chart.
+
+# The three cases: "a confirmed observation or lab report", "a doctor decision by a person" (s.Role = 'Doctor')
+# and "a report that the patient sent" (m.StaffId IS NULL AND m.Origin = 'Patient'). It includes CURRENT.
 VISIBLE = f"""{fragments.CURRENT}
   FILTER (?verification != "EnteredInError" && (
-      (?type IN (triad:Observation, triad:LabReport) && ?verification = "Confirmed")
+      EXISTS {{ ?a triad:verification ?cVerification .
+               FILTER (?type IN (triad:Observation, triad:LabReport) && ?cVerification = "Confirmed") }}
       || EXISTS {{ ?a triad:intent ?vIntent ; triad:source ?vSource . ?vMessage triad:contains ?a .
                   ?vStaff triad:issues ?vMessage ; a ?vRole .
                   FILTER (?vIntent = "Decision" && ?vSource = "Human" && ?vRole = triad:Doctor) }}
       || EXISTS {{ ?pMessage triad:contains ?a ; triad:origin ?pOrigin .
                   FILTER (?pOrigin = "Patient")
                   FILTER NOT EXISTS {{ ?pStaff triad:issues ?pMessage }} }}))"""
+# The issuer form: the patterns "verification", "intent", "source", "message" and the OPTIONAL "issuer" (or
+# "issuerName") of _Items.
+VISIBLE_BY_ISSUER = """FILTER ((?type IN (triad:Observation, triad:LabReport) && ?verification = "Confirmed")
+          || (?intent = "Decision" && ?source = "Human" && BOUND(?issuer) && ?issuerRole = triad:Doctor)
+          || (!BOUND(?issuer) && ?origin = "Patient"))"""
 
-# The text search (SQLite: lower(e.Display) LIKE ? OR lower(a.Statement) LIKE ? OR lower(AUTHOR_NAME) LIKE ?).
-# The author name is the staff member, or the patient for a message with no issuer. One small query first finds
-# the authors whose name has the text (`_Authors`), so the filter of each row compares IRIs, not names.
+# The author name is the staff member, or the patient for a message with no issuer. In the EXISTS form, one small
+# query first finds the authors whose name has the text (`_Authors`), so the filter of each row compares IRIs.
 TEXT = f"{fragments.contains('?display', 'q')} || {fragments.contains('?statement', 'q')}"
 BY_STAFF = "EXISTS { ?tMessage triad:contains ?a . ?tStaff triad:issues ?tMessage . FILTER (?tStaff IN ($authors)) }"
 BY_STAFF_NAME = f"""EXISTS {{ ?tMessage triad:contains ?a . ?tStaff triad:issues ?tMessage ; triad:name ?tName .
                   FILTER ({fragments.contains("?tName", "q")}) }}"""
 BY_PATIENT = "NOT EXISTS { ?uMessage triad:contains ?a . ?uStaff triad:issues ?uMessage }"
+BY_ISSUER_NAME = f"(BOUND(?issuer) && {fragments.contains('?issuerName', 'q')})"
 AUTHORS = f"""
 SELECT ?author FROM $abox WHERE {{
   {{ ?author a triad:Staff ; triad:name ?name . }}
@@ -121,6 +138,7 @@ class _Authors:
     patient: bool = False
 
     def condition(self) -> str:
+        """The text condition of the EXISTS form."""
         parts = [TEXT]
         if len(self.staff) > MAX_AUTHORS:
             parts.append(BY_STAFF_NAME)
@@ -128,6 +146,15 @@ class _Authors:
             parts.append(BY_STAFF)
         if self.patient:
             parts.append(BY_PATIENT)
+        return " || ".join(parts)
+
+    def issuer_condition(self) -> str:
+        """The text condition of the issuer form (the OPTIONAL "issuerName" gives ?issuer and ?issuerName)."""
+        parts = [TEXT]
+        if self.staff:
+            parts.append(BY_ISSUER_NAME)
+        if self.patient:
+            parts.append("!BOUND(?issuer)")
         return " || ".join(parts)
 
 # The author role of the recommendations (SQLite: s.Role = ?).
@@ -148,6 +175,8 @@ class _Items:
         "at": "?a triad:assertedAt ?at .",
         "seq": "?a triad:seq ?seq .",
         "intent": "?a triad:intent ?intent .",
+        "source": "?a triad:source ?source .",
+        "message": "?m triad:contains ?a ; triad:origin ?origin .",
         "verification": "?a triad:verification ?verification .",
         "statement": "?a triad:statement ?statement .",
         "display": "?e triad:display ?display .",
@@ -159,6 +188,12 @@ class _Items:
         "testName": "OPTIONAL { ?e triad:testName ?testName }",
         "conclusion": "OPTIONAL { ?e triad:conclusion ?conclusion }",
         "clinicalStatus": "OPTIONAL { ?e triad:clinicalStatus ?clinicalStatus }",
+        # The issuer of the message and its role (one OPTIONAL: SPARQL writing rule 17). "issuerName" adds the
+        # name for a text search.
+        "issuer": ("OPTIONAL { ?issuer triad:issues ?m ; a ?issuerRole . "
+                   + fragments.classes_in("?issuerRole", fragments.STAFF_ROLES) + " }"),
+        "issuerName": ("OPTIONAL { ?issuer triad:issues ?m ; a ?issuerRole ; triad:name ?issuerName . "
+                       + fragments.classes_in("?issuerRole", fragments.STAFF_ROLES) + " }"),
     }
 
     def __init__(self, patient_id: int, visit_id: Optional[int] = None):
@@ -194,12 +229,20 @@ class _Items:
               authors: _Authors = _Authors(), date_from: Optional[str] = None,
               date_to: Optional[str] = None) -> "_Items":
         """The filters of the chart. A patient-visible item is always current (Q12)."""
-        if visible_only:
+        # The issuer form (see VISIBLE) when the visible rule is not the only filter of the query.
+        by_issuer = visible_only and bool(text or date_from or date_to or self.optional or self.filters or self.late)
+        if by_issuer:
+            self.need("verification", "intent", "source", "message", "issuerName" if text else "issuer")
+            self.filters += [fragments.CURRENT, 'FILTER (?verification != "EnteredInError")']
+            self.late.append(VISIBLE_BY_ISSUER)
+        elif visible_only:
             self.need("verification")
             self.filters.append(VISIBLE)
         elif current_only:
             self.filters.append(fragments.CURRENT)
-        if text:
+        if text and by_issuer:
+            self.need("display", "statement").filter(authors.issuer_condition(), late=True, q=text.lower())
+        elif text:
             self.need("display", "statement").filter(authors.condition(), q=text.lower())
             if authors.staff and len(authors.staff) <= MAX_AUTHORS:       # FILTER (?tStaff IN (...))
                 self.bindings["authors"] = terms.term_list(Term(f"<{s}>") for s in authors.staff)
