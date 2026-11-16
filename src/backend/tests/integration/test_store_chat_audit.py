@@ -376,14 +376,12 @@ def test_the_audit_subject_check(store):
     assert ctx.audit.denied_count(SUBJECT) == 1
 
 
-@pytest.mark.skip(reason="needs the key guard key.chat-turn of agent D (guards_directory.py)")
 def test_a_client_turn_id_is_unique_in_a_session(store):
     """UK_ChatTurn_ChatSessionId_ClientTurnId: the use case reads the turn first, so only the port can write it."""
     found = same_error(store, lambda c, now: c.chat.add_turn(1, "demo-0001-1", "User", "Again?", now))
     assert found.fields == {"key": "ChatTurn.ChatSessionId, ChatTurn.ClientTurnId"}
 
 
-@pytest.mark.skip(reason="needs the key guard key.association of agent D (guards_directory.py)")
 def test_a_turn_cites_an_assertion_one_time(store):
     """UK_Citation_ChatTurnId_AssertionId: a second citation of the same assertion by the same turn."""
     found = same_error(store, lambda c, now: c.chat.add_citations(2, [3]))

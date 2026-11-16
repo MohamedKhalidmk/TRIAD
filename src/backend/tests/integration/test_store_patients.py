@@ -186,7 +186,6 @@ def test_a_patient_with_visits_cannot_be_deleted(store):
     assert ctx.patients.get(1) == ref.patients.get(1)
 
 
-@pytest.mark.skip(reason="needs the key guard key.patient of agent D (guards_directory.py)")
 def test_the_patient_key_is_unique(store):
     """UK_Patient_Name_DateOfBirth: a second patient with the same name and date of birth (the use case checks
     this first, so only the port can write it)."""
