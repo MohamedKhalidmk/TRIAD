@@ -61,9 +61,12 @@ SELECT ?e ?value ?at ?action ?outcome ?role ?actorSystem ?actorValue ?path ?turn
 # The name of one actor (?n is its place in the list): a staff member, or the patient of a patient identifier.
 # The value is a constant of the pattern ($value<n>): an identifier value is selective, so the store starts there.
 # (Measured on the full graph, Oxigraph: 0.2 ms; an OPTIONAL that joins ?actorValue of the records takes 10 ms.)
+# The system filter compares STR(?system): with "?system = $system<n>" in a UNION branch with these OPTIONALs,
+# Virtuoso 7.2 stops with "SP031: SPARQL compiler: Internal error: sparp_gp_deprecate(): equiv replaces filter but
+# under deprecation" (it puts the constant in place of the variable, and then cannot keep the FILTER).
 ACTOR_NAME = """
   {{ ?x triad:identifierValue $value{n} ; triad:identifierSystem ?system .
-    FILTER (?system = $system{n})
+    FILTER (STR(?system) = $system{n})
     OPTIONAL {{ ?x a ?staffType ; triad:name ?staffName . FILTER (?staffType = triad:Staff) }}
     OPTIONAL {{ ?x a ?identifierType . FILTER (?identifierType = triad:PatientIdentifier)
                ?patient triad:identifier ?x ; triad:name ?patientName . }}
