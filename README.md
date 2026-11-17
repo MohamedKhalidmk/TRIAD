@@ -654,11 +654,18 @@ The screenshots of Milestone 5 are in `doc/screenshots/m5/`.
   [the SPARQL of a use case in the Demo guide](doc/screenshots/m5/app_demo_guide_sparql.png)
 - [x] The Virtuoso SPARQL page: [Q2 in the editor](doc/screenshots/m5/virtuoso_sparql_q2_editor.png) (the link
   **Run in Virtuoso**) and [the result of Q2](doc/screenshots/m5/virtuoso_sparql_q2_result.png)
-- [ ] Protégé: the class hierarchy, the ontology metrics and the HermiT result (pending)
-- [ ] Conductor: the graphs list, Quad Store Upload and the User Accounts page (pending)
-- [ ] Conductor SPARQL page: `02` INSERT DATA with its result line, the `04` update and delete with their result
-  lines, B.1 (pending)
-- [ ] The app on Virtuoso: a record form and the directory 409 (pending)
+- [x] Protégé: [the class hierarchy](doc/screenshots/m5/protege_class_hierarchy.png), [the ontology metrics](doc/screenshots/m5/protege_ontology_metrics.png),
+  [the HermiT result](doc/screenshots/m5/protege_hermit_inferred.png) and [HermiT on the seed graph](doc/screenshots/m5/protege_hermit_seed_assertedby.png)
+  (`'asserted by' some Staff`: 10 assertions)
+- [x] Conductor: [the graphs list](doc/screenshots/m5/conductor_graphs.png), [Quad Store Upload](doc/screenshots/m5/conductor_quad_store_upload.png) and
+  [the account `SPARQL` in User Accounts](doc/screenshots/m5/conductor_user_account_sparql.png)
+- [x] Conductor SPARQL page: [`02` INSERT DATA](doc/screenshots/m5/conductor_sparql_02_insert_data.png) with its result line (and
+  [the SR619 error before `kg.sh init`](doc/screenshots/m5/conductor_sparql_02_insert_denied.png)), [the `04` update](doc/screenshots/m5/conductor_sparql_04_update.png)
+  and [the `04` delete](doc/screenshots/m5/conductor_sparql_04_delete.png) with their result lines, [B.1](doc/screenshots/m5/conductor_sparql_b1_graphs.png),
+  [Q2](doc/screenshots/m5/conductor_sparql_03_q2.png) and [Q2 with the whole query](doc/screenshots/m5/conductor_sparql_03_q2_full.png)
+- [x] The app on Virtuoso: [a record form](doc/screenshots/m5/app_record_form.png), [the directory 409](doc/screenshots/m5/app_directory_409.png)
+  (a department name that exists), and [Delete patient](doc/screenshots/m5/app_patient_delete_button.png) with
+  [its 409](doc/screenshots/m5/app_patient_delete_409.png) (a patient who has visits)
 
 ## Design choice: user switching instead of a login
 
