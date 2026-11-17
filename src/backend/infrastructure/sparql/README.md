@@ -364,11 +364,13 @@ The limit of the tests for a chart page is 0.9 s on Oxigraph and 3 s on Virtuoso
 record write on Virtuoso sends about 14 requests: the reads of the use case and of the guards, one ASK, one
 `INSERT DATA` (with the digest login: one more round trip) and the read of the new assertions.
 
-**The test run** (`TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso`, `-m virtuoso`, 389 tests): 387 tests pass in about
-130 s, with the loads of the three data sets. The 2 tests of C16 of `05_constraint_checks.sparql` fail: each one
-waits for the timeout of 600 s (see below).
+**The test run** (`TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso`, `-m virtuoso`, 561 tests, a second computer on
+2026-11-17): all 561 tests pass in 276 s, with the loads of the three data sets. A later run had one failure on a
+time limit: `test_each_lookup_and_the_care_teams_on_the_full_data[virtuoso]` (`latest_observations` took 8.7 s,
+the limit is 3 s; the rows were right).
 
-**Open: C16 on Virtuoso.** The check C16 (an inverse-functional property with two subjects for one object) took
-0.2 s once and more than 600 s (the test timeout) at other times, on the same full graph: Virtuoso chose another
-plan. A form with `GROUP BY ?object ?property HAVING (COUNT(DISTINCT ?subject) > 1)` (no self-join) took 0.7 s.
-The script is in `models/semantic/sparql/`; its owner must change it and its tests.
+**C16 on Virtuoso (fixed in commit 0f5e5a1).** The check C16 (an inverse-functional property with two subjects
+for one object) joined two free subjects. That form took 0.2 s once and more than 600 s (the test timeout) at other
+times, on the same full graph: Virtuoso chose another plan. The check now counts the subjects of each object in a
+sub-select (`GROUP BY ?object ?property HAVING (COUNT(DISTINCT ?s) > 1)`), with no self-join. Its two tests pass:
+0.23 s on the seed data and 0.18 s on the full graph (2026-11-17).
