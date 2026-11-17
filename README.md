@@ -178,8 +178,7 @@ The other options:
 **The time.** Measured on one laptop (macOS on arm64) with Oxigraph: the first run takes 2 min 27 s (the
 graph build is 31 s of it), and a second run takes 1 min 37 s (most of it is the fast tests). With Virtuoso,
 the first run takes 1 min 59 s when the image is on the computer (the graph build and load is 22 s of it; the
-image pull of 51 MB comes on top the first time), and a second run takes 1 min 20 s. On a second laptop (macOS
-on arm64, 8 GB of memory, Python 3.12 without uv; a new clone, 2026-11-17), with Virtuoso: the first run takes about
+image pull of 51 MB comes on top the first time), and a second run takes 1 min 20 s. On a second computer (a new clone, 2026-11-17), with Virtuoso: the first run takes about
 4 min 30 s to the server (the graph build and load is 61 s of it), and a second run takes 2 min 31 s; with Oxigraph
 (Docker stopped) a run takes 2 min 35 s (the graph build is 27 s of it); with `--store sqlite`, 2 min 6 s. A second run builds nothing again: the
 build marker of the store is current. A rebuild of the graph (a changed database, or `--reset-kg`) deletes
