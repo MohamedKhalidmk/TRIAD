@@ -135,7 +135,7 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -r requirements.txt   # also installs requirements-kg.txt
 npm --prefix src/frontend ci
 npm --prefix src/frontend run build                            # build the frontend into src/frontend/dist/
-.venv/bin/python src/backend/main.py ensure-db                 # build the SQLite database from the FHIR data (about 3 s)
+.venv/bin/python src/backend/main.py ensure-db                 # build the SQLite database from the FHIR data (3 to 7 s)
 .venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests
 ```
 
@@ -178,7 +178,10 @@ The other options:
 **The time.** Measured on one laptop (macOS on arm64) with Oxigraph: the first run takes 2 min 27 s (the
 graph build is 31 s of it), and a second run takes 1 min 37 s (most of it is the fast tests). With Virtuoso,
 the first run takes 1 min 59 s when the image is on the computer (the graph build and load is 22 s of it; the
-image pull of 51 MB comes on top the first time), and a second run takes 1 min 20 s. A second run builds nothing again: the
+image pull of 51 MB comes on top the first time), and a second run takes 1 min 20 s. On a second laptop (macOS
+on arm64, 8 GB of memory, Python 3.12 without uv; a new clone, 2026-11-17), with Virtuoso: the first run takes about
+4 min 30 s to the server (the graph build and load is 61 s of it), and a second run takes 2 min 31 s; with Oxigraph
+(Docker stopped) a run takes 2 min 35 s (the graph build is 27 s of it); with `--store sqlite`, 2 min 6 s. A second run builds nothing again: the
 build marker of the store is current. A rebuild of the graph (a changed database, or `--reset-kg`) deletes
 the writes of KG mode. To use another port: `PORT=9000 ./src/scripts/quickstart.sh`.
 
@@ -531,7 +534,7 @@ so the data stays FHIR compliant. The knowledge graph holds the same data (188,3
 
 - The sources, their checksums and how to get them again: [`src/backend/data/raw/README.md`](src/backend/data/raw/README.md)
 - The mapping from FHIR R4 to the relations: [`doc/fhir_mapping.md`](doc/fhir_mapping.md)
-- `python src/backend/main.py ensure-db --reset-db` builds the database from the FHIR files again (about 3 s).
+- `python src/backend/main.py ensure-db --reset-db` builds the database from the FHIR files again (3 to 7 s).
 
 ## DBMS and SQL scripts
 
@@ -619,17 +622,17 @@ after a seed load.
 ### Other commands
 
 ```sh
-.venv/bin/python -m pytest -q                                  # all backend tests: about 1,500, about 6 min (the Virtuoso tests are skipped)
-.venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests only (about 1,200 tests, about 1.5 min)
+.venv/bin/python -m pytest -q                                  # all backend tests: about 1,650, 6 to 8 min (the Virtuoso tests are skipped)
+.venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests only (1,288 tests, 1.5 to 2.5 min)
 .venv/bin/python -m pytest -q -m "not kg"                      # the SQLite tests only
-TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso .venv/bin/python -m pytest -q -m virtuoso   # also on Virtuoso (kg.sh up, init first)
+TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso .venv/bin/python -m pytest -q -m virtuoso   # also on Virtuoso (kg.sh up, init first; 561 tests, about 4.5 min)
 npm --prefix src/frontend run build                            # type-check and build the frontend into src/frontend/dist/
 npm --prefix src/frontend run check:demo                       # check the Demo guide, the logo and sparql_queries.json
 npm --prefix src/frontend run build:sparql                     # make src/frontend/src/demo/sparql_queries.json again
 npm --prefix src/frontend run e2e                              # the Playwright tests on SQLite (port 8123)
 npm --prefix src/frontend run e2e:kg                           # the Playwright tests on Oxigraph (port 8124)
 .venv/bin/python src/backend/main.py serve --store oxigraph    # serve the built app and the API on http://127.0.0.1:8000
-.venv/bin/python src/backend/main.py ensure-db --reset-db      # build the database again from the FHIR data (about 3 s)
+.venv/bin/python src/backend/main.py ensure-db --reset-db      # build the database again from the FHIR data (3 to 7 s)
 .venv/bin/python src/backend/main.py export-kg                 # write the RDF files to src/backend/data/kg/ (about 10 s)
 .venv/bin/python src/backend/main.py ensure-kg --store oxigraph   # build the graph of a store if its marker is not current
 .venv/bin/python src/backend/main.py load-kg --store oxigraph --seed   # load the seed graph (no --seed: the export)
