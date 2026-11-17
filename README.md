@@ -585,8 +585,8 @@ With the store `virtuoso` (`./src/scripts/kg.sh open` prints these URLs):
   gives each use case and its expected result. Run it on each store (`quickstart.sh --store …`).
 - **Through the API:** `.venv/bin/python -m pytest -q src/backend/tests/integration/test_hospital_visit.py`
   walks the same journey and checks each expected result.
-- **In the browser:** `npm --prefix src/frontend run e2e` runs the journey, the directory cases and the Demo guide
-  with Playwright (18 tests) on SQLite. `npm --prefix src/frontend run e2e:kg` runs the same tests on Oxigraph
+- **In the browser:** `npm --prefix src/frontend run e2e` runs the journey, the directory cases, the Demo guide
+  and the patient delete with Playwright (21 tests) on SQLite. `npm --prefix src/frontend run e2e:kg` runs the same tests on Oxigraph
   (port 8124). The tests build the frontend and start their own server, with a new copy of the data, the fake
   model and a fixed demo time. On a new computer, run
   `npx --prefix src/frontend playwright install --only-shell chromium` one time first.

@@ -83,6 +83,7 @@ class Permissions(Model):
     chat: bool
     tell: bool
     edit_demographics: bool
+    delete_patient: bool
     check_in: bool
     end_visit: bool
     move_location: bool
