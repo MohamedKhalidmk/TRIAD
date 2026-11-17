@@ -592,11 +592,11 @@ Kind: **attribute** = `<row> triad:p "value"`; **FK** = `<row> triad:p <target>`
 | The subject of `triad:language` | StaffLanguage.StaffId | 1 |
 | Total | | **54** |
 
-**The counts that plan 3.3 expects** (computed with this column map on the dev database on 2026-11-15; they equal the plan):
-- `rdf:type` triples = the rows of all tables except StaffLanguage = **188,302**. A subtype row adds a second type to an existing individual.
-- Attribute triples = the non-NULL cells of the 138 attribute columns = **911,978** (with the 41 `triad:language` triples).
-- FK triples = the non-NULL cells of the 17 FK columns = **198,527**.
-- Total **1,298,807** triples (+1 marker). Individuals: 188,343 rows − 57,312 subtype rows − 41 StaffLanguage rows = **130,990**.
+**The counts of a new clone** (`main.py export-kg` with this column map; `kg_report.json`, 2026-11-17). The plan counted a development database with 31 more rows (1,298,807 triples), see `doc/ai_review_log.md`:
+- `rdf:type` triples = the rows of all tables except StaffLanguage = **188,271**. A subtype row adds a second type to an existing individual.
+- Attribute triples = the non-NULL cells of the 138 attribute columns = **911,697** (with the 41 `triad:language` triples).
+- FK triples = the non-NULL cells of the 17 FK columns = **198,514**.
+- Total **1,298,482** triples (the build marker is in the meta graph, not in this count). Individuals: 188,312 rows − 57,312 subtype rows − 41 StaffLanguage rows = **130,959**.
 
 ### 10.2 Each ER relationship, its property and its cardinality
 
