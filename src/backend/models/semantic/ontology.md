@@ -141,7 +141,7 @@ The subject of each `owl:inverseOf` triple is the named inverse. The Functional 
 
 | Property | Axiom | Domain → Range | Note |
 |---|---|---|---|
-| `assertedBy` | `owl:propertyChainAxiom (inMessage issuedBy)`; ⊑ `prov:wasAttributedTo` | Assertion → Staff | Decision D5 (Mohamed's review point 1). An assertion of a patient message has no value. |
+| `assertedBy` | `owl:propertyChainAxiom (inMessage issuedBy)`; ⊑ `prov:wasAttributedTo` | Assertion → Staff | Decision D5: the issuer of the message. An assertion of a patient message has no value. It does not name the person who first made a relayed claim (see 8.1, known limits). |
 | `ofPatient` | `owl:propertyChainAxiom (about during visitOf)` | Assertion → Patient | The one path Assertion → ClinicalEntry → Visit → Patient of the tree. |
 | `supersedesTransitively` | `owl:TransitiveProperty`; `supersedes` ⊑ it | Assertion → Assertion | The history of an assertion. |
 
@@ -354,6 +354,19 @@ The local declarations: `prov:Entity`, `prov:Agent`, `prov:Person` (classes), `p
 | FOREIGN KEY | Conflict | 409 | `conflict` | "The row is in use, or it points to a row that does not exist." |
 | CHECK / NOT NULL | Invalid | 422 | `validation` | "The input is not correct.", `{database}` |
 | Trigger RAISE | Invalid | 422 | `validation` | the trigger text |
+
+### 8.1 Known limits (kept from the Milestone 4 design review, `doc/m4_design_review.md`)
+
+- **The author of a relayed claim.** `triad:assertedBy` is the issuer of the message (`inMessage` ∘ `issuedBy`).
+  When a staff member types a claim that another person made (the patient's own report in 2019, typed by the
+  MOA), the chain gives the staff member, not the person who made the claim. The origin of the message
+  (`triad:origin`, for example "Patient") is the only trace. PROV-O `prov:actedOnBehalfOf` could name both;
+  the model does not have it.
+- **The patient key (Name, DateOfBirth).** `owl:hasKey (triad:name triad:dateOfBirth)` makes a reasoner merge two
+  patients with the same name and date of birth (`owl:sameAs`, no error), and the app guard refuses the second one
+  (409). So two real patients with the same name and date of birth cannot both be registered. The key cannot
+  change either, because the chat and audit logs store it as a value, so a name correction is not possible. The
+  review's option: key the logs on a stable identifier (the PatientIdentifier MRN).
 
 ## 9. The tree
 
