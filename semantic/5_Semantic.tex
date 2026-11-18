@@ -31,7 +31,7 @@
 \email{mabuela@uvic.ca}
 
 \begin{abstract}
-A clinical chart must tell a correction from a contradiction: who said what, when, and which claim replaced which. In Milestone~4 we stored this in 29 SQLite relations, where every fact is an assertion that may supersede an earlier one. We now map the same entity-relationship (ER) model to an OWL~2 ontology with 28 classes, 25 object and 92 datatype properties, and 18 keys, and we map the relational data to a knowledge graph of 1,298,482 triples with R2RML. The same application runs on SQLite, Oxigraph and Virtuoso, and all 16 of our SQL queries return the same rows in SPARQL. We report what OWL cannot hold and what our AI tool got wrong. Code: \repolink.
+A clinical chart must tell a correction from a contradiction: who said what, when, and which claim replaced which. In Milestone~4 we stored this in 29 SQLite relations, where every fact is an assertion that may supersede an earlier one. We now map the same entity-relationship (ER) model to a Web Ontology Language (OWL~2) ontology with 28 classes, 25 object and 92 datatype properties, and 18 keys, and we map the relational data to a knowledge graph of 1,298,482 Resource Description Framework (RDF) triples with the RDB-to-RDF Mapping Language (R2RML). The same application runs on SQLite, Oxigraph and Virtuoso, and all 16 of our Structured Query Language (SQL) queries return the same rows in the SPARQL Protocol and RDF Query Language (SPARQL). We report what OWL cannot hold and what our artificial intelligence (AI) tool got wrong. Code: \repolink.
 \end{abstract}
 
 \keywords{Semantic Web, OWL 2, R2RML, SPARQL, SHACL, provenance}
@@ -40,7 +40,7 @@ A clinical chart must tell a correction from a contradiction: who said what, whe
 \section{Problem Definition}
 In 2019 a patient tells the front desk she had a rash after penicillin, and the medical office assistant (MOA) records an allergy; in 2024 another clinic's record repeats it; in 2026 a test is negative and the doctor rules it out. A chart of values still shows the allergy. TRIAD stores each claim as an \emph{assertion} in a \emph{message} with an issuer and a time, and a new assertion \emph{supersedes} the one it corrects.
 
-\textbf{Information need.} For every clinical entry, return the current assertion (the one nothing supersedes), its author and message, and the chain it replaced. Milestone~5 answers it from a knowledge graph in OWL~2~\cite{owl2}, aligned to PROV-O~\cite{provo} and FHIR R4~\cite{fhir-r4}.
+\textbf{Information need.} For every clinical entry, return the current assertion (the one nothing supersedes), its author and message, and the chain it replaced. Milestone~5 answers it from a knowledge graph in OWL~2~\cite{owl2}, aligned to the PROV Ontology (PROV-O)~\cite{provo} and to Fast Healthcare Interoperability Resources (FHIR) R4~\cite{fhir-r4}.
 
 \section{From ER and Relations to an Ontology}\label{sec:onto}
 A script checks our Turtle ontology against the SQL schema and writes \tw{triad.owl} (RDF/XML, 1,956 triples). Page~3 gives the mapping (Figure~\ref{fig:onto}).
@@ -53,15 +53,15 @@ A script checks our Turtle ontology against the SQL schema and writes \tw{triad.
 \item \textbf{Paths} become 3 derived properties: \tw{ofPatient} = \tw{about}$\circ$\tw{during}$\circ$\tw{visitOf}, \tw{assertedBy} = \tw{inMessage}$\circ$\tw{issuedBy}, and the transitive \tw{supersedesTransitively}.
 \end{itemize}}
 
-\textbf{What OWL cannot hold.} Under the Open World Assumption (OWA), OWL describes knowledge and rejects no data: a missing NOT NULL value is unknown, not an error. ``Current'' means ``no newer assertion'', which OWL cannot state, so each query writes \tw{FILTER NOT EXISTS}. A key is worse: Milestone~4 identifies a patient by (Name, DateOfBirth), and two different patients with the same name and birthday would make a reasoner infer \tw{owl:sameAs} and merge them, with no error. So the rules moved (page~3): 29 SHACL~\cite{shacl} node shapes with 28 SHACL-SPARQL constraints, 24 SPARQL checks, and guards in the app that refuse a write (409 or 422). One rule is new, not converted: a staff member must work in a department.
+\textbf{What OWL cannot hold.} Under the Open World Assumption (OWA), OWL describes knowledge and rejects no data: a missing NOT NULL value is unknown, not an error. ``Current'' means ``no newer assertion'', which OWL cannot state, so each query writes \tw{FILTER NOT EXISTS}. A key is worse: Milestone~4 identifies a patient by (Name, DateOfBirth), and two different patients with the same name and birthday would make a reasoner infer \tw{owl:sameAs} and merge them, with no error. So the rules moved (page~3): 29 Shapes Constraint Language (SHACL)~\cite{shacl} node shapes with 28 SHACL-SPARQL constraints, 24 SPARQL checks, and guards in the app that refuse a write (409 or 422). One rule is new, not converted: a staff member must work in a department.
 
-\textbf{Reasoning.} In Protégé~5.6, HermiT~\cite{hermit} finds the ontology consistent, with no unsatisfiable class. With the seed graph imported, it finishes with no error and infers \tw{assertedBy} for all 10 seed assertions (DL query \tw{'asserted by' some Staff}). It skips the 31 \tw{xsd:date} values of the seed graph, which OWL~2 lacks; HermiT run through owlready2 stops on them.
+\textbf{Reasoning.} In Protégé~5.6, HermiT~\cite{hermit} finds the ontology consistent, with no unsatisfiable class. With the seed graph imported, it finishes with no error and infers \tw{assertedBy} for all 10 seed assertions (Description Logic, DL, query \tw{'asserted by' some Staff}). It skips the 31 \tw{xsd:date} values of the seed graph, which OWL~2 lacks; HermiT run through owlready2 stops on them.
 
 \section{The Knowledge Graph}\label{sec:kg}
-An R2RML~\cite{r2rml} mapping of 35 TriplesMaps, run by Morph-KGC~\cite{morphkgc}, turns the Milestone~4 database (113 patients, 5,090 visits, 57,022 assertions; Synthea~\cite{synthea} data and our own bundle) into 1,298,482 triples: 188,271 \tw{rdf:type}, 911,697 attribute and 198,514 foreign-key triples about 130,959 individuals. The ontology and the data go into the named graphs \tw{\dots/tbox} and \tw{\dots/abox}. Unlike the W3C Direct Mapping~\cite{directmapping}, which turns one Assertion row into 13 triples with string times and a literal for every key, ours gives 10, with typed times and one object property per foreign key. Virtuoso~7.2~\cite{virtuoso} serves it in Docker; Oxigraph runs embedded.
+An R2RML~\cite{r2rml} mapping of 35 TriplesMaps, run by Morph-KGC~\cite{morphkgc}, turns the Milestone~4 database (113 patients, 5,090 visits, 57,022 assertions; Synthea~\cite{synthea} data and our own bundle) into 1,298,482 triples: 188,271 \tw{rdf:type}, 911,697 attribute and 198,514 foreign-key triples about 130,959 individuals. The ontology and the data go into the named graphs \tw{\dots/tbox} and \tw{\dots/abox}. Unlike the World Wide Web Consortium (W3C) Direct Mapping~\cite{directmapping}, which turns one Assertion row into 13 triples with string times and a literal for every key, ours gives 10, with typed times and one object property per foreign key. Virtuoso~7.2~\cite{virtuoso} serves it in Docker; Oxigraph runs embedded.
 
 \section{SPARQL Operations}\label{sec:ops}
-Six SPARQL~1.1~\cite{sparql11} scripts mirror the SQL ones (\tw{03} holds Q1--Q14b with the Milestone~4 numbers). Prefixes are omitted; \tw{\dots} shortens IRIs.
+Six SPARQL~1.1~\cite{sparql11} scripts mirror the SQL ones (\tw{03} holds Q1--Q14b with the Milestone~4 numbers). Prefixes are omitted; \tw{\dots} shortens Internationalized Resource Identifiers (IRIs).
 
 \textbf{Q1, what is true now}, joins patient, visit, entry, assertion and message, and keeps each assertion with \tw{FILTER NOT EXISTS \{ ?n triad:supersedes ?a \}} (8 rows); the issuer is \tw{OPTIONAL}, since a message the patient sends in the app has no issuer. \textbf{Q2, the revision chain.} Milestone~4 needed a recursive \tw{WITH}; SPARQL has no recursion, but the property path \tw{supersedes*} walks the chain from the current assertion. The depth of each assertion is the number of nodes between it and the head:
 \par\noindent\begin{minipage}{\columnwidth}\begin{lstlisting}
@@ -75,7 +75,7 @@ WHERE { ... ?e a triad:Allergy ; triad:substance ?s .
   ... }
 GROUP BY ?a ?date ?author ?statement ORDER BY ?depth
 \end{lstlisting}\end{minipage}\par
-\noindent It returns the same three rows as the CTE, on all three stores:
+\noindent It returns the same three rows as the recursive common table expression (CTE) of Milestone~4, on all three stores:
 \par\noindent{\scriptsize\setlength{\tabcolsep}{3pt}\begin{tabularx}{\columnwidth}{@{}rlllX@{}}
 \toprule
 \textbf{depth} & \textbf{date} & \textbf{author} & \textbf{origin} & \textbf{statement}\\
@@ -99,22 +99,22 @@ WHERE { ?p a triad:Patient ; triad:name "Elena Marsh" ;
         triad:dateOfBirth "1971-05-14"^^xsd:date .
         OPTIONAL { ?p triad:phoneNumber ?old } }
 \end{lstlisting}\end{minipage}\par
-\noindent A delete keeps the foreign-key rule by hand: it removes a patient only if \tw{FILTER NOT EXISTS \{ ?s triad:hasVisit ?v \}}. In the app, the \emph{Delete patient} form asks first and shows this refusal (409). A clinical fact is never changed in place; a correction is a new superseding assertion.
+\noindent A delete keeps the foreign-key rule by hand: it removes a patient only if \tw{FILTER NOT EXISTS \{ ?s triad:hasVisit ?v \}}. Users do not write SPARQL: the app's forms add, search, update and delete, and the \emph{Delete patient} form shows this refusal (Figure~\ref{fig:ui}, page~3). A clinical fact is never changed in place; a correction is a new superseding assertion.
 
-\textbf{SQL = SPARQL.} All 16 queries give the same rows on SQLite, Oxigraph and Virtuoso (a test compares them). The stores differ where the standard does not: Virtuoso orders a stored \tw{xsd:\allowbreak dateTime} by its text, finds \tw{sameTerm} false for equal IRIs, and runs the updates of one request without a transaction. Failing tests found 10 such quirks.
+\textbf{SQL = SPARQL.} A test checks that all 16 queries give the same rows on SQLite, Oxigraph and Virtuoso. The stores differ where the standard does not: Virtuoso orders a stored \tw{xsd:\allowbreak dateTime} by its text, finds \tw{sameTerm} false for equal IRIs, and runs the updates of one request without a transaction. Failing tests found 10 such quirks.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=.82\columnwidth]{figures/architecture.pdf}
+\includegraphics[width=.72\columnwidth]{figures/architecture.pdf}
 \caption{Architecture. Grey boxes are TRIAD's contribution.}
 \label{fig:arch}
 \end{figure}
 
 \section{Architecture and Reproducibility}\label{sec:arch}
-Figure~\ref{fig:arch} keeps the three layers of Milestone~4. The \emph{logic} layer talks to ports; \tw{TRIAD\_STORE} selects the SQLite adapters or the SPARQL ones, which buffer the triples of one request, run the guards, and write them in one \tw{INSERT DATA}. \tw{quickstart.sh} starts Virtuoso, builds and loads the graph, runs the fast tests and serves the app; without Docker it uses Oxigraph. On a fresh clone on a second computer, it took about 4.5\,min with Virtuoso the first time (61\,s of it to build and load the graph) and 2\,min 31\,s the second; with Oxigraph, 2\,min 35\,s. Without Virtuoso, 1,649 backend tests passed and one failed on a time limit (a care-team search took 0.94\,s for 0.9\,s, with correct rows); the 561 Virtuoso tests passed, and the 21 browser tests pass on all three stores. The manual path works too: in Conductor we uploaded \tw{triad.owl} and the seed graph and ran scripts \tw{02}--\tw{04}. It had three small setup problems: \tw{kg.sh up} needs a \tw{.venv}, \tw{KG\_PYTHON} must be a full path, and an \tw{INSERT} is refused (SR619) until \tw{kg.sh init}.
+Figure~\ref{fig:arch} keeps the three layers of Milestone~4. The \emph{logic} layer talks to ports; \tw{TRIAD\_STORE} selects the SQLite adapters or the SPARQL ones, which buffer the triples of one request, run the guards, and write them in one \tw{INSERT DATA}. \tw{quickstart.sh} starts Virtuoso, builds and loads the graph, runs the fast tests and serves the app; without Docker it uses Oxigraph. On a fresh clone on a second computer, it took about 4.5\,min with Virtuoso the first time (61\,s of it to build and load the graph) and 2\,min 31\,s the second; with Oxigraph, 2\,min 35\,s. Without Virtuoso, 1,649 backend tests passed and one failed on a time limit (a care-team search took 0.94\,s for 0.9\,s, with correct rows); the 561 Virtuoso tests passed, and the 21 browser tests pass on all three stores. The manual path also works: in Conductor we uploaded \tw{triad.owl} and the seed graph and ran scripts \tw{02}--\tw{04}; an \tw{INSERT} is refused (SR619) until \tw{kg.sh init} grants the write.
 
 \section{AI Use and Critique}\label{sec:ai}
-Claude Code~\cite{claudecode} wrote most of the ontology, mapping, adapters and tests from our design; \tw{doc/ai\_review\_log.md} records each phase. Claude also helped draft this report; we checked every number. Our review found where it overstated its work. (1)~It presented \tw{assertedBy} as the fix for our Milestone~4 review point that a relayed claim is credited to the wrong person; but the chain only repeats the issuer of the message, so Q2 still credits the patient's own 2019 claim to the MOA who typed it. We corrected the documents; the point stays open (PROV-O \tw{actedOnBehalfOf} could fix it). (2)~It kept \tw{hasKey} on (name, dateOfBirth) without saying that a reasoner would merge two patients; SHACL rejects the duplicate, but only we stated the risk. (3)~It called the graph OWL~2 DL, but its \tw{xsd:date} values are outside the OWL~2 datatype map, so it is not strictly OWL~2 DL: one HermiT setup stops on them, and Protégé skips them. (4)~Its documents kept stale counts (1,298,807 triples) after the mapping changed; we fixed them (1,298,482 on a fresh clone). (5)~It presented the new staff rule as converted. (6)~Its Protégé test compares triples, so it fails on a Protégé re-save that has the same axioms. As in Milestone~4, it was reliable on our design and overclaimed where it judged its own work.
+Claude Code~\cite{claudecode} wrote most of the ontology, mapping, adapters and tests from our design; \tw{doc/ai\_review\_log.md} records each phase. Claude also helped draft this report; we checked every number and found where it overstated its work. (1)~It presented \tw{assertedBy} as the fix for our Milestone~4 review point that a relayed claim is credited to the wrong person; but the chain only repeats the issuer of the message, so Q2 still credits the patient's own 2019 claim to the MOA who typed it. We corrected the documents; the point stays open (PROV-O \tw{actedOnBehalfOf} could fix it). (2)~It kept \tw{hasKey} on (name, dateOfBirth) without saying that a reasoner would merge two patients; SHACL rejects the duplicate, but only we stated the risk. (3)~It called the graph OWL~2 DL, but its 31 \tw{xsd:date} values are outside the OWL~2 datatype map (see Reasoning). (4)~Its documents kept stale counts (1,298,807 triples); we fixed them. (5)~It presented the new staff rule as converted, and (6)~its Protégé test compares triples, so it fails on a Protégé re-save that has the same axioms. As in Milestone~4, it was reliable on our design and overclaimed where it judged its own work.
 
 
 \clearpage
@@ -137,23 +137,26 @@ Claude Code~\cite{claudecode} wrote most of the ontology, mapping, adapters and 
 Entity set & \tw{owl:Class} & \tw{triad:Patient a owl:Class .}\\
 Entity (a row) & Named individual; IRI from the surrogate key & \tw{kg:patient/1 a triad:Patient .}\\
 Simple attribute & \tw{owl:DatatypeProperty}, functional & \tw{kg:patient/1 triad:name "Elena Marsh" .}\\
-Date / time attribute & \tw{rdfs:Literal} (TBox), \tw{xsd:date} (data) / \tw{xsd:dateTime} & \tw{kg:assertion/3 triad:assertedAt "2026-10-02T11:40:00-04:00"\^{}\^{}xsd:dateTime .}\\
-Multivalued attribute (Language) & Non-functional property & \tw{kg:staff/2 triad:language "en" , "hi" .}\\
+Date / time attribute & \tw{rdfs:Literal} (ontology), \tw{xsd:date} (data) / \tw{xsd:dateTime} & \tw{kg:assertion/3 triad:assertedAt "2026-10-02T11:40:00-04:00"\^{}\^{}xsd:dateTime .}\\
 Key & \tw{owl:hasKey} & \tw{triad:Patient owl:hasKey ( triad:name triad:dateOfBirth ) .}\\
-Weak entity, partial key & \tw{owl:hasKey} with the owner's inverse & \tw{triad:Assertion owl:hasKey ( triad:inMessage triad:seq ) .}\\
 IS-A (disjoint, total) & \tw{rdfs:subClassOf}, \tw{owl:disjointUnionOf} & \tw{triad:Staff owl:disjointUnionOf ( triad:Doctor triad:Nurse triad:MOA ) .}\\
-Discriminator (Role, Category) & \tw{rdf:type} (no property) & \tw{kg:staff/2 a triad:Staff , triad:Nurse .}\\
-M:1 relationship (FK) & Object property, functional, \tw{owl:cardinality 1} & \tw{kg:assertion/3 triad:about kg:clinical-entry/1 .}\\
+M:1 relationship (foreign key) & Object property, functional, \tw{owl:cardinality 1} & \tw{kg:assertion/3 triad:about kg:clinical-entry/1 .}\\
 Identifying relationship & Inverse-functional; =1 on the named inverse & \tw{kg:message/5 triad:contains kg:assertion/3 .}\\
 Unary 1:1 (Supersedes) & Functional, inverse-functional, asymmetric, irreflexive & \tw{kg:assertion/3 triad:supersedes kg:assertion/2 .}\\
 M:N with attributes & Association class, two functional properties & \tw{kg:works-in/2 triad:ofStaff kg:staff/2 ; triad:atDepartment kg:department/1 .}\\
 NOT NULL & \tw{owl:minCardinality 1} (81 restrictions) & \tw{triad:Patient rdfs:subClassOf [ owl:onProperty triad:name ; owl:minCardinality 1 ] .}\\
 CHECK \dots\ IN & Closed datatype (\tw{owl:oneOf}) & \tw{triad:intent rdfs:range [ owl:oneOf ( "Report" "Recommendation" "Decision" ) ] .}\\
-CHECK (Seq $\ge$ 1) & Datatype facet & \tw{triad:seq rdfs:range [ owl:onDatatype xsd:integer ; owl:withRestrictions ( [ xsd:minInclusive 1 ] ) ] .}\\
 Authorship & Property chain, PROV-O & \tw{triad:assertedBy owl:propertyChainAxiom ( triad:inMessage triad:issuedBy ) .}\\
 \bottomrule
 \end{tabularx}
 
+\smallskip\noindent
+\begin{minipage}[c]{.36\linewidth}\centering
+\includegraphics[width=\linewidth]{figures/app_patient_delete_409.png}
+\end{minipage}\hfill
+\begin{minipage}[c]{.6\linewidth}
+\captionof{figure}{The app on Virtuoso: users add, search, update and delete through forms, not SPARQL. The front desk's \emph{Delete patient} form asks for a confirmation and refuses a patient who has visits (409): the SPARQL delete of Section~\ref{sec:ops} with its \tw{FILTER NOT EXISTS} guard.}\label{fig:ui}
+\end{minipage}
 \end{minipage}
 
 \medskip\noindent
@@ -174,6 +177,7 @@ Triggers: one current assertion per entry, one patient per message, \dots & No (
 Staff works in $\ge$1 department & \textbf{New rule:} \tw{Staff} $\sqsubseteq\ \ge$1 \tw{inverse(ofStaff).WorksIn} & SHACL \tw{sh:minCount 1} on \tw{\^{}triad:ofStaff}\\
 \bottomrule
 \end{tabularx}
+
 
 \medskip\normalsize
 \begin{multicols}{2}
