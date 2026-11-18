@@ -107,6 +107,7 @@ Both queries give the same three rows (on the full data, SQLite and Oxigraph):
 
 - macOS or Linux. On Windows, use WSL2.
 - [uv](https://docs.astral.sh/uv/) (it gets Python 3.12 itself), or Python 3.12 if uv is not installed.
+  To install uv: `brew install uv` on macOS, or `curl -LsSf https://astral.sh/uv/install.sh | sh` on macOS and Linux (WSL2).
 - Node.js 20.19 or later (in version 22: 22.12 or later) with npm.
 - **For Virtuoso (optional):** [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on macOS). `kg.sh`
   pulls the Virtuoso Open Source 7.2 image the first time. Without Docker, the app uses the embedded store
