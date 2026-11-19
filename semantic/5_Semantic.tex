@@ -53,7 +53,7 @@ A script checks our Turtle ontology against the SQL schema and writes \tw{triad.
 \item \textbf{Paths} become 3 derived properties: \tw{ofPatient} = \tw{about}$\circ$\tw{during}$\circ$\tw{visitOf}, \tw{assertedBy} = \tw{inMessage}$\circ$\tw{issuedBy}, and the transitive \tw{supersedesTransitively}.
 \end{itemize}}
 
-\textbf{What OWL cannot hold.} Under the Open World Assumption (OWA), OWL describes knowledge and rejects no data: a missing NOT NULL value is unknown, not an error. ``Current'' means ``no newer assertion'', which OWL cannot state, so each query writes \tw{FILTER NOT EXISTS}. A key is worse: Milestone~4 identifies a patient by (Name, DateOfBirth), and two different patients with the same name and birthday would make a reasoner infer \tw{owl:sameAs} and merge them, with no error. So the rules moved (page~3): 29 Shapes Constraint Language (SHACL)~\cite{shacl} node shapes with 28 SHACL-SPARQL constraints, 24 SPARQL checks, and guards in the app that refuse a write (409 or 422). One rule is new, not converted: a staff member must work in a department.
+\textbf{What OWL cannot hold.} Under the Open World Assumption (OWA), OWL describes knowledge and rejects no data: a missing NOT NULL value is unknown, not an error. ``Current'' means ``no newer assertion'', which OWL cannot state, so each query writes \tw{FILTER NOT EXISTS}. A key is worse: Milestone~4 identifies a patient by (Name, DateOfBirth), and two different patients with the same name and birthday would make a reasoner infer \tw{owl:sameAs} and merge them, with no error. So the rules moved (table in \tw{ontology.md}): 29 Shapes Constraint Language (SHACL)~\cite{shacl} node shapes with 28 SHACL-SPARQL constraints, 24 SPARQL checks, and guards in the app that refuse a write (409 or 422). One rule is new, not converted: a staff member must work in a department.
 
 \textbf{Reasoning.} In Protégé~5.6, HermiT~\cite{hermit} finds the ontology consistent, with no unsatisfiable class. With the seed graph imported, it finishes with no error and infers \tw{assertedBy} for all 10 seed assertions (Description Logic, DL, query \tw{'asserted by' some Staff}). It skips the 31 \tw{xsd:date} values of the seed graph, which OWL~2 lacks; HermiT run through owlready2 stops on them.
 
@@ -120,14 +120,13 @@ Claude Code~\cite{claudecode} wrote most of the ontology, mapping, adapters and 
 \clearpage
 \onecolumn
 \raggedbottom
-\section*{The Ontology, the Mapping and Where Each Rule Went}
+\section*{The Ontology, the Mapping and the App}
 \footnotesize
-\noindent\tw{triad:} = \url{https://github.com/MohamedKhalidmk/TRIAD/ontology/triad\#}; \tw{kg:} = \url{https://github.com/MohamedKhalidmk/TRIAD/kg/} (a query writes the full IRI). The examples use the seed patient Elena Marsh (\tw{kg:patient/1}). Full tables: \tw{src/backend/models/semantic/ontology.md}.
 
 \smallskip\noindent
 \begin{minipage}[t]{.17\textwidth}\vspace{0pt}\centering
 \includegraphics[width=\linewidth]{figures/protege_class_hierarchy.png}
-\captionof{figure}{Class hierarchy in Protégé: 28 TRIAD classes under PROV-O Agent, Person, Entity.}\label{fig:onto}
+{\captionsetup{justification=raggedright,singlelinecheck=false}\captionof{figure}{The 28 classes in Protégé.}\label{fig:onto}}
 \end{minipage}\hfill
 \begin{minipage}[t]{.81\textwidth}\vspace{0pt}
 \begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{.17\linewidth}>{\raggedright\arraybackslash}p{.25\linewidth}>{\raggedright\arraybackslash}X@{}}
@@ -137,8 +136,10 @@ Claude Code~\cite{claudecode} wrote most of the ontology, mapping, adapters and 
 Entity set & \tw{owl:Class} & \tw{triad:Patient a owl:Class .}\\
 Entity (a row) & Named individual; IRI from the surrogate key & \tw{kg:patient/1 a triad:Patient .}\\
 Simple attribute & \tw{owl:DatatypeProperty}, functional & \tw{kg:patient/1 triad:name "Elena Marsh" .}\\
+Multivalued attribute (Language) & Non-functional property & \tw{kg:staff/2 triad:language "en" , "hi" .}\\
 Date / time attribute & \tw{rdfs:Literal} (ontology), \tw{xsd:date} (data) / \tw{xsd:dateTime} & \tw{kg:assertion/3 triad:assertedAt "2026-10-02T11:40:00-04:00"\^{}\^{}xsd:dateTime .}\\
 Key & \tw{owl:hasKey} & \tw{triad:Patient owl:hasKey ( triad:name triad:dateOfBirth ) .}\\
+Weak entity, partial key & \tw{owl:hasKey} with the owner's inverse & \tw{triad:Assertion owl:hasKey ( triad:inMessage triad:seq ) .}\\
 IS-A (disjoint, total) & \tw{rdfs:subClassOf}, \tw{owl:disjointUnionOf} & \tw{triad:Staff owl:disjointUnionOf ( triad:Doctor triad:Nurse triad:MOA ) .}\\
 M:1 relationship (foreign key) & Object property, functional, \tw{owl:cardinality 1} & \tw{kg:assertion/3 triad:about kg:clinical-entry/1 .}\\
 Identifying relationship & Inverse-functional; =1 on the named inverse & \tw{kg:message/5 triad:contains kg:assertion/3 .}\\
@@ -150,33 +151,16 @@ Authorship & Property chain, PROV-O & \tw{triad:assertedBy owl:propertyChainAxio
 \bottomrule
 \end{tabularx}
 
-\smallskip\noindent
-\begin{minipage}[c]{.36\linewidth}\centering
-\includegraphics[width=\linewidth]{figures/app_patient_delete_409.png}
-\end{minipage}\hfill
-\begin{minipage}[c]{.6\linewidth}
-\captionof{figure}{The app on Virtuoso: users add, search, update and delete through forms, not SPARQL. The front desk's \emph{Delete patient} form asks for a confirmation and refuses a patient who has visits (409): the SPARQL delete of Section~\ref{sec:ops} with its \tw{FILTER NOT EXISTS} guard.}\label{fig:ui}
-\end{minipage}
+\medskip
+\noindent\tw{triad:} = \url{https://github.com/MohamedKhalidmk/TRIAD/ontology/triad\#}; \tw{kg:} = \url{https://github.com/MohamedKhalidmk/TRIAD/kg/} (a query writes the full IRI). The examples use the seed patient Elena Marsh (\tw{kg:patient/1}). Full tables: \tw{src/backend/models/semantic/ontology.md}.
 \end{minipage}
 
-\medskip\noindent
-\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{.27\linewidth}>{\raggedright\arraybackslash}p{.36\linewidth}>{\raggedright\arraybackslash}X@{}}
-\toprule
-\textbf{Milestone 4 rule (SQLite)} & \textbf{In OWL?} & \textbf{Where it went in Milestone 5}\\
-\midrule
-NOT NULL & \tw{minCardinality 1}; under the OWA a missing value is unknown & SHACL \tw{sh:minCount 1}; a \tw{05} query\\
-CHECK \dots\ IN, CHECK ($x \ge 1$) & Closed range, facet: a reasoner finds a wrong value & SHACL \tw{sh:in}, \tw{sh:minInclusive}; app validation (422)\\
-Date column & No: OWL~2 has no \tw{xsd:date} & SHACL \tw{sh:datatype xsd:date}\\
-UNIQUE, candidate key & \tw{owl:hasKey}: infers \tw{owl:sameAs}, no error & SHACL-SPARQL; app guard (409)\\
-Foreign key & A dangling IRI gets a type, no error & SHACL \tw{sh:class}; delete only if \tw{FILTER NOT EXISTS}\\
-EndDate $\ge$ StartDate; issuer or Origin = Patient & No & SHACL \tw{sh:lessThanOrEquals}, \tw{sh:or}\\
-No supersedes cycle & Irreflexive finds a 1-cycle only (DL forbids it on a transitive property) & Guard; \tw{ASK \{ ?a triad:supersedes+ ?a \}}\\
-Append-only (Assertion, AuditEvent) & No: a store has no update event & The delete helper refuses these class paths\\
-Triggers: one current assertion per entry, one patient per message, \dots & No (negation as failure, other rows) & Guards in Python on the buffered write; \tw{05} queries\\
-``The current assertion'' & No: ``no triple'' is not ``false'' & \tw{FILTER NOT EXISTS \{ ?n triad:supersedes ?a \}}\\
-Staff works in $\ge$1 department & \textbf{New rule:} \tw{Staff} $\sqsubseteq\ \ge$1 \tw{inverse(ofStaff).WorksIn} & SHACL \tw{sh:minCount 1} on \tw{\^{}triad:ofStaff}\\
-\bottomrule
-\end{tabularx}
+\smallskip\noindent
+\begin{minipage}{\textwidth}\centering
+\includegraphics[height=48mm]{figures/app_chain_virtuoso.png}\hspace{5mm}
+\includegraphics[height=38mm]{figures/app_patient_delete_409.png}
+\captionof{figure}{The app on Virtuoso. Left: the penicillin chain (Q2); the 2026 refutation is current, the 2019 and 2024 claims are superseded. Right: \emph{Delete patient} refuses a patient with visits (409, Section~\ref{sec:ops}).}\label{fig:ui}
+\end{minipage}
 
 
 \medskip\normalsize
