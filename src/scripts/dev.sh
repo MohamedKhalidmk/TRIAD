@@ -10,7 +10,8 @@
 #
 # The script:
 #   1. makes src/backend/.env and src/frontend/.env from their .env.example files, if they are missing;
-#   2. makes .venv with uv if it is missing, and installs requirements.txt (uv skips the packages that are current);
+#   2. makes .venv (Python 3.12) if it is missing, and installs requirements.txt (the installer skips the packages
+#      that are current). It uses uv; with no uv, it uses python3.12 (or a python3 that is 3.12) and pip;
 #   3. runs "main.py ensure-db" (it builds the database only if it is missing);
 #      for a knowledge-graph store it then runs "main.py ensure-kg --store STORE" (it builds the graph only if
 #      the build marker is not current). For virtuoso it first runs "kg.sh up" and "kg.sh init" if Virtuoso
@@ -129,9 +130,31 @@ if command -v uv >/dev/null 2>&1; then
     fi
     echo "Checking the Python packages of requirements.txt ..."
     uv pip install --quiet --python .venv/bin/python -r requirements.txt
-elif [ ! -x .venv/bin/uvicorn ]; then
-    echo "uv is not installed. Install it from https://docs.astral.sh/uv/ and run this script again." >&2
-    exit 1
+else
+    # No uv: the same fallback as quickstart.sh (python3.12, or a python3 that is 3.12, with venv and pip).
+    if [ ! -x .venv/bin/python ]; then
+        PYTHON312=""
+        for candidate in python3.12 python3; do
+            if command -v "$candidate" >/dev/null 2>&1 \
+                && "$candidate" -c 'import sys; sys.exit(sys.version_info[:2] != (3, 12))' >/dev/null 2>&1; then
+                PYTHON312="$candidate"
+                break
+            fi
+        done
+        if [ -z "$PYTHON312" ]; then
+            echo "uv is not installed, and Python 3.12 is not found. Install uv, then run this script again:" >&2
+            echo "    curl -LsSf https://astral.sh/uv/install.sh | sh     (macOS and Linux; see https://docs.astral.sh/uv/)" >&2
+            exit 1
+        fi
+        echo "uv is not installed. Making the Python environment .venv with $PYTHON312 -m venv ..."
+        "$PYTHON312" -m venv .venv
+    fi
+    if ! .venv/bin/python -m pip --version >/dev/null 2>&1; then
+        echo ".venv has no pip. Install uv (https://docs.astral.sh/uv/), or remove .venv and run this script again." >&2
+        exit 1
+    fi
+    echo "Checking the Python packages of requirements.txt (pip) ..."
+    .venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements.txt
 fi
 
 .venv/bin/python src/backend/main.py ensure-db ${RESET:+--reset-db}

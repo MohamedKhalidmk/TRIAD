@@ -106,7 +106,11 @@ Both queries give the same three rows (on the full data, SQLite and Oxigraph):
 ## Prerequisites
 
 - macOS or Linux. On Windows, use WSL2.
-- [uv](https://docs.astral.sh/uv/) (it gets Python 3.12 itself), or Python 3.12 if uv is not installed.
+- [uv](https://docs.astral.sh/uv/), the Python package manager of the project (it gets Python 3.12 itself).
+  **Set up uv in one line:** `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS, Linux and WSL2), or
+  `brew install uv` on macOS. Then open a new terminal and check it: `uv --version`. Other ways to install:
+  [the uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+  Without uv, `quickstart.sh` and `dev.sh` use Python 3.12 (`python3.12`, or a `python3` that is 3.12) and pip.
 - Node.js 20.19 or later (in version 22: 22.12 or later) with npm.
 - **For Virtuoso (optional):** [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on macOS). `kg.sh`
   pulls the Virtuoso Open Source 7.2 image the first time. Without Docker, the app uses the embedded store
@@ -135,8 +139,15 @@ uv venv --python 3.12 .venv
 uv pip install --python .venv/bin/python -r requirements.txt   # also installs requirements-kg.txt
 npm --prefix src/frontend ci
 npm --prefix src/frontend run build                            # build the frontend into src/frontend/dist/
-.venv/bin/python src/backend/main.py ensure-db                 # build the SQLite database from the FHIR data (about 3 s)
+.venv/bin/python src/backend/main.py ensure-db                 # build the SQLite database from the FHIR data (3 to 7 s)
 .venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests
+```
+
+Without uv, make the environment with Python 3.12 and pip in place of the two `uv` lines:
+
+```sh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
 ```
 
 Then select a store, build its knowledge graph and serve the app (see [Triple store setup](#triple-store-setup)):
@@ -178,7 +189,9 @@ The other options:
 **The time.** Measured on one laptop (macOS on arm64) with Oxigraph: the first run takes 2 min 27 s (the
 graph build is 31 s of it), and a second run takes 1 min 37 s (most of it is the fast tests). With Virtuoso,
 the first run takes 1 min 59 s when the image is on the computer (the graph build and load is 22 s of it; the
-image pull of 51 MB comes on top the first time), and a second run takes 1 min 20 s. A second run builds nothing again: the
+image pull of 51 MB comes on top the first time), and a second run takes 1 min 20 s. On a second computer (a new clone, 2026-11-17), with Virtuoso: the first run takes about
+4 min 30 s to the server (the graph build and load is 61 s of it), and a second run takes 2 min 31 s; with Oxigraph
+(Docker stopped) a run takes 2 min 35 s (the graph build is 27 s of it); with `--store sqlite`, 2 min 6 s. A second run builds nothing again: the
 build marker of the store is current. A rebuild of the graph (a changed database, or `--reset-kg`) deletes
 the writes of KG mode. To use another port: `PORT=9000 ./src/scripts/quickstart.sh`.
 
@@ -200,7 +213,8 @@ PORT=9000 VITE_PORT=5174 ./src/scripts/dev.sh      # other ports
 
 `dev.sh` takes the store from `--store`, else from `TRIAD_STORE` (the shell or `src/backend/.env`), else
 `sqlite`. For a knowledge-graph store, it runs `main.py ensure-kg` first. For `virtuoso`, it also runs
-`kg.sh up` and `kg.sh init` if Virtuoso does not answer.
+`kg.sh up` and `kg.sh init` if Virtuoso does not answer. Like `quickstart.sh`, it makes `.venv` if it is
+missing: with uv, else with Python 3.12 and pip.
 Open http://127.0.0.1:5173. One Ctrl+C stops the two servers.
 
 ### Settings and the LLM mode (optional)
@@ -375,6 +389,10 @@ The triple store is **Virtuoso Open Source 7.2** (the store of the course manual
 
 - Measured: `up` takes 5 to 7 s, `init` less than 1 s, the export about 10 s, and the bulk load with the
   checkpoint about 4 s.
+- **On a new clone (no `.venv`).** `up`, `init`, `status`, `open`, `down` and `reset` need only `python3` (the
+  standard library), so they work before the first `quickstart.sh`. `load` and `sparql` need the packages of
+  `requirements.txt`: run `./src/scripts/quickstart.sh` once (it makes `.venv`), or set `KG_PYTHON` to a Python
+  that has them. `KG_PYTHON` can be a path or a command name (for example `KG_PYTHON=python3.12`).
 - `kg.sh load --seed` loads the seed graph in place of the full graph. `kg.sh load` checks the load list of the
   bulk loader and compares the triples of each predicate with the export (`isql` gives the exit code 0 also on
   an error, so the script checks the result itself).
@@ -412,12 +430,26 @@ This is the path of the course manual (5.2.1 to 5.2.3), in Conductor:
 2. **The account step (5.2.3).** System Admin → User Accounts → the account `SPARQL`: select "User enabled"
    and give it the roles `SPARQL_SELECT` and `SPARQL_UPDATE`. Then run `./src/scripts/kg.sh init` one time.
    It does the same with SQL, makes the user `triad`, and sets the graph permissions of the table below.
+   **Do not skip `kg.sh init`:** the roles alone are not sufficient. Without the graph permissions, `02` stops
+   with "SR619: SPARUL INSERT access denied ... has no write permission on graph .../graph/abox"
+   ([screenshot](doc/screenshots/m5/conductor_sparql_02_insert_denied.png)).
+   **With no script at all:** Database → Interactive SQL, as `dba`, runs the graph permissions of the account
+   `SPARQL` (it is the user `nobody` for graph permissions; 3 = read and write):
+
+   ```sql
+   DB.DBA.RDF_GRAPH_USER_PERMS_SET ('https://github.com/MohamedKhalidmk/TRIAD/graph/abox', 'nobody', 3);
+   DB.DBA.RDF_GRAPH_USER_PERMS_SET ('https://github.com/MohamedKhalidmk/TRIAD/graph/scratch', 'nobody', 3);
+   ```
+
+   This is sufficient for `02` to `06` on the SPARQL page. The app needs the user `triad` too, so run
+   `kg.sh init` before you start the app on Virtuoso.
 3. **Linked Data → Quad Store Upload:**
    - the file `src/backend/models/semantic/triad.owl`, named graph IRI `https://github.com/MohamedKhalidmk/TRIAD/graph/tbox`;
    - the file `src/backend/models/semantic/kg/triad_kg_seed.rdf`, named graph IRI `https://github.com/MohamedKhalidmk/TRIAD/graph/abox`.
 
    The full graph is too large for the upload form. Load it with `./src/scripts/kg.sh load`.
-4. **Linked Data → Graphs:** check the two graphs. Then run B.1 and B.1a of `06_debug.sparql` on the SPARQL page
+4. **Linked Data → Graphs:** check the two graphs (the page opens on the sub-tab "Users Security"; select the
+   sub-tab "Graphs"). Then run B.1 and B.1a of `06_debug.sparql` on the SPARQL page
    (http://localhost:8890/sparql).
 5. Run `02` to `06` on the SPARQL page (see [SPARQL scripts](#sparql-scripts)).
 
@@ -531,7 +563,7 @@ so the data stays FHIR compliant. The knowledge graph holds the same data (188,3
 
 - The sources, their checksums and how to get them again: [`src/backend/data/raw/README.md`](src/backend/data/raw/README.md)
 - The mapping from FHIR R4 to the relations: [`doc/fhir_mapping.md`](doc/fhir_mapping.md)
-- `python src/backend/main.py ensure-db --reset-db` builds the database from the FHIR files again (about 3 s).
+- `python src/backend/main.py ensure-db --reset-db` builds the database from the FHIR files again (3 to 7 s).
 
 ## DBMS and SQL scripts
 
@@ -585,8 +617,8 @@ With the store `virtuoso` (`./src/scripts/kg.sh open` prints these URLs):
   gives each use case and its expected result. Run it on each store (`quickstart.sh --store …`).
 - **Through the API:** `.venv/bin/python -m pytest -q src/backend/tests/integration/test_hospital_visit.py`
   walks the same journey and checks each expected result.
-- **In the browser:** `npm --prefix src/frontend run e2e` runs the journey, the directory cases and the Demo guide
-  with Playwright (18 tests) on SQLite. `npm --prefix src/frontend run e2e:kg` runs the same tests on Oxigraph
+- **In the browser:** `npm --prefix src/frontend run e2e` runs the journey, the directory cases, the Demo guide
+  and the patient delete with Playwright (21 tests) on SQLite. `npm --prefix src/frontend run e2e:kg` runs the same tests on Oxigraph
   (port 8124). The tests build the frontend and start their own server, with a new copy of the data, the fake
   model and a fixed demo time. On a new computer, run
   `npx --prefix src/frontend playwright install --only-shell chromium` one time first.
@@ -619,17 +651,17 @@ after a seed load.
 ### Other commands
 
 ```sh
-.venv/bin/python -m pytest -q                                  # all backend tests: about 1,500, about 6 min (the Virtuoso tests are skipped)
-.venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests only (about 1,200 tests, about 1.5 min)
+.venv/bin/python -m pytest -q                                  # all backend tests: about 1,650, 6 to 8 min (the Virtuoso tests are skipped)
+.venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests only (1,288 tests, 1.5 to 2.5 min)
 .venv/bin/python -m pytest -q -m "not kg"                      # the SQLite tests only
-TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso .venv/bin/python -m pytest -q -m virtuoso   # also on Virtuoso (kg.sh up, init first)
+TRIAD_TEST_STORES=sqlite,oxigraph,virtuoso .venv/bin/python -m pytest -q -m virtuoso   # also on Virtuoso (kg.sh up, init first; 561 tests, about 4.5 min)
 npm --prefix src/frontend run build                            # type-check and build the frontend into src/frontend/dist/
 npm --prefix src/frontend run check:demo                       # check the Demo guide, the logo and sparql_queries.json
 npm --prefix src/frontend run build:sparql                     # make src/frontend/src/demo/sparql_queries.json again
 npm --prefix src/frontend run e2e                              # the Playwright tests on SQLite (port 8123)
 npm --prefix src/frontend run e2e:kg                           # the Playwright tests on Oxigraph (port 8124)
 .venv/bin/python src/backend/main.py serve --store oxigraph    # serve the built app and the API on http://127.0.0.1:8000
-.venv/bin/python src/backend/main.py ensure-db --reset-db      # build the database again from the FHIR data (about 3 s)
+.venv/bin/python src/backend/main.py ensure-db --reset-db      # build the database again from the FHIR data (3 to 7 s)
 .venv/bin/python src/backend/main.py export-kg                 # write the RDF files to src/backend/data/kg/ (about 10 s)
 .venv/bin/python src/backend/main.py ensure-kg --store oxigraph   # build the graph of a store if its marker is not current
 .venv/bin/python src/backend/main.py load-kg --store oxigraph --seed   # load the seed graph (no --seed: the export)
@@ -651,11 +683,18 @@ The screenshots of Milestone 5 are in `doc/screenshots/m5/`.
   [the SPARQL of a use case in the Demo guide](doc/screenshots/m5/app_demo_guide_sparql.png)
 - [x] The Virtuoso SPARQL page: [Q2 in the editor](doc/screenshots/m5/virtuoso_sparql_q2_editor.png) (the link
   **Run in Virtuoso**) and [the result of Q2](doc/screenshots/m5/virtuoso_sparql_q2_result.png)
-- [ ] Protégé: the class hierarchy, the ontology metrics and the HermiT result (pending)
-- [ ] Conductor: the graphs list, Quad Store Upload and the User Accounts page (pending)
-- [ ] Conductor SPARQL page: `02` INSERT DATA with its result line, the `04` update and delete with their result
-  lines, B.1 (pending)
-- [ ] The app on Virtuoso: a record form and the directory 409 (pending)
+- [x] Protégé: [the class hierarchy](doc/screenshots/m5/protege_class_hierarchy.png), [the ontology metrics](doc/screenshots/m5/protege_ontology_metrics.png),
+  [the HermiT result](doc/screenshots/m5/protege_hermit_inferred.png) and [HermiT on the seed graph](doc/screenshots/m5/protege_hermit_seed_assertedby.png)
+  (`'asserted by' some Staff`: 10 assertions)
+- [x] Conductor: [the graphs list](doc/screenshots/m5/conductor_graphs.png), [Quad Store Upload](doc/screenshots/m5/conductor_quad_store_upload.png) and
+  [the account `SPARQL` in User Accounts](doc/screenshots/m5/conductor_user_account_sparql.png)
+- [x] Conductor SPARQL page: [`02` INSERT DATA](doc/screenshots/m5/conductor_sparql_02_insert_data.png) with its result line (and
+  [the SR619 error before `kg.sh init`](doc/screenshots/m5/conductor_sparql_02_insert_denied.png)), [the `04` update](doc/screenshots/m5/conductor_sparql_04_update.png)
+  and [the `04` delete](doc/screenshots/m5/conductor_sparql_04_delete.png) with their result lines, [B.1](doc/screenshots/m5/conductor_sparql_b1_graphs.png),
+  [Q2](doc/screenshots/m5/conductor_sparql_03_q2.png) and [Q2 with the whole query](doc/screenshots/m5/conductor_sparql_03_q2_full.png)
+- [x] The app on Virtuoso: [a record form](doc/screenshots/m5/app_record_form.png), [the directory 409](doc/screenshots/m5/app_directory_409.png)
+  (a department name that exists), and [Delete patient](doc/screenshots/m5/app_patient_delete_button.png) with
+  [its 409](doc/screenshots/m5/app_patient_delete_409.png) (a patient who has visits)
 
 ## Design choice: user switching instead of a login
 

@@ -70,6 +70,30 @@ def test_the_protege_resave_is_the_same_graph():
     assert bo.compare(Path(os.environ["TRIAD_PROTEGE_OWL"])) == []
 
 
+def protege_style_copy(source: Graph) -> Graph:
+    """triad.owl as Protégé 5.6 saves it (issue 6): rdf:type rdf:List on the list nodes, owl:inverseOf flipped."""
+    g = Graph()
+    for s, p, o in source:
+        if p == OWL.inverseOf and not isinstance(s, BNode):
+            s, o = o, s
+        g.add((s, p, o))
+    for node in {s for s, p, _ in source if p == RDF.first}:
+        g.add((node, RDF.type, RDF.List))
+    return g
+
+
+def test_the_compare_ignores_how_protege_writes_the_file(source, tmp_path):
+    copy = protege_style_copy(source)
+    assert len(copy) > len(source) and {(s, o) for s, _, o in copy.triples((None, OWL.inverseOf, None))} != \
+        {(s, o) for s, _, o in source.triples((None, OWL.inverseOf, None))}
+    path = tmp_path / "protege.owl"
+    copy.serialize(path, format="xml")
+    assert bo.compare(path) == []
+    copy.remove((T.Patient, RDFS.label, None))
+    copy.serialize(path, format="xml")
+    assert bo.compare(path) and all(line.startswith("- <") and "Patient" in line for line in bo.compare(path))
+
+
 def test_the_script_checks_the_committed_file():
     script = bo.HERE / "build_ontology.py"
     done = subprocess.run([sys.executable, str(script), "--check"], capture_output=True, text=True, timeout=120)

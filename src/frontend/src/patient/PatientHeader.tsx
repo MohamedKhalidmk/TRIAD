@@ -1,15 +1,17 @@
 // The header of the patient page: the demographics.
 // The MOA can change the phone number, the sex and the address (PATCH /api/patients/{id}).
 // The name and the date of birth are the key of the patient. Nobody can change them.
+// The MOA can delete a patient who has no visit (DELETE /api/patients/{id}); a patient with visits gives 409.
 
 import { useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { fieldError } from '../api/client';
 import { api, queryKeys, type PatientPatchBody } from '../api/endpoints';
 import type { Patient, UserView } from '../api/types';
 import { ADDRESS_FIELD_NAMES, AddressFields, formatAddress, readAddress } from '../components/AddressFields';
 import { Badge } from '../components/Badges';
-import { Dialog } from '../components/Dialog';
+import { ConfirmDialog, Dialog } from '../components/Dialog';
 import { ErrorBanner, FieldList } from '../components/ErrorView';
 import { formText, SelectField, TextField } from '../components/Field';
 import { formatDate } from '../lib/dates';
@@ -25,6 +27,7 @@ function identifierLabel(system: string): string {
 
 export function PatientHeader({ patient, user }: { patient: Patient; user: UserView }) {
   const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const isSelf = user.role === 'Patient';
   const mainIdentifier = patient.identifiers[0];
   return (
@@ -67,10 +70,53 @@ export function PatientHeader({ patient, user }: { patient: Patient; user: UserV
               Edit details
             </button>
           )}
+          {patient.permissions.deletePatient && (
+            <button type="button" className="button button-danger-outline" onClick={() => setDeleting(true)}>
+              Delete patient
+            </button>
+          )}
         </div>
       </div>
       {patient.permissions.editDemographics && <EditDemographicsDialog patient={patient} open={editing} onClose={() => setEditing(false)} />}
+      {patient.permissions.deletePatient && <DeletePatientDialog patient={patient} open={deleting} onClose={() => setDeleting(false)} />}
     </section>
+  );
+}
+
+/** The confirm dialog of "Delete patient". A 409 (the patient has visits) shows as a banner in the dialog. */
+function DeletePatientDialog({ patient, open, onClose }: { patient: Patient; open: boolean; onClose: () => void }) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const remove = useMutation({
+    mutationFn: () => api.deletePatient(patient.id),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: queryKeys.patient(patient.id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.patientLists });
+      onClose();
+      navigate('/patients', { replace: true });
+    },
+  });
+  const close = () => {
+    remove.reset();
+    onClose();
+  };
+  return (
+    <ConfirmDialog
+      open={open}
+      title="Delete a patient"
+      message={
+        <p>
+          Do you want to delete the patient <strong>{patient.name}</strong>, born {formatDate(patient.dateOfBirth)}? You cannot
+          delete a patient who has visits.
+        </p>
+      }
+      confirmLabel="Delete"
+      danger
+      busy={remove.isPending}
+      error={<ErrorBanner error={remove.error} />}
+      onConfirm={() => remove.mutate()}
+      onClose={close}
+    />
   );
 }
 

@@ -40,9 +40,51 @@ The team uses this log to write the Level D critique of the AI output.
 | 7 (scripts) | Add the store switch to `quickstart.sh` and `dev.sh`: the Docker check, `kg.sh up` and `init`, `ensure-kg`, and the default store (Virtuoso when Docker runs, else Oxigraph). | `test_run_scripts.py` checks the syntax, the help and a wrong store. The agent timed the quickstart on Oxigraph: 2 min 27 s for the first run (31 s for the graph), 1 min 37 s for a second run. | The help said that a second run takes some seconds; the fast tests take about 1.5 minutes, so the help changed. The test step also ran the Virtuoso tests; it now uses `-m "not slow and not virtuoso"`. **Not done yet:** the time of the Virtuoso path on a new clone. |
 | 7 (docs) | Write the knowledge-graph sections of the root README (Prerequisites, Installation, Knowledge graph, Triple store setup, SPARQL scripts, Store switch, the browser views), the backend README, the index of `models/semantic/`, `CITATION.cff` 5.0.0, the semantic data layer of the architecture figure, the build figure `doc/kg_build`, and these Milestone 5 rows. | The agent checked each command of the READMEs against its `--help` or the code. It ran the commands that need no Docker: `export-kg` on a new onboarding (1,298,482 triples), `ensure-kg` and `load-kg` on Oxigraph in a temporary folder, `validate-kg`, the `--check` of the ontology, the mapping and the shapes, the seed export (the same bytes), `check:demo`, and Q2 in SQL and in SPARQL (the same three rows). It looked at the PNG of each figure and moved the boxes that touched. It parsed `CITATION.cff` with PyYAML and compared its keys with the CFF 1.2.0 schema. The fast tests pass. | Another agent used the one Virtuoso container, so this agent did not run the Virtuoso commands (`kg.sh`, the native `KG_ISQL` path, the Conductor steps); the README gives the results that the other agents measured. The Virtuoso time of the quickstart is marked TODO-MEASURE. The architecture figure grew from 652 × 765 to 652 × 1,036 units. Found and not changed: `infrastructure/sparql/README.md` still calls the repositories stubs and says that Virtuoso is not tested; `dev.sh` has no `--help`; the licence of `src/frontend/package.json` (MIT) is not the licence of `LICENSE`. |
 
-**The checks that a human must still do (Milestone 5):**
-- Open `triad.owl` in Protégé 5.6, run HermiT, record the result, and run the re-save test (`src/backend/models/semantic/README.md`).
-- Do the manual path in Conductor on a second computer: the account step, the Quad Store Upload of `triad.owl` and the seed graph, and `02` to `06` on the SPARQL page.
-- Take the screenshots of `doc/screenshots/m5/` (Protégé, Conductor, the app on Virtuoso).
-- Time `quickstart.sh` with Virtuoso on a new clone.
-- Read the AI output of each phase above and write the Level D critique.
+**The human checks of Milestone 5 (done).** The table above is the record of the AI tool. Mohamed did the checks
+that it marks "not done yet" on a second computer, on a new clone, and reported each result in an issue:
+
+- **Protégé and HermiT** ([#6](https://github.com/MohamedKhalidmk/TRIAD/issues/6)): Protégé 5.6 with HermiT 1.4.3.
+  `triad.owl` is consistent, with no unsatisfiable class (28 TRIAD classes, 25 object and 92 datatype properties).
+  With the seed graph, HermiT infers `triad:assertedBy` for all 10 seed assertions. Protégé's HermiT skips the 31
+  `xsd:date` values; HermiT through owlready2 stops on them. The re-save test fails only on how Protégé writes
+  the file (838 triples: `rdf:List` types and 3 `owl:inverseOf` axioms written from the other side), not on the
+  axioms.
+- **The manual path in Conductor** ([#7](https://github.com/MohamedKhalidmk/TRIAD/issues/7)): Quad Store Upload of
+  `triad.owl` (1,956 triples) and the seed graph (1,125 triples), the account `SPARQL` with `SPARQL_SELECT` and
+  `SPARQL_UPDATE`, and `06`, `02`, `03` (Q1, Q2) and `04` on the SPARQL page. An `INSERT` is refused (SR619) until
+  `kg.sh init` grants the write on the graph.
+- **The app, the quickstart and the tests** ([#8](https://github.com/MohamedKhalidmk/TRIAD/issues/8)): the first
+  quickstart with Virtuoso took about 4.5 min (61 s for the graph), the second 2 min 31 s; with Oxigraph 2 min
+  35 s. `-m "not virtuoso"`: 1,649 passed, 1 over its time limit only (a care-team search, 0.94 s for 0.9 s, with
+  correct rows). The 561 Virtuoso tests and the 21 browser tests pass.
+- **The screenshots** are in `doc/screenshots/m5/` (Protégé, Conductor, the app on Virtuoso).
+
+**What we found wrong in the AI output (the Level D critique; section 6 of the report):**
+
+1. It presented `triad:assertedBy` as the fix for our review point that the patient's own claim is credited to the
+   MOA who typed it. It is not: the chain `inMessage` → `issuedBy` copies the sender of the message, so it still
+   names the MOA. We changed `ontology.md` (commit 9fba7de); the point stays open (PROV-O `actedOnBehalfOf` could fix it).
+2. It kept `owl:hasKey` on (name, dateOfBirth) and did not say that a reasoner would merge two different patients
+   with the same name and birthday (`owl:sameAs`). SHACL rejects the second patient; we added the risk to `ontology.md`.
+3. It called the graph OWL 2 DL, but the 31 `xsd:date` values are outside the OWL 2 datatype map.
+4. Its documents kept the count of a development database (1,298,807 triples); a new clone gives 1,298,482
+   (commit 440bf99).
+5. It presented the new rule "a staff member works in at least one department" as converted from Milestone 4.
+6. Its Protégé test compares triples, so it fails on a Protégé re-save that has the same axioms.
+7. Two of its agents connected `validate-kg` in two different ways, and a test with a fake module did not see it
+   (phase 5a + 5b).
+8. The app had no way to delete a patient, which manual 5.4 asks for. Mohamed added the Delete patient form,
+   with a confirmation and the 409 for a patient who has visits (commit 20432a0).
+9. Smaller: the C16 note was stale (3fb9cfa), and the frontend package said MIT instead of the licence of the
+   repository (fe86ae4).
+
+Overall, the AI was reliable where it followed our design and the tests, and it overclaimed where it judged its
+own work.
+
+**Fixed after the review (from the issues #6 to #8):** the Protégé compare (`build_ontology.py --compare` and
+`test_ontology.py -k protege`) now removes the `rdf:List` types and writes each `owl:inverseOf` pair one way before
+it compares; a new test makes a Protégé-style copy and checks that the compare accepts it and still finds a
+changed label. The time factor of Oxigraph in the tests with a time limit is 5 (it was 3). `kg.sh` accepts a
+command name in `KG_PYTHON`, and `up`, `init`, `status`, `open`, `down` and `reset` work with no `.venv`.
+`dev.sh` makes `.venv` with Python 3.12 and pip when uv is not installed. The README gives the graph-permission
+step of the manual path (`kg.sh init`, or the SQL in Conductor) and the one-line setup of uv.

@@ -37,7 +37,10 @@
 #     volume. After a change, run "kg.sh reset" (this deletes all the data) and "kg.sh up".
 #     "up" uses KG_HTTP_PORT when it makes the container. After a change, run "docker rm -f triad-virtuoso"
 #     and "kg.sh up" (the data stays). After a change of TRIAD_SPARQL_PASSWORD, run "kg.sh init".
-# Other shell variables: KG_PYTHON (the Python of the helpers, default .venv/bin/python);
+# Other shell variables: KG_PYTHON (the Python of the helpers: a path or a command name such as python3;
+#     default .venv/bin/python, else python3). up, init, status, open, down and reset need only the standard
+#     library, so they work before .venv exists (a fresh clone). load and sparql need the packages of .venv:
+#     run ./src/scripts/quickstart.sh once, or set KG_PYTHON to a Python that has requirements.txt;
 #     KG_ISQL (an isql command, for example isql-vt, for a Virtuoso without Docker on port 1111).
 #     With KG_ISQL, init, load and status use that isql, and load uses the folders of this computer:
 #     add them to DirsAllowed in virtuoso.ini. up, down and reset are then not available.
@@ -50,7 +53,20 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SCRIPT="$ROOT/src/scripts/kg.sh"
 cd "$ROOT"
 
-PY="${KG_PYTHON:-.venv/bin/python}"
+# The Python of the helpers (see KG_PYTHON above). PY_HAS_PACKAGES=no: python3 with no .venv (no packages).
+PY_HAS_PACKAGES=yes
+if [ -n "${KG_PYTHON:-}" ]; then
+    case "$KG_PYTHON" in
+        */*) PY="$KG_PYTHON" ;;
+        *) PY="$(command -v "$KG_PYTHON" 2>/dev/null || true)"
+           [ -n "$PY" ] || { echo "ERROR: KG_PYTHON=$KG_PYTHON is not a command on PATH. Give a command name or a path." >&2; exit 1; } ;;
+    esac
+elif [ -x .venv/bin/python ]; then
+    PY=".venv/bin/python"
+else
+    PY="$(command -v python3 2>/dev/null || true)"
+    PY_HAS_PACKAGES=no
+fi
 CONTAINER="triad-virtuoso"
 VOLUME="triad-virtuoso-db"
 # Virtuoso Open Source 7.2 (decision D3). The digest pins the image; the tag is for people.
@@ -67,6 +83,14 @@ usage() {
     awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$SCRIPT"
 }
 
+# Stop with a clear message if PY is python3 with no .venv (load and sparql need the packages of requirements.txt).
+need_packages() {
+    if [ "$PY_HAS_PACKAGES" = no ]; then
+        fail "\"kg.sh $COMMAND\" needs the packages of requirements.txt, and .venv does not exist.
+       Run ./src/scripts/quickstart.sh once (it makes .venv), or set KG_PYTHON to a Python with requirements.txt."
+    fi
+}
+
 # Run a Python module of src/backend (for example infrastructure.rdf.counts).
 pymod() {
     PYTHONPATH="$ROOT/src/backend${PYTHONPATH:+:$PYTHONPATH}" "$PY" -m "$@"
@@ -79,6 +103,9 @@ pymod() {
 # The lines are values only: the script does not run them as shell code.
 load_settings() {
     local lines line name value
+    if [ -z "$PY" ]; then
+        fail "There is no .venv and no python3. Run ./src/scripts/quickstart.sh once (it makes .venv), or set KG_PYTHON."
+    fi
     if [ ! -x "$PY" ]; then
         fail "$PY does not exist. Run ./src/scripts/quickstart.sh once (it makes .venv), or set KG_PYTHON."
     fi
@@ -362,6 +389,7 @@ EOF
 cmd_load() {
     local seed="$1" export="${2:-yes}" owl data data_name import_dir started out file line rest state error ok=yes tbox_count abox_count
     load_settings
+    need_packages
     need_running
     owl="$KG_SEMANTIC_DIR/triad.owl"
     if [ "$seed" = yes ]; then
@@ -499,6 +527,7 @@ cmd_sparql() {
     local file="$1" path
     shift
     load_settings
+    need_packages
     case "$file" in
         /*) path="$file" ;;
         *)

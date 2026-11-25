@@ -33,7 +33,7 @@ export interface UserView {
 
 // Patients
 export interface Permissions {      // what the current user can do for this patient. The UI uses it to show buttons. The backend checks again.
-  viewChart: boolean; chat: boolean; tell: boolean; editDemographics: boolean;
+  viewChart: boolean; chat: boolean; tell: boolean; editDemographics: boolean; deletePatient: boolean;
   checkIn: boolean; endVisit: boolean; moveLocation: boolean; manageCareTeam: boolean; viewAudit: boolean;
   recordIntents: Intent[];   // the intents that the user can record
 }

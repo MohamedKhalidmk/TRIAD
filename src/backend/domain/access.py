@@ -99,7 +99,8 @@ def permissions(role: str, is_self: bool, on_care_team: bool) -> Permissions:
         return allowed(action, role, is_self, on_care_team)
     return Permissions(
         view_chart=ok("view_chart"), chat=ok("chat"), tell=ok("tell"),
-        edit_demographics=ok("edit_demographics"), check_in=ok("check_in"), end_visit=ok("end_visit"),
+        edit_demographics=ok("edit_demographics"), delete_patient=ok("delete_patient"),
+        check_in=ok("check_in"), end_visit=ok("end_visit"),
         move_location=ok("move_location"), manage_care_team=ok("manage_care_team"), view_audit=ok("view_audit"),
         record_intents=record_intents(role, is_self, on_care_team))
 

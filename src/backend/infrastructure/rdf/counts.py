@@ -7,10 +7,10 @@ the count per predicate found the NULL bug of the mapping (plan 5, section 3.3).
 The shape of kg_report.json. The export (main.py export-kg) writes it into TRIAD_KG_DIR, next to triad_kg.nt.gz.
 This check reads only "total" and "per_predicate"; the file can have more keys.
     {
-      "total": 1298807,
+      "total": 1298482,
       "per_predicate": {
-        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 188302,
-        "https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#name": 405,
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type": 188271,
+        "https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#name": 627,
         ...
       },
       "per_class": {

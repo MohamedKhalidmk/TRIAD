@@ -49,7 +49,8 @@ DEMO_NOW = "2026-10-30T09:00:00-04:00"
 DEFAULT_STORES = ("sqlite", "oxigraph")
 KG_STORES = ("oxigraph", "virtuoso")
 # How much slower a KG store can be than SQLite in a test with a time limit (test_api.py has 300 ms for a page).
-TIME_FACTOR = {"sqlite": 1.0, "oxigraph": 3.0, "virtuoso": 10.0}
+# Oxigraph has 5 (not 3): on a slower laptop the care-team search took 0.94 s against a limit of 0.9 s (issue 8).
+TIME_FACTOR = {"sqlite": 1.0, "oxigraph": 5.0, "virtuoso": 10.0}
 
 
 def selected_stores() -> tuple[str, ...]:

@@ -779,13 +779,31 @@ def direct_mapping_example(db_path: Path | None = None, assertion_id: int = 3) -
 # Main
 # ---------------------------------------------------------------------------
 
+def normalize(g: Graph) -> Graph:
+    """Return a copy of g without the two differences that do not change the meaning (Protégé 5.6 adds them).
+
+    1. Protégé adds "rdf:type rdf:List" to each list node (owl:oneOf, owl:unionOf). The copy has no such triple.
+    2. Protégé can write "A owl:inverseOf B" as "B owl:inverseOf A". owl:inverseOf is symmetric, so the copy
+       writes each pair of named properties one way only: the IRI that sorts first is the subject. An inverse
+       property expression ([ owl:inverseOf B ], a blank node) does not change.
+    """
+    out = Graph()
+    for s, p, o in g:
+        if p == RDF.type and o == RDF.List and isinstance(s, BNode):
+            continue
+        if p == OWL.inverseOf and isinstance(s, URIRef) and isinstance(o, URIRef) and str(o) < str(s):
+            s, o = o, s
+        out.add((s, p, o))
+    return out
+
+
 def compare(path: Path) -> list[str]:
     """Compare an RDF/XML file (for example a copy that Protégé saved) with triad.ttl.
 
-    Return the differences as lines; an empty list means that the two graphs are isomorphic.
+    Return the differences as lines; an empty list means that the two graphs are isomorphic after normalize().
     """
     other = Graph().parse(path, format="xml")
-    _, only_ours, only_theirs = graph_diff(to_isomorphic(load_graph()), to_isomorphic(other))
+    _, only_ours, only_theirs = graph_diff(to_isomorphic(normalize(load_graph())), to_isomorphic(normalize(other)))
     lines = [f"- {s.n3()} {p.n3()} {o.n3()}" for s, p, o in sorted(only_ours)]
     lines += [f"+ {s.n3()} {p.n3()} {o.n3()}" for s, p, o in sorted(only_theirs)]
     return lines
@@ -819,7 +837,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.compare:
             diff = compare(args.compare)
-            print("\n".join(diff[:40]) or f"{args.compare} has the same graph as triad.ttl (isomorphic).")
+            print("\n".join(diff[:40]) or f"{args.compare} has the same graph as triad.ttl "
+                  "(isomorphic after normalize(): rdf:List types and the direction of owl:inverseOf).")
             if diff:
                 print(f"{len(diff)} triples differ (- only in triad.ttl, + only in {args.compare.name}).")
             return 1 if diff else 0

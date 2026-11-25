@@ -94,15 +94,32 @@ or by hand in Conductor. `python src/backend/main.py validate-kg` checks it with
 
 ## Open the ontology in Protégé
 
-These steps are for a team member. **Nobody has done them for this version yet**: the results (HermiT, the metrics,
-the screenshots) are not recorded.
+These steps are for a team member. They were done on 2026-11-17 with Protégé 5.6 and HermiT 1.4.3.456 (issue 6);
+the results are below each step, and the screenshots are in `doc/screenshots/m5/protege_*.png`.
 
 1. Install Protégé 5.6 (desktop). It includes its own Java and the HermiT reasoner.
 2. **File → Open**, and select `triad.owl`.
 3. Look at the class tree (**Entities → Classes**). Staff has the subclasses Doctor, Nurse and MOA. ClinicalEntry has 8 subclasses. Protégé also shows `prov:Entity`, `prov:Agent` and `prov:Person`: TRIAD declares these PROV-O terms locally and does not import PROV-O.
 4. Look at **Active ontology → Ontology metrics**. The counts include the PROV-O terms (3 classes, 2 object properties), so they are higher than the `triad:` counts above.
+   Result: 32 classes (28 + 3 PROV-O + `owl:Thing`), 27 object properties (25 + 2 PROV-O), 92 data properties.
 5. **Reasoner → HermiT**, then **Reasoner → Start reasoner**. The expected result: the ontology is consistent, and no class is unsatisfiable (no class under `owl:Nothing`).
-6. **Do not save over `triad.owl`.** To check that Protégé reads the full graph, use **File → Save as…**, select **RDF/XML Syntax**, and save to a temporary file (for example `/tmp/triad_protege.owl`). Then run:
+   Result: consistent; the inferred class tree equals the asserted tree.
+6. **The seed graph with the ontology.** Do not open `kg/triad_kg_seed.rdf` alone: it has no ontology header, so
+   Protégé reads its 104 properties as annotation properties, and HermiT ignores the data. An import added in
+   Protégé afterwards does not change this. Make a copy of the seed graph with a header that imports `triad.owl`
+   (put it in a folder outside the repository), and open the copy:
+
+   ```xml
+   <owl:Ontology xmlns:owl="http://www.w3.org/2002/07/owl#" rdf:about="urn:triad:test:seed">
+     <owl:imports rdf:resource="file:/ABSOLUTE/PATH/TO/src/backend/models/semantic/triad.owl"/>
+   </owl:Ontology>
+   ```
+
+   (the lines go right after the `<rdf:RDF …>` tag). Then the metrics show 92 data properties and 1,627 logical
+   axioms (502 + 1,125). Start HermiT, then **DL Query**: `'asserted by' some Staff`, with **Instances** selected.
+   Result: consistent, and the query gives the 10 assertions of the seed graph (the property chain
+   `inMessage` → `issuedBy`).
+7. **Do not save over `triad.owl`.** To check that Protégé reads the full graph, use **File → Save as…**, select **RDF/XML Syntax**, and save to a temporary file (for example `/tmp/triad_protege.owl`). Then run:
 
    ```bash
    .venv/bin/python src/backend/models/semantic/build_ontology.py --compare /tmp/triad_protege.owl
@@ -110,9 +127,13 @@ the screenshots) are not recorded.
    ```
 
    Both commands pass when the two graphs are isomorphic. Never commit the file that Protégé saved. Git ignores `catalog-v001.xml`.
-7. Take the screenshots for `doc/screenshots/m5/`: the class tree, the ontology metrics and the HermiT result.
+   Result: the commands report 838 different triples, but the axioms are the same. Protégé adds `rdf:type rdf:List`
+   to the 72 list nodes, and it writes 3 `owl:inverseOf` axioms from the other side (`hasVisit`/`visitOf`,
+   `contains`/`inMessage`, `member`/`memberOf`). So the test fails on a Protégé re-save until it removes these
+   differences before it compares.
+8. Take the screenshots for `doc/screenshots/m5/`: the class tree, the ontology metrics and the HermiT result.
 
-**Dates and HermiT.** OWL 2 has no `xsd:date`, and HermiT stops on an `xsd:date` literal. The four date-only properties (`dateOfBirth`, `subjectDateOfBirth`, `roleStartDate`, `roleEndDate`) have the range `rdfs:Literal`, so the ontology alone is valid. The data keeps `xsd:date`. To run HermiT on data, use a copy of the data without these four properties (plan, Phase 2).
+**Dates and HermiT.** OWL 2 has no `xsd:date` (it is not in the OWL 2 datatype map). The four date-only properties (`dateOfBirth`, `subjectDateOfBirth`, `roleStartDate`, `roleEndDate`) have the range `rdfs:Literal`, so the ontology alone is valid. The data keeps `xsd:date` (31 values in the seed graph). In Protégé 5.6, HermiT 1.4.3.456 does not stop on them: it finishes on the seed graph in about 2 s with no error and no warning in the log, so it does not check these values. An earlier review reported that HermiT stops on them; this did not happen in Protégé. To check the dates with a reasoner, store them as `xsd:dateTime`.
 
 ## The W3C Direct Mapping example
 
