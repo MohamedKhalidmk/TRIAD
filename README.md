@@ -106,8 +106,11 @@ Both queries give the same three rows (on the full data, SQLite and Oxigraph):
 ## Prerequisites
 
 - macOS or Linux. On Windows, use WSL2.
-- [uv](https://docs.astral.sh/uv/) (it gets Python 3.12 itself), or Python 3.12 if uv is not installed.
-  To install uv: `brew install uv` on macOS, or `curl -LsSf https://astral.sh/uv/install.sh | sh` on macOS and Linux (WSL2).
+- [uv](https://docs.astral.sh/uv/), the Python package manager of the project (it gets Python 3.12 itself).
+  **Set up uv in one line:** `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS, Linux and WSL2), or
+  `brew install uv` on macOS. Then open a new terminal and check it: `uv --version`. Other ways to install:
+  [the uv installation guide](https://docs.astral.sh/uv/getting-started/installation/).
+  Without uv, `quickstart.sh` and `dev.sh` use Python 3.12 (`python3.12`, or a `python3` that is 3.12) and pip.
 - Node.js 20.19 or later (in version 22: 22.12 or later) with npm.
 - **For Virtuoso (optional):** [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on macOS). `kg.sh`
   pulls the Virtuoso Open Source 7.2 image the first time. Without Docker, the app uses the embedded store
@@ -138,6 +141,13 @@ npm --prefix src/frontend ci
 npm --prefix src/frontend run build                            # build the frontend into src/frontend/dist/
 .venv/bin/python src/backend/main.py ensure-db                 # build the SQLite database from the FHIR data (3 to 7 s)
 .venv/bin/python -m pytest -q -m "not slow and not virtuoso"   # the fast tests
+```
+
+Without uv, make the environment with Python 3.12 and pip in place of the two `uv` lines:
+
+```sh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
 ```
 
 Then select a store, build its knowledge graph and serve the app (see [Triple store setup](#triple-store-setup)):
@@ -203,7 +213,8 @@ PORT=9000 VITE_PORT=5174 ./src/scripts/dev.sh      # other ports
 
 `dev.sh` takes the store from `--store`, else from `TRIAD_STORE` (the shell or `src/backend/.env`), else
 `sqlite`. For a knowledge-graph store, it runs `main.py ensure-kg` first. For `virtuoso`, it also runs
-`kg.sh up` and `kg.sh init` if Virtuoso does not answer.
+`kg.sh up` and `kg.sh init` if Virtuoso does not answer. Like `quickstart.sh`, it makes `.venv` if it is
+missing: with uv, else with Python 3.12 and pip.
 Open http://127.0.0.1:5173. One Ctrl+C stops the two servers.
 
 ### Settings and the LLM mode (optional)
@@ -378,6 +389,10 @@ The triple store is **Virtuoso Open Source 7.2** (the store of the course manual
 
 - Measured: `up` takes 5 to 7 s, `init` less than 1 s, the export about 10 s, and the bulk load with the
   checkpoint about 4 s.
+- **On a new clone (no `.venv`).** `up`, `init`, `status`, `open`, `down` and `reset` need only `python3` (the
+  standard library), so they work before the first `quickstart.sh`. `load` and `sparql` need the packages of
+  `requirements.txt`: run `./src/scripts/quickstart.sh` once (it makes `.venv`), or set `KG_PYTHON` to a Python
+  that has them. `KG_PYTHON` can be a path or a command name (for example `KG_PYTHON=python3.12`).
 - `kg.sh load --seed` loads the seed graph in place of the full graph. `kg.sh load` checks the load list of the
   bulk loader and compares the triples of each predicate with the export (`isql` gives the exit code 0 also on
   an error, so the script checks the result itself).
@@ -415,12 +430,26 @@ This is the path of the course manual (5.2.1 to 5.2.3), in Conductor:
 2. **The account step (5.2.3).** System Admin → User Accounts → the account `SPARQL`: select "User enabled"
    and give it the roles `SPARQL_SELECT` and `SPARQL_UPDATE`. Then run `./src/scripts/kg.sh init` one time.
    It does the same with SQL, makes the user `triad`, and sets the graph permissions of the table below.
+   **Do not skip `kg.sh init`:** the roles alone are not sufficient. Without the graph permissions, `02` stops
+   with "SR619: SPARUL INSERT access denied ... has no write permission on graph .../graph/abox"
+   ([screenshot](doc/screenshots/m5/conductor_sparql_02_insert_denied.png)).
+   **With no script at all:** Database → Interactive SQL, as `dba`, runs the graph permissions of the account
+   `SPARQL` (it is the user `nobody` for graph permissions; 3 = read and write):
+
+   ```sql
+   DB.DBA.RDF_GRAPH_USER_PERMS_SET ('https://github.com/MohamedKhalidmk/TRIAD/graph/abox', 'nobody', 3);
+   DB.DBA.RDF_GRAPH_USER_PERMS_SET ('https://github.com/MohamedKhalidmk/TRIAD/graph/scratch', 'nobody', 3);
+   ```
+
+   This is sufficient for `02` to `06` on the SPARQL page. The app needs the user `triad` too, so run
+   `kg.sh init` before you start the app on Virtuoso.
 3. **Linked Data → Quad Store Upload:**
    - the file `src/backend/models/semantic/triad.owl`, named graph IRI `https://github.com/MohamedKhalidmk/TRIAD/graph/tbox`;
    - the file `src/backend/models/semantic/kg/triad_kg_seed.rdf`, named graph IRI `https://github.com/MohamedKhalidmk/TRIAD/graph/abox`.
 
    The full graph is too large for the upload form. Load it with `./src/scripts/kg.sh load`.
-4. **Linked Data → Graphs:** check the two graphs. Then run B.1 and B.1a of `06_debug.sparql` on the SPARQL page
+4. **Linked Data → Graphs:** check the two graphs (the page opens on the sub-tab "Users Security"; select the
+   sub-tab "Graphs"). Then run B.1 and B.1a of `06_debug.sparql` on the SPARQL page
    (http://localhost:8890/sparql).
 5. Run `02` to `06` on the SPARQL page (see [SPARQL scripts](#sparql-scripts)).
 

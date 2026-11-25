@@ -81,5 +81,10 @@ that it marks "not done yet" on a second computer, on a new clone, and reported 
 Overall, the AI was reliable where it followed our design and the tests, and it overclaimed where it judged its
 own work.
 
-**Still open:** the time limit of the care-team test; the Protégé re-save test (normalize before comparing);
-`dev.sh` without `.venv` needs uv.
+**Fixed after the review (from the issues #6 to #8):** the Protégé compare (`build_ontology.py --compare` and
+`test_ontology.py -k protege`) now removes the `rdf:List` types and writes each `owl:inverseOf` pair one way before
+it compares; a new test makes a Protégé-style copy and checks that the compare accepts it and still finds a
+changed label. The time factor of Oxigraph in the tests with a time limit is 5 (it was 3). `kg.sh` accepts a
+command name in `KG_PYTHON`, and `up`, `init`, `status`, `open`, `down` and `reset` work with no `.venv`.
+`dev.sh` makes `.venv` with Python 3.12 and pip when uv is not installed. The README gives the graph-permission
+step of the manual path (`kg.sh init`, or the SQL in Conductor) and the one-line setup of uv.
