@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import secrets
 import socket
 import threading
 import time
@@ -22,7 +23,9 @@ from infrastructure.sparql.terms import XSD
 
 pytest.importorskip("SPARQLWrapper")
 
-REALM, USER, PASSWORD, NONCE = "SPARQL", "triad", "secret", "dcd98b7102dd2f0e8b11d0f600bfb0c093"
+REALM, USER, PASSWORD = "SPARQL", "triad", "secret"
+# The fake Digest challenge of the local test server (not a credential). It is new on each run.
+NONCE, OPAQUE = secrets.token_hex(17), secrets.token_hex(16)
 VIRTUOSO_500 = ("Virtuoso 42000 Error SR186:SECURITY: No permission to execute procedure DB.DBA.SPARQL_INSERT_DICT"
                 "_CONTENT with user ID 107, group ID 107\n\nSPARQL query:\ndefine sql:big-data-const 0 INSERT DATA {}")
 SELECT_RESULT = {"head": {"vars": ["s", "n", "b", "t", "d", "name", "none", "x"]}, "results": {"bindings": [{
@@ -76,7 +79,7 @@ class FakeVirtuoso(BaseHTTPRequestHandler):
                 server.challenges += 1
                 self.send_response(401)
                 self.send_header("WWW-Authenticate", f'Digest realm="{REALM}", nonce="{NONCE}", qop="auth", '
-                                                     'algorithm="MD5", opaque="5ccc069c403ebaf9f0171e9517f40e41"')
+                                                     f'algorithm="MD5", opaque="{OPAQUE}"')
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
