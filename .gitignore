@@ -14,6 +14,7 @@
 # Course reference files (manual, sample, annotated feedback). Do not commit.
 /ref/
 4_Relational_*.zip
+5_Semantic_*.zip
 
 # SQLite databases and their side files
 *.db
@@ -24,6 +25,12 @@
 # Downloaded source data (the preprocessed data is committed)
 src/backend/data/raw/*.zip
 src/backend/data/raw/*.part
+
+# Knowledge-graph build output (the seed graph is committed in models/semantic/kg/)
+src/backend/data/kg/
+
+# Protege side file
+catalog-v001.xml
 
 # Python
 .venv/

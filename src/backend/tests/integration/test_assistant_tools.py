@@ -5,9 +5,14 @@
 - No tool parameter is a patient, a user or an id, and each schema has additionalProperties = false.
 - A scripted fake `litellm` module gives tool calls. It checks the arguments, the references and the citations,
   that no id and no patient data go to the model, the patient-visible rule and the fallback to the fake model.
+
+The tools run on each store: one copy of the full data for the module (`module_full_store`), on SQLite, then on the
+knowledge graph. The old selection (the expected result) reads the full chart from `ref`, a SQLite context on the
+same data (`store.reference()`): the port has no method that reads a full chart.
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import logging
 import re
@@ -24,9 +29,8 @@ from application.assistant.tools import MAX_ITEMS, PLAN_ORDER, VITAL_SIGNS, make
 from application.ports import ToolCall
 from domain.access import Actor
 from domain.rules import plan_visit
-from infrastructure import config
 from infrastructure.llm.litellm_client import LiteLlmLanguageModel
-from tests.conftest import DEMO_NOW, as_user, make_client
+from tests.conftest import as_user
 
 pytestmark = pytest.mark.slow
 
@@ -39,31 +43,38 @@ ALL_CALLS = [("get_allergies", {}), ("get_medications", {"status": "all"}), ("ge
              ("get_recommendations", {}), ("search_record", {"text": "a"})]
 
 
-def open_ctx(db_path):
-    settings = config.Settings(db_path=db_path, now=DEMO_NOW, llm_mode="fake", llm_model="triad-test",
-                               frontend_dist=None)
-    return main.context_factory(settings)()
+def open_ctx(store):
+    """A context of the store with the settings of the tests (the fake model "triad-test")."""
+    return main.context_factory(dataclasses.replace(store.settings, llm_model="triad-test"))()
 
 
 @pytest.fixture(scope="module")
-def ctx(full_db):
-    """A context on the full database, for reads only."""
-    context = open_ctx(full_db)
+def ctx(module_full_store):
+    """A context of the store on the full data, for reads only."""
+    context = open_ctx(module_full_store)
+    yield context
+    context.close()
+
+
+@pytest.fixture(scope="module")
+def ref(module_full_store):
+    """A SQLite context on the same data: the reference of the old selection (SqliteRecordRepository.assertions)."""
+    context = module_full_store.reference()
     yield context
     context.close()
 
 
 @pytest.fixture
-def fresh_ctx(full_db):
+def fresh_ctx(module_full_store):
     """A context that a test can change (for example the model or a spy on a repository)."""
-    context = open_ctx(full_db)
+    context = open_ctx(module_full_store)
     yield context
     context.close()
 
 
-def largest_patient(ctx) -> int:
-    """The Synthea patient with the most current items (12,471)."""
-    return ctx.records.conn.execute(
+def largest_patient(ref) -> int:
+    """The Synthea patient with the most current items (12,471), from the SQLite reference."""
+    return ref.records.conn.execute(
         "SELECT v.PatientId FROM Visit v JOIN ClinicalEntry e ON e.VisitId = v.Id "
         "JOIN Assertion a ON a.ClinicalEntryId = e.Id "
         "WHERE NOT EXISTS (SELECT 1 FROM Assertion n WHERE n.SupersedesId = a.Id) "
@@ -80,16 +91,24 @@ def patient_actor(patient) -> Actor:
 
 
 @pytest.fixture(scope="module", params=["A", "B", "largest"])
-def patient(request, ctx):
-    pid = {"A": ELENA_ID, "B": B_ID, "largest": largest_patient(ctx)}[request.param]
+def patient(request, ctx, ref):
+    pid = {"A": ELENA_ID, "B": B_ID, "largest": largest_patient(ref)}[request.param]
     return ctx.patients.get(pid)
 
 
+@pytest.fixture(scope="module")
+def charts() -> dict:
+    """The full current chart of each patient (from the reference): the cases read it once for each patient."""
+    return {}
+
+
 @pytest.fixture(scope="module", params=["clinician", "patient"])
-def case(request, ctx, patient):
+def case(request, ctx, ref, charts, patient):
     """(the actor, the patient, the full current chart that the actor can see, newest first)."""
     actor = doctor(ctx) if request.param == "clinician" else patient_actor(patient)
-    items = ctx.records.assertions(patient.id, current_only=True)
+    if patient.id not in charts:
+        charts[patient.id] = ref.records.assertions(patient.id, current_only=True)
+    items = charts[patient.id]
     if actor.is_patient:
         items = [a for a in items if a.patient_visible]
     return actor, patient, items
@@ -133,9 +152,9 @@ def old_vitals(items):
     return found
 
 
-def old_recommendations(ctx, actor, patient, role):
-    visit_id = plan_visit(ctx.visits.visit_rows(patient.id))
-    found = ctx.records.assertions(patient.id, current_only=False, visit_id=visit_id)
+def old_recommendations(ref, actor, patient, role):
+    visit_id = plan_visit(ref.visits.visit_rows(patient.id))
+    found = ref.records.assertions(patient.id, current_only=False, visit_id=visit_id)
     if actor.is_patient:
         found = [a for a in found if a.patient_visible]
     found = [a for a in found if a.intent == "Recommendation" and (not role or a.author.role == role)]
@@ -165,10 +184,10 @@ def test_get_medications_and_get_diagnoses(ctx, case):
     assert ids(call(box, "get_diagnoses", status="all").items) == ids(old_diagnoses(items, False)[:MAX_ITEMS])
 
 
-def test_get_plan(ctx, case):
+def test_get_plan(ctx, ref, case):
     actor, patient, items = case
     result = call(make_tools(ctx, actor, patient), "get_plan")
-    visit_id = plan_visit(ctx.visits.visit_rows(patient.id))
+    visit_id = plan_visit(ref.visits.visit_rows(patient.id))
     chosen = [a for a in items if a.visit_id == visit_id and a.category in PLAN_ORDER]
     chosen.sort(key=lambda a: PLAN_ORDER.index(a.category))
     assert result.visit.id == visit_id
@@ -197,18 +216,18 @@ def test_get_vital_signs_gives_the_latest_value_of_each_code(ctx, case):
     assert len({a.code for a in result.items}) == len(result.items)
 
 
-def test_get_visits(ctx, case):
+def test_get_visits(ctx, ref, case):
     actor, patient, _ = case
     result = call(make_tools(ctx, actor, patient), "get_visits")
-    assert [v.id for v in result.visits] == [v.id for v in ctx.visits.for_patient(patient.id)[:5]]
-    assert result.items == [] and result.total == len(ctx.visits.visit_rows(patient.id))
+    assert [v.id for v in result.visits] == [v.id for v in ref.visits.for_patient(patient.id)[:5]]
+    assert result.items == [] and result.total == len(ref.visits.visit_rows(patient.id))
 
 
-def test_get_recommendations(ctx, case):
+def test_get_recommendations(ctx, ref, case):
     actor, patient, _ = case
     box = make_tools(ctx, actor, patient)
     for role in (None, "Nurse", "Doctor"):
-        expected = old_recommendations(ctx, actor, patient, role)[:MAX_ITEMS]
+        expected = old_recommendations(ref, actor, patient, role)[:MAX_ITEMS]
         arguments = {"role": role} if role else {}
         assert ids(call(box, "get_recommendations", **arguments).items) == ids(expected), role
 
@@ -448,12 +467,12 @@ def test_a_failure_of_the_model_gives_the_fake_answer(fresh_ctx, monkeypatch, ca
     assert "triad-test-secret-42" not in caplog.text
 
 
-def test_the_llm_mode_answers_through_the_api_with_the_tools(full_copy, monkeypatch):
+def test_the_llm_mode_answers_through_the_api_with_the_tools(module_full_store, monkeypatch):
     script = ScriptedLitellm(monkeypatch, [
         response(calls=[("get_allergies", {"substance": "penicillin"})]),
         response("No. A physician ruled it out with an allergy test on 2026-10-02 [E1]."),
     ])
-    client = make_client(full_copy, llm_mode="llm", llm_model="gemini/gemini-3.8-flash")
+    client = module_full_store.client(llm_mode="llm", llm_model="gemini/gemini-3.8-flash")
     session = client.post(f"/api/patients/{ELENA_ID}/chat/sessions", headers=as_user(OKAFOR)).json()
     assert (session["mode"], session["model"]) == ("llm", "gemini/gemini-3.8-flash")
     turn = client.post(f"/api/chat/sessions/{session['id']}/turns", headers=as_user(OKAFOR),
@@ -470,18 +489,38 @@ def test_the_llm_mode_answers_through_the_api_with_the_tools(full_copy, monkeypa
     assert [m["role"] for m in script.requests[1]["messages"]] == ["system", "user", "assistant", "tool"]
 
 
-def test_a_turn_reads_no_full_chart(full_copy, capsys):
-    """Each SQL statement of a turn that reads the items of the patient has a LIMIT (the SQL log)."""
-    client = make_client(full_copy, sql_log="on")
+QUESTIONS = ("Is she allergic to penicillin?", "What is the plan?", "What are her vital signs?",
+             "What did the nurse recommend?", "Any lab results?")
+
+
+def turn_log_lines(client, capsys, tag: str):
+    """For each question: the log lines of the requests of its turn (the SQL log or the SPARQL log)."""
     session = client.post(f"/api/patients/{ELENA_ID}/chat/sessions", headers=as_user(OKAFOR)).json()
-    for question in ("Is she allergic to penicillin?", "What is the plan?", "What are her vital signs?",
-                     "What did the nurse recommend?", "Any lab results?"):
+    for question in QUESTIONS:
         capsys.readouterr()
         turn = client.post(f"/api/chat/sessions/{session['id']}/turns", headers=as_user(OKAFOR),
                            json={"clientTurnId": str(uuid.uuid4()), "text": question})
         assert turn.status_code == 200, turn.text
-        lines = [line for line in capsys.readouterr().err.splitlines() if line.startswith("[sql] POST")]
+        yield question, [line for line in capsys.readouterr().err.splitlines() if line.startswith(f"[{tag}] POST")]
+
+
+@pytest.mark.stores("sqlite")
+def test_a_turn_reads_no_full_chart(module_full_store, capsys):
+    """Each SQL statement of a turn that reads the items of the patient has a LIMIT (the SQL log)."""
+    for question, lines in turn_log_lines(module_full_store.client(sql_log="on"), capsys, "sql"):
         chart_reads = [line for line in lines if "JOIN Assertion a ON a.ClinicalEntryId = e.Id" in line
                        and "v.PatientId = ?" in line]
         assert chart_reads, question
         assert all(line.endswith("LIMIT ?") for line in chart_reads), question
+
+
+@pytest.mark.stores("oxigraph", "virtuoso")
+def test_a_turn_reads_no_full_chart_on_the_knowledge_graph(module_full_store, capsys):
+    """Each SPARQL query of a turn that reads the items of the patient (the assertions of the entries of the visits
+    of the patient: "$patient triad:hasVisit" and "?a triad:about ?e") ends with LIMIT 12. The SPARQL log shows the
+    template, and the LIMIT is in its text. The other queries of a turn start at bound IRIs (the views and the
+    chains of the found items, the guards) or read no item (the care-team check of the access rule)."""
+    for question, lines in turn_log_lines(module_full_store.client(sparql_log="on"), capsys, "sparql"):
+        chart_reads = [line for line in lines if "$patient triad:hasVisit" in line and "?a triad:about ?e" in line]
+        assert chart_reads, question
+        assert all(line.endswith(f"LIMIT {MAX_ITEMS}") for line in chart_reads), (question, chart_reads)

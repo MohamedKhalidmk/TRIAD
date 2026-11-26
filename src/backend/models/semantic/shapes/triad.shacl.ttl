@@ -1,0 +1,2419 @@
+# TRIAD: the W3C SHACL shapes (https://www.w3.org/TR/shacl/) of the knowledge graph. Milestone 5, plan 3.4.
+#
+# The shapes hold the closed-world rules of the SQLite schema (01_create_tables.sql): NOT NULL, CHECK ... IN,
+# the foreign keys, the UNIQUE constraints, the CHECKs across columns and the triggers. OWL cannot hold them,
+# because OWL uses the Open World Assumption (ontology.md section 8).
+#
+# This file has two parts:
+# 1. The generated part (to the END line). Do not edit it by hand. build_shapes.py writes it from ../triad.ttl,
+#    ../vocabulary.py and 01_create_tables.sql:
+#        .venv/bin/python src/backend/models/semantic/shapes/build_shapes.py
+# 2. The hand-written part (after the END line): the rules across columns and the rules of the triggers.
+#
+# Each shape and constraint has an sh:message that names the rule. The comment above it names the SQL that
+# it replaces. Run the shapes with: python -m infrastructure.rdf.shacl FILE (PYTHONPATH=src/backend).
+
+@prefix shape: <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad#> .
+@prefix triad: <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#> .
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+# The shapes graph. Its sh:declare values give the prefixes of the SPARQL constraints (sh:prefixes).
+<https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> a owl:Ontology ;
+    rdfs:label "TRIAD SHACL shapes"@en ;
+    rdfs:comment "The closed-world rules of the TRIAD knowledge graph: the rules of the SQLite schema that OWL cannot hold."@en ;
+    sh:declare
+        [ sh:prefix "triad" ; sh:namespace "https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#"^^xsd:anyURI ] ,
+        [ sh:prefix "rdf" ; sh:namespace "http://www.w3.org/1999/02/22-rdf-syntax-ns#"^^xsd:anyURI ] ,
+        [ sh:prefix "xsd" ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ] .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Department (the rows of the table Department)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:DepartmentShape a sh:NodeShape ;
+    sh:targetClass triad:Department ;
+    sh:property
+        shape:Department-identifierSystem ,
+        shape:Department-identifierValue ,
+        shape:Department-name ,
+        shape:Department-departmentType ,
+        shape:Department-phoneNumber ,
+        shape:Department-email ,
+        shape:Department-street ,
+        shape:Department-city ,
+        shape:Department-region ,
+        shape:Department-postalCode ,
+        shape:Department-country ;
+    sh:sparql shape:UK_Department_Identifier .
+
+# SQL: Department.IdentifierSystem TEXT NOT NULL
+shape:Department-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department must have exactly one value of triad:identifierSystem. The value must be an xsd:string (Department.IdentifierSystem)." .
+
+# SQL: Department.IdentifierValue TEXT NOT NULL
+shape:Department-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department must have exactly one value of triad:identifierValue. The value must be an xsd:string (Department.IdentifierValue)." .
+
+# SQL: Department.Name TEXT NOT NULL
+shape:Department-name a sh:PropertyShape ;
+    sh:path triad:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department must have exactly one value of triad:name. The value must be an xsd:string (Department.Name)." .
+
+# SQL: Department.Type TEXT
+shape:Department-departmentType a sh:PropertyShape ;
+    sh:path triad:departmentType ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:departmentType. The value must be an xsd:string (Department.Type)." .
+
+# SQL: Department.PhoneNumber TEXT
+shape:Department-phoneNumber a sh:PropertyShape ;
+    sh:path triad:phoneNumber ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:phoneNumber. The value must be an xsd:string (Department.PhoneNumber)." .
+
+# SQL: Department.Email TEXT
+shape:Department-email a sh:PropertyShape ;
+    sh:path triad:email ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:email. The value must be an xsd:string (Department.Email)." .
+
+# SQL: Department.Street TEXT
+shape:Department-street a sh:PropertyShape ;
+    sh:path triad:street ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:street. The value must be an xsd:string (Department.Street)." .
+
+# SQL: Department.City TEXT
+shape:Department-city a sh:PropertyShape ;
+    sh:path triad:city ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:city. The value must be an xsd:string (Department.City)." .
+
+# SQL: Department.Region TEXT
+shape:Department-region a sh:PropertyShape ;
+    sh:path triad:region ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:region. The value must be an xsd:string (Department.Region)." .
+
+# SQL: Department.PostalCode TEXT
+shape:Department-postalCode a sh:PropertyShape ;
+    sh:path triad:postalCode ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:postalCode. The value must be an xsd:string (Department.PostalCode)." .
+
+# SQL: Department.Country TEXT
+shape:Department-country a sh:PropertyShape ;
+    sh:path triad:country ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Department can have at most one value of triad:country. The value must be an xsd:string (Department.Country)." .
+
+# SQL: CONSTRAINT UK_Department_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:Department owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_Department_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:Department ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_Department_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:Department .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Location (the rows of the table Location)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:LocationShape a sh:NodeShape ;
+    sh:targetClass triad:Location ;
+    sh:property
+        shape:Location-identifierSystem ,
+        shape:Location-identifierValue ,
+        shape:Location-name ,
+        shape:Location-locationType ,
+        shape:Location-physicalType ,
+        shape:Location-phoneNumber ,
+        shape:Location-street ,
+        shape:Location-city ,
+        shape:Location-region ,
+        shape:Location-postalCode ,
+        shape:Location-country ;
+    sh:sparql shape:UK_Location_Identifier .
+
+# SQL: Location.IdentifierSystem TEXT NOT NULL
+shape:Location-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location must have exactly one value of triad:identifierSystem. The value must be an xsd:string (Location.IdentifierSystem)." .
+
+# SQL: Location.IdentifierValue TEXT NOT NULL
+shape:Location-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location must have exactly one value of triad:identifierValue. The value must be an xsd:string (Location.IdentifierValue)." .
+
+# SQL: Location.Name TEXT NOT NULL
+shape:Location-name a sh:PropertyShape ;
+    sh:path triad:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location must have exactly one value of triad:name. The value must be an xsd:string (Location.Name)." .
+
+# SQL: Location.Type TEXT
+shape:Location-locationType a sh:PropertyShape ;
+    sh:path triad:locationType ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:locationType. The value must be an xsd:string (Location.Type)." .
+
+# SQL: Location.PhysicalType TEXT
+shape:Location-physicalType a sh:PropertyShape ;
+    sh:path triad:physicalType ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:physicalType. The value must be an xsd:string (Location.PhysicalType)." .
+
+# SQL: Location.PhoneNumber TEXT
+shape:Location-phoneNumber a sh:PropertyShape ;
+    sh:path triad:phoneNumber ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:phoneNumber. The value must be an xsd:string (Location.PhoneNumber)." .
+
+# SQL: Location.Street TEXT
+shape:Location-street a sh:PropertyShape ;
+    sh:path triad:street ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:street. The value must be an xsd:string (Location.Street)." .
+
+# SQL: Location.City TEXT
+shape:Location-city a sh:PropertyShape ;
+    sh:path triad:city ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:city. The value must be an xsd:string (Location.City)." .
+
+# SQL: Location.Region TEXT
+shape:Location-region a sh:PropertyShape ;
+    sh:path triad:region ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:region. The value must be an xsd:string (Location.Region)." .
+
+# SQL: Location.PostalCode TEXT
+shape:Location-postalCode a sh:PropertyShape ;
+    sh:path triad:postalCode ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:postalCode. The value must be an xsd:string (Location.PostalCode)." .
+
+# SQL: Location.Country TEXT
+shape:Location-country a sh:PropertyShape ;
+    sh:path triad:country ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Location can have at most one value of triad:country. The value must be an xsd:string (Location.Country)." .
+
+# SQL: CONSTRAINT UK_Location_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:Location owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_Location_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:Location ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_Location_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:Location .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Staff (the rows of the table Staff)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:StaffShape a sh:NodeShape ;
+    sh:targetClass triad:Staff ;
+    sh:property
+        shape:Staff-identifierSystem ,
+        shape:Staff-identifierValue ,
+        shape:Staff-name ,
+        shape:Staff-staffSex ,
+        shape:Staff-email ,
+        shape:Staff-phoneNumber ,
+        shape:Staff-active ,
+        shape:Staff-language ,
+        shape:Staff-issues ,
+        shape:Staff-inverse-ofStaff ,
+        shape:Staff-subtype ;
+    sh:sparql shape:UK_Staff_Identifier .
+
+# SQL: Staff.IdentifierSystem TEXT NOT NULL
+shape:Staff-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Staff must have exactly one value of triad:identifierSystem. The value must be an xsd:string (Staff.IdentifierSystem)." .
+
+# SQL: Staff.IdentifierValue TEXT NOT NULL
+shape:Staff-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Staff must have exactly one value of triad:identifierValue. The value must be an xsd:string (Staff.IdentifierValue)." .
+
+# SQL: Staff.Name TEXT NOT NULL
+shape:Staff-name a sh:PropertyShape ;
+    sh:path triad:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Staff must have exactly one value of triad:name. The value must be an xsd:string (Staff.Name)." .
+
+# SQL: Staff.Sex TEXT CHECK (Sex IN ('female', 'male', 'other', 'unknown'))
+shape:Staff-staffSex a sh:PropertyShape ;
+    sh:path triad:staffSex ;
+    sh:datatype xsd:string ;
+    sh:in ( "female" "male" "other" "unknown" ) ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Staff can have at most one value of triad:staffSex. The value must be one of: female, male, other, unknown (Staff.Sex)." .
+
+# SQL: Staff.Email TEXT
+shape:Staff-email a sh:PropertyShape ;
+    sh:path triad:email ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Staff can have at most one value of triad:email. The value must be an xsd:string (Staff.Email)." .
+
+# SQL: Staff.PhoneNumber TEXT
+shape:Staff-phoneNumber a sh:PropertyShape ;
+    sh:path triad:phoneNumber ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Staff can have at most one value of triad:phoneNumber. The value must be an xsd:string (Staff.PhoneNumber)." .
+
+# SQL: Staff.Active INTEGER NOT NULL DEFAULT 1 CHECK (Active IN (0, 1))
+shape:Staff-active a sh:PropertyShape ;
+    sh:path triad:active ;
+    sh:datatype xsd:boolean ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Staff must have exactly one value of triad:active. The value must be an xsd:boolean (Staff.Active)." .
+
+# SQL: StaffLanguage.Language TEXT NOT NULL
+shape:Staff-language a sh:PropertyShape ;
+    sh:path triad:language ;
+    sh:datatype xsd:string ;
+    sh:message "Each triad:Staff can have more than one value of triad:language. Each value must be an xsd:string (StaffLanguage.Language)." .
+
+# SQL: CONSTRAINT FK_Message_StaffId_2_Staff_Id FOREIGN KEY (StaffId) REFERENCES Staff (Id)
+shape:Staff-issues a sh:PropertyShape ;
+    sh:path triad:issues ;
+    sh:class triad:Message ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Each triad:Staff can have more than one value of triad:issues. Each value must be a triad:Message (Message.StaffId)." .
+
+# No column: new in Milestone 5 (plan 1.3). A staff member works in at least one department. triad.ttl: Staff ⊑ ≥1 inverse(ofStaff).WorksIn.
+shape:Staff-inverse-ofStaff a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:ofStaff ] ;
+    sh:class triad:WorksIn ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:message "Each triad:Staff must have at least one triad:WorksIn that links to it with triad:ofStaff (new in Milestone 5)." .
+
+# SQL: Staff.Role TEXT NOT NULL CHECK (Role IN ('Doctor', 'Nurse', 'MOA'))
+# SQL: the subtype rows (UK_Doctor_StaffId, UK_Nurse_StaffId, UK_MOA_StaffId).
+# The discriminator gives no property: rdf:type holds it (ontology.md section 2).
+shape:Staff-subtype a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:qualifiedValueShape [ sh:in ( triad:Doctor triad:Nurse triad:MOA ) ] ;
+    sh:qualifiedMinCount 1 ;
+    sh:qualifiedMaxCount 1 ;
+    sh:message "Each triad:Staff must have exactly one subtype: triad:Doctor, triad:Nurse or triad:MOA (Staff.Role; the ISA is disjoint and total)." .
+
+# SQL: CONSTRAINT UK_Staff_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:Staff owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_Staff_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:Staff ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_Staff_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:Staff .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:WorksIn (the rows of the table WorksIn)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:WorksInShape a sh:NodeShape ;
+    sh:targetClass triad:WorksIn ;
+    sh:property
+        shape:WorksIn-ofStaff ,
+        shape:WorksIn-atDepartment ,
+        shape:WorksIn-roleCode ,
+        shape:WorksIn-specialty ,
+        shape:WorksIn-roleStartDate ,
+        shape:WorksIn-roleEndDate ;
+    sh:sparql shape:UK_WorksIn_StaffId_DepartmentId_RoleCode .
+
+# SQL: WorksIn.StaffId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_WorksIn_StaffId_2_Staff_Id FOREIGN KEY (StaffId) REFERENCES Staff (Id)
+shape:WorksIn-ofStaff a sh:PropertyShape ;
+    sh:path triad:ofStaff ;
+    sh:class triad:Staff ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:WorksIn must have exactly one value of triad:ofStaff. The value must be a triad:Staff (WorksIn.StaffId)." .
+
+# SQL: WorksIn.DepartmentId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_WorksIn_DepartmentId_2_Department_Id FOREIGN KEY (DepartmentId) REFERENCES Department (Id)
+shape:WorksIn-atDepartment a sh:PropertyShape ;
+    sh:path triad:atDepartment ;
+    sh:class triad:Department ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:WorksIn must have exactly one value of triad:atDepartment. The value must be a triad:Department (WorksIn.DepartmentId)." .
+
+# SQL: WorksIn.RoleCode TEXT NOT NULL
+shape:WorksIn-roleCode a sh:PropertyShape ;
+    sh:path triad:roleCode ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:WorksIn must have exactly one value of triad:roleCode. The value must be an xsd:string (WorksIn.RoleCode)." .
+
+# SQL: WorksIn.Specialty TEXT
+shape:WorksIn-specialty a sh:PropertyShape ;
+    sh:path triad:specialty ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:WorksIn can have at most one value of triad:specialty. The value must be an xsd:string (WorksIn.Specialty)." .
+
+# SQL: WorksIn.StartDate TEXT CHECK (StartDate IS NULL OR julianday(StartDate) IS NOT NULL)
+shape:WorksIn-roleStartDate a sh:PropertyShape ;
+    sh:path triad:roleStartDate ;
+    sh:datatype xsd:date ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:WorksIn can have at most one value of triad:roleStartDate. The value must be an xsd:date (WorksIn.StartDate)." .
+
+# SQL: WorksIn.EndDate TEXT CHECK (EndDate IS NULL OR julianday(EndDate) IS NOT NULL)
+shape:WorksIn-roleEndDate a sh:PropertyShape ;
+    sh:path triad:roleEndDate ;
+    sh:datatype xsd:date ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:WorksIn can have at most one value of triad:roleEndDate. The value must be an xsd:date (WorksIn.EndDate)." .
+
+# SQL: CONSTRAINT UK_WorksIn_StaffId_DepartmentId_RoleCode UNIQUE (StaffId, DepartmentId, RoleCode)
+# triad.ttl: triad:WorksIn owl:hasKey ( triad:ofStaff triad:atDepartment triad:roleCode ).
+shape:UK_WorksIn_StaffId_DepartmentId_RoleCode a sh:SPARQLConstraint ;
+    sh:message "Another triad:WorksIn ({?value}) has the same values of triad:ofStaff, triad:atDepartment and triad:roleCode. The key must be unique (UK_WorksIn_StaffId_DepartmentId_RoleCode)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:ofStaff ?key1 ;
+                triad:atDepartment ?key2 ;
+                triad:roleCode ?key3 .
+            ?value triad:ofStaff ?key1 ;
+                triad:atDepartment ?key2 ;
+                triad:roleCode ?key3 ;
+                a triad:WorksIn .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Doctor (a subtype of triad:Staff: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:DoctorShape a sh:NodeShape ;
+    sh:targetClass triad:Doctor ;
+    sh:property
+        shape:Doctor-licenseNumber ,
+        shape:Doctor-qualification ,
+        shape:Doctor-type .
+
+# SQL: Doctor.LicenseNumber TEXT
+shape:Doctor-licenseNumber a sh:PropertyShape ;
+    sh:path triad:licenseNumber ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Doctor can have at most one value of triad:licenseNumber. The value must be an xsd:string (Doctor.LicenseNumber)." .
+
+# SQL: Doctor.Qualification TEXT
+shape:Doctor-qualification a sh:PropertyShape ;
+    sh:path triad:qualification ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Doctor can have at most one value of triad:qualification. The value must be an xsd:string (Doctor.Qualification)." .
+
+# SQL: Doctor.Role TEXT NOT NULL DEFAULT 'Doctor' CHECK (Role = 'Doctor')
+# SQL: CONSTRAINT FK_Doctor_StaffId_Role_2_Staff_Id_Role FOREIGN KEY (StaffId, Role) REFERENCES Staff (Id, Role)
+shape:Doctor-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:Staff ;
+    sh:message "Each triad:Doctor must also be a triad:Staff: the subtype row and the parent row are one individual (FK_Doctor_StaffId_Role_2_Staff_Id_Role)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Nurse (a subtype of triad:Staff: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:NurseShape a sh:NodeShape ;
+    sh:targetClass triad:Nurse ;
+    sh:property
+        shape:Nurse-licenseNumber ,
+        shape:Nurse-designation ,
+        shape:Nurse-type .
+
+# SQL: Nurse.LicenseNumber TEXT
+shape:Nurse-licenseNumber a sh:PropertyShape ;
+    sh:path triad:licenseNumber ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Nurse can have at most one value of triad:licenseNumber. The value must be an xsd:string (Nurse.LicenseNumber)." .
+
+# SQL: Nurse.Designation TEXT NOT NULL CHECK (Designation IN ('RN', 'LPN', 'RPN', 'NP'))
+shape:Nurse-designation a sh:PropertyShape ;
+    sh:path triad:designation ;
+    sh:datatype xsd:string ;
+    sh:in ( "RN" "LPN" "RPN" "NP" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Nurse must have exactly one value of triad:designation. The value must be one of: RN, LPN, RPN, NP (Nurse.Designation)." .
+
+# SQL: Nurse.Role TEXT NOT NULL DEFAULT 'Nurse' CHECK (Role = 'Nurse')
+# SQL: CONSTRAINT FK_Nurse_StaffId_Role_2_Staff_Id_Role FOREIGN KEY (StaffId, Role) REFERENCES Staff (Id, Role)
+shape:Nurse-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:Staff ;
+    sh:message "Each triad:Nurse must also be a triad:Staff: the subtype row and the parent row are one individual (FK_Nurse_StaffId_Role_2_Staff_Id_Role)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:MOA (a subtype of triad:Staff: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:MOAShape a sh:NodeShape ;
+    sh:targetClass triad:MOA ;
+    sh:property
+        shape:MOA-certificationNumber ,
+        shape:MOA-desk ,
+        shape:MOA-phoneExtension ,
+        shape:MOA-type .
+
+# SQL: MOA.CertificationNumber TEXT
+shape:MOA-certificationNumber a sh:PropertyShape ;
+    sh:path triad:certificationNumber ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:MOA can have at most one value of triad:certificationNumber. The value must be an xsd:string (MOA.CertificationNumber)." .
+
+# SQL: MOA.Desk TEXT NOT NULL
+shape:MOA-desk a sh:PropertyShape ;
+    sh:path triad:desk ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:MOA must have exactly one value of triad:desk. The value must be an xsd:string (MOA.Desk)." .
+
+# SQL: MOA.PhoneExtension TEXT
+shape:MOA-phoneExtension a sh:PropertyShape ;
+    sh:path triad:phoneExtension ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:MOA can have at most one value of triad:phoneExtension. The value must be an xsd:string (MOA.PhoneExtension)." .
+
+# SQL: MOA.Role TEXT NOT NULL DEFAULT 'MOA' CHECK (Role = 'MOA')
+# SQL: CONSTRAINT FK_MOA_StaffId_Role_2_Staff_Id_Role FOREIGN KEY (StaffId, Role) REFERENCES Staff (Id, Role)
+shape:MOA-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:Staff ;
+    sh:message "Each triad:MOA must also be a triad:Staff: the subtype row and the parent row are one individual (FK_MOA_StaffId_Role_2_Staff_Id_Role)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Patient (the rows of the table Patient)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:PatientShape a sh:NodeShape ;
+    sh:targetClass triad:Patient ;
+    sh:property
+        shape:Patient-name ,
+        shape:Patient-dateOfBirth ,
+        shape:Patient-patientSex ,
+        shape:Patient-phoneNumber ,
+        shape:Patient-street ,
+        shape:Patient-city ,
+        shape:Patient-region ,
+        shape:Patient-postalCode ,
+        shape:Patient-country ,
+        shape:Patient-identifier ,
+        shape:Patient-hasVisit ;
+    sh:sparql shape:UK_Patient_Name_DateOfBirth .
+
+# SQL: Patient.Name TEXT NOT NULL
+shape:Patient-name a sh:PropertyShape ;
+    sh:path triad:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient must have exactly one value of triad:name. The value must be an xsd:string (Patient.Name)." .
+
+# SQL: Patient.DateOfBirth TEXT NOT NULL CHECK (date(DateOfBirth) IS NOT NULL)
+shape:Patient-dateOfBirth a sh:PropertyShape ;
+    sh:path triad:dateOfBirth ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient must have exactly one value of triad:dateOfBirth. The value must be an xsd:date (Patient.DateOfBirth)." .
+
+# SQL: Patient.Sex TEXT NOT NULL CHECK (Sex IN ('female', 'male', 'other', 'unknown'))
+shape:Patient-patientSex a sh:PropertyShape ;
+    sh:path triad:patientSex ;
+    sh:datatype xsd:string ;
+    sh:in ( "female" "male" "other" "unknown" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient must have exactly one value of triad:patientSex. The value must be one of: female, male, other, unknown (Patient.Sex)." .
+
+# SQL: Patient.PhoneNumber TEXT
+shape:Patient-phoneNumber a sh:PropertyShape ;
+    sh:path triad:phoneNumber ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient can have at most one value of triad:phoneNumber. The value must be an xsd:string (Patient.PhoneNumber)." .
+
+# SQL: Patient.Street TEXT
+shape:Patient-street a sh:PropertyShape ;
+    sh:path triad:street ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient can have at most one value of triad:street. The value must be an xsd:string (Patient.Street)." .
+
+# SQL: Patient.City TEXT
+shape:Patient-city a sh:PropertyShape ;
+    sh:path triad:city ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient can have at most one value of triad:city. The value must be an xsd:string (Patient.City)." .
+
+# SQL: Patient.Region TEXT
+shape:Patient-region a sh:PropertyShape ;
+    sh:path triad:region ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient can have at most one value of triad:region. The value must be an xsd:string (Patient.Region)." .
+
+# SQL: Patient.PostalCode TEXT
+shape:Patient-postalCode a sh:PropertyShape ;
+    sh:path triad:postalCode ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient can have at most one value of triad:postalCode. The value must be an xsd:string (Patient.PostalCode)." .
+
+# SQL: Patient.Country TEXT
+shape:Patient-country a sh:PropertyShape ;
+    sh:path triad:country ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Patient can have at most one value of triad:country. The value must be an xsd:string (Patient.Country)." .
+
+# SQL: CONSTRAINT FK_PatientIdentifier_PatientId_2_Patient_Id FOREIGN KEY (PatientId) REFERENCES Patient (Id)
+shape:Patient-identifier a sh:PropertyShape ;
+    sh:path triad:identifier ;
+    sh:class triad:PatientIdentifier ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Each triad:Patient can have more than one value of triad:identifier. Each value must be a triad:PatientIdentifier (PatientIdentifier.PatientId)." .
+
+# SQL: CONSTRAINT FK_Visit_PatientId_2_Patient_Id FOREIGN KEY (PatientId) REFERENCES Patient (Id)
+shape:Patient-hasVisit a sh:PropertyShape ;
+    sh:path triad:hasVisit ;
+    sh:class triad:Visit ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Each triad:Patient can have more than one value of triad:hasVisit. Each value must be a triad:Visit (Visit.PatientId)." .
+
+# SQL: CONSTRAINT UK_Patient_Name_DateOfBirth UNIQUE (Name, DateOfBirth)
+# triad.ttl: triad:Patient owl:hasKey ( triad:name triad:dateOfBirth ).
+shape:UK_Patient_Name_DateOfBirth a sh:SPARQLConstraint ;
+    sh:message "Another triad:Patient ({?value}) has the same values of triad:name and triad:dateOfBirth. The key must be unique (UK_Patient_Name_DateOfBirth)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:name ?key1 ;
+                triad:dateOfBirth ?key2 .
+            ?value triad:name ?key1 ;
+                triad:dateOfBirth ?key2 ;
+                a triad:Patient .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:PatientIdentifier (the rows of the table PatientIdentifier)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:PatientIdentifierShape a sh:NodeShape ;
+    sh:targetClass triad:PatientIdentifier ;
+    sh:property
+        shape:PatientIdentifier-inverse-identifier ,
+        shape:PatientIdentifier-identifierSystem ,
+        shape:PatientIdentifier-identifierValue ;
+    sh:sparql shape:UK_PatientIdentifier_System_Value .
+
+# SQL: PatientIdentifier.PatientId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_PatientIdentifier_PatientId_2_Patient_Id FOREIGN KEY (PatientId) REFERENCES Patient (Id)
+shape:PatientIdentifier-inverse-identifier a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:identifier ] ;
+    sh:class triad:Patient ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:PatientIdentifier must have exactly one triad:Patient that links to it with triad:identifier (PatientIdentifier.PatientId)." .
+
+# SQL: PatientIdentifier.System TEXT NOT NULL
+shape:PatientIdentifier-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:PatientIdentifier must have exactly one value of triad:identifierSystem. The value must be an xsd:string (PatientIdentifier.System)." .
+
+# SQL: PatientIdentifier.Value TEXT NOT NULL
+shape:PatientIdentifier-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:PatientIdentifier must have exactly one value of triad:identifierValue. The value must be an xsd:string (PatientIdentifier.Value)." .
+
+# SQL: CONSTRAINT UK_PatientIdentifier_System_Value UNIQUE (System, Value)
+# triad.ttl: triad:PatientIdentifier owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_PatientIdentifier_System_Value a sh:SPARQLConstraint ;
+    sh:message "Another triad:PatientIdentifier ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_PatientIdentifier_System_Value)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:PatientIdentifier .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Visit (the rows of the table Visit)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:VisitShape a sh:NodeShape ;
+    sh:targetClass triad:Visit ;
+    sh:property
+        shape:Visit-identifierSystem ,
+        shape:Visit-identifierValue ,
+        shape:Visit-inverse-hasVisit ,
+        shape:Visit-visitClass ,
+        shape:Visit-visitType ,
+        shape:Visit-reason ,
+        shape:Visit-startDate ,
+        shape:Visit-endDate ;
+    sh:sparql shape:UK_Visit_Identifier .
+
+# SQL: Visit.IdentifierSystem TEXT NOT NULL
+shape:Visit-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit must have exactly one value of triad:identifierSystem. The value must be an xsd:string (Visit.IdentifierSystem)." .
+
+# SQL: Visit.IdentifierValue TEXT NOT NULL
+shape:Visit-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit must have exactly one value of triad:identifierValue. The value must be an xsd:string (Visit.IdentifierValue)." .
+
+# SQL: Visit.PatientId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_Visit_PatientId_2_Patient_Id FOREIGN KEY (PatientId) REFERENCES Patient (Id)
+shape:Visit-inverse-hasVisit a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:hasVisit ] ;
+    sh:class triad:Patient ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit must have exactly one triad:Patient that links to it with triad:hasVisit (Visit.PatientId)." .
+
+# SQL: Visit.Class TEXT NOT NULL CHECK (Class IN ('AMB', 'EMER', 'IMP', 'HH', 'VR'))
+shape:Visit-visitClass a sh:PropertyShape ;
+    sh:path triad:visitClass ;
+    sh:datatype xsd:string ;
+    sh:in ( "AMB" "EMER" "IMP" "HH" "VR" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit must have exactly one value of triad:visitClass. The value must be one of: AMB, EMER, IMP, HH, VR (Visit.Class)." .
+
+# SQL: Visit.Type TEXT
+shape:Visit-visitType a sh:PropertyShape ;
+    sh:path triad:visitType ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit can have at most one value of triad:visitType. The value must be an xsd:string (Visit.Type)." .
+
+# SQL: Visit.Reason TEXT
+shape:Visit-reason a sh:PropertyShape ;
+    sh:path triad:reason ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit can have at most one value of triad:reason. The value must be an xsd:string (Visit.Reason)." .
+
+# SQL: Visit.StartDate TEXT NOT NULL CHECK (julianday(StartDate) IS NOT NULL)
+shape:Visit-startDate a sh:PropertyShape ;
+    sh:path triad:startDate ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit must have exactly one value of triad:startDate. The value must be an xsd:dateTime (Visit.StartDate)." .
+
+# SQL: Visit.EndDate TEXT CHECK (EndDate IS NULL OR julianday(EndDate) IS NOT NULL)
+shape:Visit-endDate a sh:PropertyShape ;
+    sh:path triad:endDate ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Visit can have at most one value of triad:endDate. The value must be an xsd:dateTime (Visit.EndDate)." .
+
+# SQL: CONSTRAINT UK_Visit_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:Visit owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_Visit_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:Visit ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_Visit_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:Visit .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:VisitLocation (the rows of the table VisitLocation)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:VisitLocationShape a sh:NodeShape ;
+    sh:targetClass triad:VisitLocation ;
+    sh:property
+        shape:VisitLocation-ofVisit ,
+        shape:VisitLocation-atLocation ,
+        shape:VisitLocation-startDate ,
+        shape:VisitLocation-endDate ;
+    sh:sparql shape:UK_VisitLocation_VisitId_LocationId_StartDate .
+
+# SQL: VisitLocation.VisitId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_VisitLocation_VisitId_2_Visit_Id FOREIGN KEY (VisitId) REFERENCES Visit (Id)
+shape:VisitLocation-ofVisit a sh:PropertyShape ;
+    sh:path triad:ofVisit ;
+    sh:class triad:Visit ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:VisitLocation must have exactly one value of triad:ofVisit. The value must be a triad:Visit (VisitLocation.VisitId)." .
+
+# SQL: VisitLocation.LocationId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_VisitLocation_LocationId_2_Location_Id FOREIGN KEY (LocationId) REFERENCES Location (Id)
+shape:VisitLocation-atLocation a sh:PropertyShape ;
+    sh:path triad:atLocation ;
+    sh:class triad:Location ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:VisitLocation must have exactly one value of triad:atLocation. The value must be a triad:Location (VisitLocation.LocationId)." .
+
+# SQL: VisitLocation.StartDate TEXT NOT NULL CHECK (julianday(StartDate) IS NOT NULL)
+shape:VisitLocation-startDate a sh:PropertyShape ;
+    sh:path triad:startDate ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:VisitLocation must have exactly one value of triad:startDate. The value must be an xsd:dateTime (VisitLocation.StartDate)." .
+
+# SQL: VisitLocation.EndDate TEXT CHECK (EndDate IS NULL OR julianday(EndDate) IS NOT NULL)
+shape:VisitLocation-endDate a sh:PropertyShape ;
+    sh:path triad:endDate ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:VisitLocation can have at most one value of triad:endDate. The value must be an xsd:dateTime (VisitLocation.EndDate)." .
+
+# SQL: CONSTRAINT UK_VisitLocation_VisitId_LocationId_StartDate UNIQUE (VisitId, LocationId, StartDate)
+# triad.ttl: triad:VisitLocation owl:hasKey ( triad:ofVisit triad:atLocation triad:startDate ).
+shape:UK_VisitLocation_VisitId_LocationId_StartDate a sh:SPARQLConstraint ;
+    sh:message "Another triad:VisitLocation ({?value}) has the same values of triad:ofVisit, triad:atLocation and triad:startDate. The key must be unique (UK_VisitLocation_VisitId_LocationId_StartDate)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:ofVisit ?key1 ;
+                triad:atLocation ?key2 ;
+                triad:startDate ?key3 .
+            ?value triad:ofVisit ?key1 ;
+                triad:atLocation ?key2 ;
+                triad:startDate ?key3 ;
+                a triad:VisitLocation .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:ClinicalEntry (the rows of the table ClinicalEntry)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:ClinicalEntryShape a sh:NodeShape ;
+    sh:targetClass triad:ClinicalEntry ;
+    sh:property
+        shape:ClinicalEntry-identifierSystem ,
+        shape:ClinicalEntry-identifierValue ,
+        shape:ClinicalEntry-during ,
+        shape:ClinicalEntry-code ,
+        shape:ClinicalEntry-codeSystem ,
+        shape:ClinicalEntry-display ,
+        shape:ClinicalEntry-text ,
+        shape:ClinicalEntry-recordedAt ,
+        shape:ClinicalEntry-inverse-about ,
+        shape:ClinicalEntry-subtype ;
+    sh:sparql shape:UK_ClinicalEntry_Identifier .
+
+# SQL: ClinicalEntry.IdentifierSystem TEXT NOT NULL
+shape:ClinicalEntry-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one value of triad:identifierSystem. The value must be an xsd:string (ClinicalEntry.IdentifierSystem)." .
+
+# SQL: ClinicalEntry.IdentifierValue TEXT NOT NULL
+shape:ClinicalEntry-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one value of triad:identifierValue. The value must be an xsd:string (ClinicalEntry.IdentifierValue)." .
+
+# SQL: ClinicalEntry.VisitId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_ClinicalEntry_VisitId_2_Visit_Id FOREIGN KEY (VisitId) REFERENCES Visit (Id)
+shape:ClinicalEntry-during a sh:PropertyShape ;
+    sh:path triad:during ;
+    sh:class triad:Visit ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one value of triad:during. The value must be a triad:Visit (ClinicalEntry.VisitId)." .
+
+# SQL: ClinicalEntry.Code TEXT NOT NULL
+shape:ClinicalEntry-code a sh:PropertyShape ;
+    sh:path triad:code ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one value of triad:code. The value must be an xsd:string (ClinicalEntry.Code)." .
+
+# SQL: ClinicalEntry.CodeSystem TEXT NOT NULL
+shape:ClinicalEntry-codeSystem a sh:PropertyShape ;
+    sh:path triad:codeSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one value of triad:codeSystem. The value must be an xsd:string (ClinicalEntry.CodeSystem)." .
+
+# SQL: ClinicalEntry.Display TEXT NOT NULL
+shape:ClinicalEntry-display a sh:PropertyShape ;
+    sh:path triad:display ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one value of triad:display. The value must be an xsd:string (ClinicalEntry.Display)." .
+
+# SQL: ClinicalEntry.Text TEXT
+shape:ClinicalEntry-text a sh:PropertyShape ;
+    sh:path triad:text ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry can have at most one value of triad:text. The value must be an xsd:string (ClinicalEntry.Text)." .
+
+# SQL: ClinicalEntry.RecordedAt TEXT NOT NULL CHECK (julianday(RecordedAt) IS NOT NULL)
+shape:ClinicalEntry-recordedAt a sh:PropertyShape ;
+    sh:path triad:recordedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one value of triad:recordedAt. The value must be an xsd:dateTime (ClinicalEntry.RecordedAt)." .
+
+# No column: the ER participation of About. An entry has at least one assertion. triad.ttl: ClinicalEntry ⊑ ≥1 inverse(about).Assertion.
+shape:ClinicalEntry-inverse-about a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:about ] ;
+    sh:class triad:Assertion ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have at least one triad:Assertion that links to it with triad:about (the ER participation of About)." .
+
+# SQL: ClinicalEntry.Category TEXT NOT NULL CHECK (Category IN ('Diagnosis', 'Procedure', 'Allergy', 'Observation', 'LabOrder', 'LabReport', 'Prescription', 'CareTeam'))
+# SQL: the subtype rows (UK_Diagnosis_ClinicalEntryId, UK_Procedure_ClinicalEntryId, UK_Allergy_ClinicalEntryId, UK_Observation_ClinicalEntryId, UK_LabOrder_ClinicalEntryId, UK_LabReport_ClinicalEntryId, UK_Prescription_ClinicalEntryId, UK_CareTeam_ClinicalEntryId).
+# The discriminator gives no property: rdf:type holds it (ontology.md section 2).
+shape:ClinicalEntry-subtype a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:qualifiedValueShape [ sh:in ( triad:Diagnosis triad:Procedure triad:Allergy triad:Observation triad:LabOrder triad:LabReport triad:Prescription triad:CareTeam ) ] ;
+    sh:qualifiedMinCount 1 ;
+    sh:qualifiedMaxCount 1 ;
+    sh:message "Each triad:ClinicalEntry must have exactly one subtype: triad:Diagnosis, triad:Procedure, triad:Allergy, triad:Observation, triad:LabOrder, triad:LabReport, triad:Prescription or triad:CareTeam (ClinicalEntry.Category; the ISA is disjoint and total)." .
+
+# SQL: CONSTRAINT UK_ClinicalEntry_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:ClinicalEntry owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_ClinicalEntry_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:ClinicalEntry ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_ClinicalEntry_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:ClinicalEntry .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Diagnosis (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:DiagnosisShape a sh:NodeShape ;
+    sh:targetClass triad:Diagnosis ;
+    sh:property
+        shape:Diagnosis-onsetDate ,
+        shape:Diagnosis-abatementDate ,
+        shape:Diagnosis-clinicalStatus ,
+        shape:Diagnosis-severity ,
+        shape:Diagnosis-type .
+
+# SQL: Diagnosis.OnsetDate TEXT
+shape:Diagnosis-onsetDate a sh:PropertyShape ;
+    sh:path triad:onsetDate ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Diagnosis can have at most one value of triad:onsetDate. The value must be an xsd:dateTime (Diagnosis.OnsetDate)." .
+
+# SQL: Diagnosis.AbatementDate TEXT
+shape:Diagnosis-abatementDate a sh:PropertyShape ;
+    sh:path triad:abatementDate ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Diagnosis can have at most one value of triad:abatementDate. The value must be an xsd:dateTime (Diagnosis.AbatementDate)." .
+
+# SQL: Diagnosis.ClinicalStatus TEXT NOT NULL
+shape:Diagnosis-clinicalStatus a sh:PropertyShape ;
+    sh:path triad:clinicalStatus ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Diagnosis must have exactly one value of triad:clinicalStatus. The value must be an xsd:string (Diagnosis.ClinicalStatus)." .
+
+# SQL: Diagnosis.Severity TEXT
+shape:Diagnosis-severity a sh:PropertyShape ;
+    sh:path triad:severity ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Diagnosis can have at most one value of triad:severity. The value must be an xsd:string (Diagnosis.Severity)." .
+
+# SQL: Diagnosis.Category TEXT NOT NULL DEFAULT 'Diagnosis' CHECK (Category = 'Diagnosis')
+# SQL: CONSTRAINT FK_Diagnosis_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:Diagnosis-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:Diagnosis must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_Diagnosis_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Procedure (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:ProcedureShape a sh:NodeShape ;
+    sh:targetClass triad:Procedure ;
+    sh:property
+        shape:Procedure-performedDate ,
+        shape:Procedure-procedureOutcome ,
+        shape:Procedure-type .
+
+# SQL: Procedure.PerformedDate TEXT NOT NULL CHECK (julianday(PerformedDate) IS NOT NULL)
+shape:Procedure-performedDate a sh:PropertyShape ;
+    sh:path triad:performedDate ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Procedure must have exactly one value of triad:performedDate. The value must be an xsd:dateTime (Procedure.PerformedDate)." .
+
+# SQL: Procedure.Outcome TEXT
+shape:Procedure-procedureOutcome a sh:PropertyShape ;
+    sh:path triad:procedureOutcome ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Procedure can have at most one value of triad:procedureOutcome. The value must be an xsd:string (Procedure.Outcome)." .
+
+# SQL: Procedure.Category TEXT NOT NULL DEFAULT 'Procedure' CHECK (Category = 'Procedure')
+# SQL: CONSTRAINT FK_Procedure_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:Procedure-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:Procedure must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_Procedure_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Allergy (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:AllergyShape a sh:NodeShape ;
+    sh:targetClass triad:Allergy ;
+    sh:property
+        shape:Allergy-substance ,
+        shape:Allergy-allergyType ,
+        shape:Allergy-allergyCategory ,
+        shape:Allergy-criticality ,
+        shape:Allergy-clinicalStatus ,
+        shape:Allergy-type .
+
+# SQL: Allergy.Substance TEXT NOT NULL
+shape:Allergy-substance a sh:PropertyShape ;
+    sh:path triad:substance ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Allergy must have exactly one value of triad:substance. The value must be an xsd:string (Allergy.Substance)." .
+
+# SQL: Allergy.Type TEXT
+shape:Allergy-allergyType a sh:PropertyShape ;
+    sh:path triad:allergyType ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Allergy can have at most one value of triad:allergyType. The value must be an xsd:string (Allergy.Type)." .
+
+# SQL: Allergy.AllergyCategory TEXT
+shape:Allergy-allergyCategory a sh:PropertyShape ;
+    sh:path triad:allergyCategory ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Allergy can have at most one value of triad:allergyCategory. The value must be an xsd:string (Allergy.AllergyCategory)." .
+
+# SQL: Allergy.Criticality TEXT
+shape:Allergy-criticality a sh:PropertyShape ;
+    sh:path triad:criticality ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Allergy can have at most one value of triad:criticality. The value must be an xsd:string (Allergy.Criticality)." .
+
+# SQL: Allergy.ClinicalStatus TEXT
+shape:Allergy-clinicalStatus a sh:PropertyShape ;
+    sh:path triad:clinicalStatus ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Allergy can have at most one value of triad:clinicalStatus. The value must be an xsd:string (Allergy.ClinicalStatus)." .
+
+# SQL: Allergy.Category TEXT NOT NULL DEFAULT 'Allergy' CHECK (Category = 'Allergy')
+# SQL: CONSTRAINT FK_Allergy_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:Allergy-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:Allergy must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_Allergy_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Observation (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:ObservationShape a sh:NodeShape ;
+    sh:targetClass triad:Observation ;
+    sh:property
+        shape:Observation-value ,
+        shape:Observation-unit ,
+        shape:Observation-type .
+
+# SQL: Observation.Value TEXT NOT NULL
+shape:Observation-value a sh:PropertyShape ;
+    sh:path triad:value ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Observation must have exactly one value of triad:value. The value must be an xsd:string (Observation.Value)." .
+
+# SQL: Observation.Unit TEXT
+shape:Observation-unit a sh:PropertyShape ;
+    sh:path triad:unit ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Observation can have at most one value of triad:unit. The value must be an xsd:string (Observation.Unit)." .
+
+# SQL: Observation.Category TEXT NOT NULL DEFAULT 'Observation' CHECK (Category = 'Observation')
+# SQL: CONSTRAINT FK_Observation_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:Observation-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:Observation must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_Observation_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:LabOrder (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:LabOrderShape a sh:NodeShape ;
+    sh:targetClass triad:LabOrder ;
+    sh:property
+        shape:LabOrder-testName ,
+        shape:LabOrder-priority ,
+        shape:LabOrder-specimen ,
+        shape:LabOrder-type .
+
+# SQL: LabOrder.TestName TEXT NOT NULL
+shape:LabOrder-testName a sh:PropertyShape ;
+    sh:path triad:testName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:LabOrder must have exactly one value of triad:testName. The value must be an xsd:string (LabOrder.TestName)." .
+
+# SQL: LabOrder.Priority TEXT NOT NULL CHECK (Priority IN ('routine', 'urgent', 'asap', 'stat'))
+shape:LabOrder-priority a sh:PropertyShape ;
+    sh:path triad:priority ;
+    sh:datatype xsd:string ;
+    sh:in ( "routine" "urgent" "asap" "stat" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:LabOrder must have exactly one value of triad:priority. The value must be one of: routine, urgent, asap, stat (LabOrder.Priority)." .
+
+# SQL: LabOrder.Specimen TEXT
+shape:LabOrder-specimen a sh:PropertyShape ;
+    sh:path triad:specimen ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:LabOrder can have at most one value of triad:specimen. The value must be an xsd:string (LabOrder.Specimen)." .
+
+# SQL: LabOrder.Category TEXT NOT NULL DEFAULT 'LabOrder' CHECK (Category = 'LabOrder')
+# SQL: CONSTRAINT FK_LabOrder_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:LabOrder-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:LabOrder must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_LabOrder_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:LabReport (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:LabReportShape a sh:NodeShape ;
+    sh:targetClass triad:LabReport ;
+    sh:property
+        shape:LabReport-issuedDate ,
+        shape:LabReport-conclusion ,
+        shape:LabReport-type .
+
+# SQL: LabReport.IssuedDate TEXT NOT NULL CHECK (julianday(IssuedDate) IS NOT NULL)
+shape:LabReport-issuedDate a sh:PropertyShape ;
+    sh:path triad:issuedDate ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:LabReport must have exactly one value of triad:issuedDate. The value must be an xsd:dateTime (LabReport.IssuedDate)." .
+
+# SQL: LabReport.Conclusion TEXT
+shape:LabReport-conclusion a sh:PropertyShape ;
+    sh:path triad:conclusion ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:LabReport can have at most one value of triad:conclusion. The value must be an xsd:string (LabReport.Conclusion)." .
+
+# SQL: LabReport.Category TEXT NOT NULL DEFAULT 'LabReport' CHECK (Category = 'LabReport')
+# SQL: CONSTRAINT FK_LabReport_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:LabReport-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:LabReport must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_LabReport_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Medication (the rows of the table Medication)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:MedicationShape a sh:NodeShape ;
+    sh:targetClass triad:Medication ;
+    sh:property
+        shape:Medication-code ,
+        shape:Medication-codeSystem ,
+        shape:Medication-name ,
+        shape:Medication-form ,
+        shape:Medication-manufacturer ;
+    sh:sparql shape:UK_Medication_Code_CodeSystem .
+
+# SQL: Medication.Code TEXT NOT NULL
+shape:Medication-code a sh:PropertyShape ;
+    sh:path triad:code ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Medication must have exactly one value of triad:code. The value must be an xsd:string (Medication.Code)." .
+
+# SQL: Medication.CodeSystem TEXT NOT NULL
+shape:Medication-codeSystem a sh:PropertyShape ;
+    sh:path triad:codeSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Medication must have exactly one value of triad:codeSystem. The value must be an xsd:string (Medication.CodeSystem)." .
+
+# SQL: Medication.Name TEXT NOT NULL
+shape:Medication-name a sh:PropertyShape ;
+    sh:path triad:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Medication must have exactly one value of triad:name. The value must be an xsd:string (Medication.Name)." .
+
+# SQL: Medication.Form TEXT
+shape:Medication-form a sh:PropertyShape ;
+    sh:path triad:form ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Medication can have at most one value of triad:form. The value must be an xsd:string (Medication.Form)." .
+
+# SQL: Medication.Manufacturer TEXT
+shape:Medication-manufacturer a sh:PropertyShape ;
+    sh:path triad:manufacturer ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Medication can have at most one value of triad:manufacturer. The value must be an xsd:string (Medication.Manufacturer)." .
+
+# SQL: CONSTRAINT UK_Medication_Code_CodeSystem UNIQUE (Code, CodeSystem)
+# triad.ttl: triad:Medication owl:hasKey ( triad:code triad:codeSystem ).
+shape:UK_Medication_Code_CodeSystem a sh:SPARQLConstraint ;
+    sh:message "Another triad:Medication ({?value}) has the same values of triad:code and triad:codeSystem. The key must be unique (UK_Medication_Code_CodeSystem)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:code ?key1 ;
+                triad:codeSystem ?key2 .
+            ?value triad:code ?key1 ;
+                triad:codeSystem ?key2 ;
+                a triad:Medication .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Prescription (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:PrescriptionShape a sh:NodeShape ;
+    sh:targetClass triad:Prescription ;
+    sh:property
+        shape:Prescription-prescribes ,
+        shape:Prescription-dosage ,
+        shape:Prescription-frequency ,
+        shape:Prescription-prescriptionStatus ,
+        shape:Prescription-type .
+
+# SQL: Prescription.MedicationId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_Prescription_MedicationId_2_Medication_Id FOREIGN KEY (MedicationId) REFERENCES Medication (Id)
+shape:Prescription-prescribes a sh:PropertyShape ;
+    sh:path triad:prescribes ;
+    sh:class triad:Medication ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Prescription must have exactly one value of triad:prescribes. The value must be a triad:Medication (Prescription.MedicationId)." .
+
+# SQL: Prescription.Dosage TEXT
+shape:Prescription-dosage a sh:PropertyShape ;
+    sh:path triad:dosage ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Prescription can have at most one value of triad:dosage. The value must be an xsd:string (Prescription.Dosage)." .
+
+# SQL: Prescription.Frequency TEXT
+shape:Prescription-frequency a sh:PropertyShape ;
+    sh:path triad:frequency ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Prescription can have at most one value of triad:frequency. The value must be an xsd:string (Prescription.Frequency)." .
+
+# SQL: Prescription.Status TEXT NOT NULL
+shape:Prescription-prescriptionStatus a sh:PropertyShape ;
+    sh:path triad:prescriptionStatus ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Prescription must have exactly one value of triad:prescriptionStatus. The value must be an xsd:string (Prescription.Status)." .
+
+# SQL: Prescription.Category TEXT NOT NULL DEFAULT 'Prescription' CHECK (Category = 'Prescription')
+# SQL: CONSTRAINT FK_Prescription_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:Prescription-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:Prescription must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_Prescription_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:CareTeam (a subtype of triad:ClinicalEntry: the same individual as its parent row)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:CareTeamShape a sh:NodeShape ;
+    sh:targetClass triad:CareTeam ;
+    sh:property
+        shape:CareTeam-name ,
+        shape:CareTeam-careTeamStatus ,
+        shape:CareTeam-member ,
+        shape:CareTeam-type .
+
+# SQL: CareTeam.Name TEXT
+shape:CareTeam-name a sh:PropertyShape ;
+    sh:path triad:name ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:CareTeam can have at most one value of triad:name. The value must be an xsd:string (CareTeam.Name)." .
+
+# SQL: CareTeam.Status TEXT NOT NULL CHECK (Status IN ('proposed', 'active', 'suspended', 'inactive', 'entered-in-error'))
+shape:CareTeam-careTeamStatus a sh:PropertyShape ;
+    sh:path triad:careTeamStatus ;
+    sh:datatype xsd:string ;
+    sh:in ( "proposed" "active" "suspended" "inactive" "entered-in-error" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:CareTeam must have exactly one value of triad:careTeamStatus. The value must be one of: proposed, active, suspended, inactive, entered-in-error (CareTeam.Status)." .
+
+# SQL: CONSTRAINT FK_CareTeamMember_CareTeamId_2_CareTeam_Id FOREIGN KEY (CareTeamId) REFERENCES CareTeam (Id)
+shape:CareTeam-member a sh:PropertyShape ;
+    sh:path triad:member ;
+    sh:class triad:CareTeamMember ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Each triad:CareTeam can have more than one value of triad:member. Each value must be a triad:CareTeamMember (CareTeamMember.CareTeamId)." .
+
+# SQL: CareTeam.Category TEXT NOT NULL DEFAULT 'CareTeam' CHECK (Category = 'CareTeam')
+# SQL: CONSTRAINT FK_CareTeam_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category FOREIGN KEY (ClinicalEntryId, Category) REFERENCES ClinicalEntry (Id, Category)
+shape:CareTeam-type a sh:PropertyShape ;
+    sh:path rdf:type ;
+    sh:hasValue triad:ClinicalEntry ;
+    sh:message "Each triad:CareTeam must also be a triad:ClinicalEntry: the subtype row and the parent row are one individual (FK_CareTeam_ClinicalEntryId_Category_2_ClinicalEntry_Id_Category)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:CareTeamMember (the rows of the table CareTeamMember)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:CareTeamMemberShape a sh:NodeShape ;
+    sh:targetClass triad:CareTeamMember ;
+    sh:property
+        shape:CareTeamMember-inverse-member ,
+        shape:CareTeamMember-memberSystem ,
+        shape:CareTeamMember-memberValue ,
+        shape:CareTeamMember-memberRole ;
+    sh:sparql shape:UK_CareTeamMember_CareTeamId_Member .
+
+# SQL: CareTeamMember.CareTeamId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_CareTeamMember_CareTeamId_2_CareTeam_Id FOREIGN KEY (CareTeamId) REFERENCES CareTeam (Id)
+shape:CareTeamMember-inverse-member a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:member ] ;
+    sh:class triad:CareTeam ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:CareTeamMember must have exactly one triad:CareTeam that links to it with triad:member (CareTeamMember.CareTeamId)." .
+
+# SQL: CareTeamMember.MemberSystem TEXT NOT NULL
+shape:CareTeamMember-memberSystem a sh:PropertyShape ;
+    sh:path triad:memberSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:CareTeamMember must have exactly one value of triad:memberSystem. The value must be an xsd:string (CareTeamMember.MemberSystem)." .
+
+# SQL: CareTeamMember.MemberValue TEXT NOT NULL
+shape:CareTeamMember-memberValue a sh:PropertyShape ;
+    sh:path triad:memberValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:CareTeamMember must have exactly one value of triad:memberValue. The value must be an xsd:string (CareTeamMember.MemberValue)." .
+
+# SQL: CareTeamMember.Role TEXT
+shape:CareTeamMember-memberRole a sh:PropertyShape ;
+    sh:path triad:memberRole ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:CareTeamMember can have at most one value of triad:memberRole. The value must be an xsd:string (CareTeamMember.Role)." .
+
+# SQL: CONSTRAINT UK_CareTeamMember_CareTeamId_Member UNIQUE (CareTeamId, MemberSystem, MemberValue)
+# triad.ttl: triad:CareTeamMember owl:hasKey ( triad:memberOf triad:memberSystem triad:memberValue ).
+shape:UK_CareTeamMember_CareTeamId_Member a sh:SPARQLConstraint ;
+    sh:message "Another triad:CareTeamMember ({?value}) has the same values of triad:memberOf, triad:memberSystem and triad:memberValue. The key must be unique (UK_CareTeamMember_CareTeamId_Member)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this ^triad:member ?key1 ;
+                triad:memberSystem ?key2 ;
+                triad:memberValue ?key3 .
+            ?value ^triad:member ?key1 ;
+                triad:memberSystem ?key2 ;
+                triad:memberValue ?key3 ;
+                a triad:CareTeamMember .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Message (the rows of the table Message)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:MessageShape a sh:NodeShape ;
+    sh:targetClass triad:Message ;
+    sh:property
+        shape:Message-identifierSystem ,
+        shape:Message-identifierValue ,
+        shape:Message-inverse-issues ,
+        shape:Message-channel ,
+        shape:Message-origin ,
+        shape:Message-sentAt ,
+        shape:Message-text ,
+        shape:Message-contains ;
+    sh:sparql shape:UK_Message_Identifier .
+
+# SQL: Message.IdentifierSystem TEXT NOT NULL
+shape:Message-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Message must have exactly one value of triad:identifierSystem. The value must be an xsd:string (Message.IdentifierSystem)." .
+
+# SQL: Message.IdentifierValue TEXT NOT NULL
+shape:Message-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Message must have exactly one value of triad:identifierValue. The value must be an xsd:string (Message.IdentifierValue)." .
+
+# SQL: Message.StaffId INTEGER
+# SQL: CONSTRAINT FK_Message_StaffId_2_Staff_Id FOREIGN KEY (StaffId) REFERENCES Staff (Id)
+shape:Message-inverse-issues a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:issues ] ;
+    sh:class triad:Staff ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Message can have at most one triad:Staff that links to it with triad:issues (Message.StaffId)." .
+
+# SQL: Message.Channel TEXT NOT NULL CHECK (Channel IN ('InPerson', 'Phone', 'Video', 'Email', 'Fax', 'Transfer', 'Chat', 'App'))
+shape:Message-channel a sh:PropertyShape ;
+    sh:path triad:channel ;
+    sh:datatype xsd:string ;
+    sh:in ( "InPerson" "Phone" "Video" "Email" "Fax" "Transfer" "Chat" "App" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Message must have exactly one value of triad:channel. The value must be one of: InPerson, Phone, Video, Email, Fax, Transfer, Chat, App (Message.Channel)." .
+
+# SQL: Message.Origin TEXT NOT NULL CHECK (Origin IN ('Patient', 'Staff', 'OtherClinic', 'PharmaNet', 'Lab', 'Agent'))
+shape:Message-origin a sh:PropertyShape ;
+    sh:path triad:origin ;
+    sh:datatype xsd:string ;
+    sh:in ( "Patient" "Staff" "OtherClinic" "PharmaNet" "Lab" "Agent" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Message must have exactly one value of triad:origin. The value must be one of: Patient, Staff, OtherClinic, PharmaNet, Lab, Agent (Message.Origin)." .
+
+# SQL: Message.SentAt TEXT NOT NULL CHECK (julianday(SentAt) IS NOT NULL)
+shape:Message-sentAt a sh:PropertyShape ;
+    sh:path triad:sentAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Message must have exactly one value of triad:sentAt. The value must be an xsd:dateTime (Message.SentAt)." .
+
+# SQL: Message.Text TEXT NOT NULL
+shape:Message-text a sh:PropertyShape ;
+    sh:path triad:text ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Message must have exactly one value of triad:text. The value must be an xsd:string (Message.Text)." .
+
+# SQL: CONSTRAINT FK_Assertion_MessageId_2_Message_Id FOREIGN KEY (MessageId) REFERENCES Message (Id)
+# No column: the ER participation of Contains. A message has at least one assertion. triad.ttl: Message ⊑ ≥1 contains.
+shape:Message-contains a sh:PropertyShape ;
+    sh:path triad:contains ;
+    sh:class triad:Assertion ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:message "Each triad:Message must have at least one value of triad:contains. Each value must be a triad:Assertion (Assertion.MessageId)." .
+
+# SQL: CONSTRAINT UK_Message_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:Message owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_Message_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:Message ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_Message_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:Message .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Assertion (the rows of the table Assertion)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:AssertionShape a sh:NodeShape ;
+    sh:targetClass triad:Assertion ;
+    sh:property
+        shape:Assertion-inverse-contains ,
+        shape:Assertion-seq ,
+        shape:Assertion-about ,
+        shape:Assertion-supersedes ,
+        shape:Assertion-assertedAt ,
+        shape:Assertion-intent ,
+        shape:Assertion-source ,
+        shape:Assertion-verification ,
+        shape:Assertion-statement ,
+        shape:Assertion-inverse-supersedes ;
+    sh:sparql shape:UK_Assertion_MessageId_Seq .
+
+# SQL: Assertion.MessageId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_Assertion_MessageId_2_Message_Id FOREIGN KEY (MessageId) REFERENCES Message (Id)
+shape:Assertion-inverse-contains a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:contains ] ;
+    sh:class triad:Message ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one triad:Message that links to it with triad:contains (Assertion.MessageId)." .
+
+# SQL: Assertion.Seq INTEGER NOT NULL CHECK (Seq >= 1)
+shape:Assertion-seq a sh:PropertyShape ;
+    sh:path triad:seq ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 1 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one value of triad:seq. The value must be an xsd:integer of 1 or more (Assertion.Seq)." .
+
+# SQL: Assertion.ClinicalEntryId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_Assertion_ClinicalEntryId_2_ClinicalEntry_Id FOREIGN KEY (ClinicalEntryId) REFERENCES ClinicalEntry (Id)
+shape:Assertion-about a sh:PropertyShape ;
+    sh:path triad:about ;
+    sh:class triad:ClinicalEntry ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one value of triad:about. The value must be a triad:ClinicalEntry (Assertion.ClinicalEntryId)." .
+
+# SQL: Assertion.SupersedesId INTEGER
+# SQL: CONSTRAINT FK_Assertion_SupersedesId_2_Assertion_Id FOREIGN KEY (SupersedesId) REFERENCES Assertion (Id)
+shape:Assertion-supersedes a sh:PropertyShape ;
+    sh:path triad:supersedes ;
+    sh:class triad:Assertion ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion can have at most one value of triad:supersedes. The value must be a triad:Assertion (Assertion.SupersedesId)." .
+
+# SQL: Assertion.AssertedAt TEXT NOT NULL CHECK (julianday(AssertedAt) IS NOT NULL)
+shape:Assertion-assertedAt a sh:PropertyShape ;
+    sh:path triad:assertedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one value of triad:assertedAt. The value must be an xsd:dateTime (Assertion.AssertedAt)." .
+
+# SQL: Assertion.Intent TEXT NOT NULL CHECK (Intent IN ('Report', 'Recommendation', 'Decision'))
+shape:Assertion-intent a sh:PropertyShape ;
+    sh:path triad:intent ;
+    sh:datatype xsd:string ;
+    sh:in ( "Report" "Recommendation" "Decision" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one value of triad:intent. The value must be one of: Report, Recommendation, Decision (Assertion.Intent)." .
+
+# SQL: Assertion.Source TEXT NOT NULL CHECK (Source IN ('Human', 'Agent'))
+shape:Assertion-source a sh:PropertyShape ;
+    sh:path triad:source ;
+    sh:datatype xsd:string ;
+    sh:in ( "Human" "Agent" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one value of triad:source. The value must be one of: Human, Agent (Assertion.Source)." .
+
+# SQL: Assertion.Verification TEXT NOT NULL CHECK (Verification IN ('Unconfirmed', 'Provisional', 'Differential', 'Confirmed', 'Refuted', 'EnteredInError'))
+shape:Assertion-verification a sh:PropertyShape ;
+    sh:path triad:verification ;
+    sh:datatype xsd:string ;
+    sh:in ( "Unconfirmed" "Provisional" "Differential" "Confirmed" "Refuted" "EnteredInError" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one value of triad:verification. The value must be one of: Unconfirmed, Provisional, Differential, Confirmed, Refuted, EnteredInError (Assertion.Verification)." .
+
+# SQL: Assertion.Statement TEXT NOT NULL
+shape:Assertion-statement a sh:PropertyShape ;
+    sh:path triad:statement ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion must have exactly one value of triad:statement. The value must be an xsd:string (Assertion.Statement)." .
+
+# SQL: CONSTRAINT UK_Assertion_SupersedesId UNIQUE (SupersedesId)
+shape:Assertion-inverse-supersedes a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:supersedes ] ;
+    sh:class triad:Assertion ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Assertion can have at most one triad:Assertion that links to it with triad:supersedes (UK_Assertion_SupersedesId)." .
+
+# SQL: CONSTRAINT UK_Assertion_MessageId_Seq UNIQUE (MessageId, Seq)
+# triad.ttl: triad:Assertion owl:hasKey ( triad:inMessage triad:seq ).
+shape:UK_Assertion_MessageId_Seq a sh:SPARQLConstraint ;
+    sh:message "Another triad:Assertion ({?value}) has the same values of triad:inMessage and triad:seq. The key must be unique (UK_Assertion_MessageId_Seq)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this ^triad:contains ?key1 ;
+                triad:seq ?key2 .
+            ?value ^triad:contains ?key1 ;
+                triad:seq ?key2 ;
+                a triad:Assertion .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:ChatSession (the rows of the table ChatSession)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:ChatSessionShape a sh:NodeShape ;
+    sh:targetClass triad:ChatSession ;
+    sh:property
+        shape:ChatSession-identifierSystem ,
+        shape:ChatSession-identifierValue ,
+        shape:ChatSession-userRole ,
+        shape:ChatSession-userSystem ,
+        shape:ChatSession-userValue ,
+        shape:ChatSession-subjectName ,
+        shape:ChatSession-subjectDateOfBirth ,
+        shape:ChatSession-startedAt ,
+        shape:ChatSession-mode ,
+        shape:ChatSession-model ,
+        shape:ChatSession-includes ;
+    sh:sparql shape:UK_ChatSession_Identifier .
+
+# SQL: ChatSession.IdentifierSystem TEXT NOT NULL
+shape:ChatSession-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:identifierSystem. The value must be an xsd:string (ChatSession.IdentifierSystem)." .
+
+# SQL: ChatSession.IdentifierValue TEXT NOT NULL
+shape:ChatSession-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:identifierValue. The value must be an xsd:string (ChatSession.IdentifierValue)." .
+
+# SQL: ChatSession.UserRole TEXT NOT NULL CHECK (UserRole IN ('Patient', 'Doctor', 'Nurse', 'MOA'))
+shape:ChatSession-userRole a sh:PropertyShape ;
+    sh:path triad:userRole ;
+    sh:datatype xsd:string ;
+    sh:in ( "Patient" "Doctor" "Nurse" "MOA" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:userRole. The value must be one of: Patient, Doctor, Nurse, MOA (ChatSession.UserRole)." .
+
+# SQL: ChatSession.UserSystem TEXT NOT NULL
+shape:ChatSession-userSystem a sh:PropertyShape ;
+    sh:path triad:userSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:userSystem. The value must be an xsd:string (ChatSession.UserSystem)." .
+
+# SQL: ChatSession.UserValue TEXT NOT NULL
+shape:ChatSession-userValue a sh:PropertyShape ;
+    sh:path triad:userValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:userValue. The value must be an xsd:string (ChatSession.UserValue)." .
+
+# SQL: ChatSession.SubjectName TEXT NOT NULL
+shape:ChatSession-subjectName a sh:PropertyShape ;
+    sh:path triad:subjectName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:subjectName. The value must be an xsd:string (ChatSession.SubjectName)." .
+
+# SQL: ChatSession.SubjectDateOfBirth TEXT NOT NULL
+shape:ChatSession-subjectDateOfBirth a sh:PropertyShape ;
+    sh:path triad:subjectDateOfBirth ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:subjectDateOfBirth. The value must be an xsd:date (ChatSession.SubjectDateOfBirth)." .
+
+# SQL: ChatSession.StartedAt TEXT NOT NULL CHECK (julianday(StartedAt) IS NOT NULL)
+shape:ChatSession-startedAt a sh:PropertyShape ;
+    sh:path triad:startedAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:startedAt. The value must be an xsd:dateTime (ChatSession.StartedAt)." .
+
+# SQL: ChatSession.Mode TEXT NOT NULL CHECK (Mode IN ('rules', 'fake', 'llm'))
+shape:ChatSession-mode a sh:PropertyShape ;
+    sh:path triad:mode ;
+    sh:datatype xsd:string ;
+    sh:in ( "rules" "fake" "llm" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession must have exactly one value of triad:mode. The value must be one of: rules, fake, llm (ChatSession.Mode)." .
+
+# SQL: ChatSession.Model TEXT
+shape:ChatSession-model a sh:PropertyShape ;
+    sh:path triad:model ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatSession can have at most one value of triad:model. The value must be an xsd:string (ChatSession.Model)." .
+
+# SQL: CONSTRAINT FK_ChatTurn_ChatSessionId_2_ChatSession_Id FOREIGN KEY (ChatSessionId) REFERENCES ChatSession (Id)
+shape:ChatSession-includes a sh:PropertyShape ;
+    sh:path triad:includes ;
+    sh:class triad:ChatTurn ;
+    sh:nodeKind sh:IRI ;
+    sh:message "Each triad:ChatSession can have more than one value of triad:includes. Each value must be a triad:ChatTurn (ChatTurn.ChatSessionId)." .
+
+# SQL: CONSTRAINT UK_ChatSession_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:ChatSession owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_ChatSession_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:ChatSession ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_ChatSession_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:ChatSession .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:ChatTurn (the rows of the table ChatTurn)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:ChatTurnShape a sh:NodeShape ;
+    sh:targetClass triad:ChatTurn ;
+    sh:property
+        shape:ChatTurn-inverse-includes ,
+        shape:ChatTurn-seq ,
+        shape:ChatTurn-clientTurnId ,
+        shape:ChatTurn-speaker ,
+        shape:ChatTurn-text ,
+        shape:ChatTurn-createdAt ;
+    sh:sparql shape:UK_ChatTurn_ChatSessionId_Seq , shape:UK_ChatTurn_ChatSessionId_ClientTurnId .
+
+# SQL: ChatTurn.ChatSessionId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_ChatTurn_ChatSessionId_2_ChatSession_Id FOREIGN KEY (ChatSessionId) REFERENCES ChatSession (Id)
+shape:ChatTurn-inverse-includes a sh:PropertyShape ;
+    sh:path [ sh:inversePath triad:includes ] ;
+    sh:class triad:ChatSession ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatTurn must have exactly one triad:ChatSession that links to it with triad:includes (ChatTurn.ChatSessionId)." .
+
+# SQL: ChatTurn.Seq INTEGER NOT NULL CHECK (Seq >= 1)
+shape:ChatTurn-seq a sh:PropertyShape ;
+    sh:path triad:seq ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 1 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatTurn must have exactly one value of triad:seq. The value must be an xsd:integer of 1 or more (ChatTurn.Seq)." .
+
+# SQL: ChatTurn.ClientTurnId TEXT NOT NULL
+shape:ChatTurn-clientTurnId a sh:PropertyShape ;
+    sh:path triad:clientTurnId ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatTurn must have exactly one value of triad:clientTurnId. The value must be an xsd:string (ChatTurn.ClientTurnId)." .
+
+# SQL: ChatTurn.Speaker TEXT NOT NULL CHECK (Speaker IN ('User', 'Assistant'))
+shape:ChatTurn-speaker a sh:PropertyShape ;
+    sh:path triad:speaker ;
+    sh:datatype xsd:string ;
+    sh:in ( "User" "Assistant" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatTurn must have exactly one value of triad:speaker. The value must be one of: User, Assistant (ChatTurn.Speaker)." .
+
+# SQL: ChatTurn.Text TEXT NOT NULL
+shape:ChatTurn-text a sh:PropertyShape ;
+    sh:path triad:text ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatTurn must have exactly one value of triad:text. The value must be an xsd:string (ChatTurn.Text)." .
+
+# SQL: ChatTurn.CreatedAt TEXT NOT NULL CHECK (julianday(CreatedAt) IS NOT NULL)
+shape:ChatTurn-createdAt a sh:PropertyShape ;
+    sh:path triad:createdAt ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:ChatTurn must have exactly one value of triad:createdAt. The value must be an xsd:dateTime (ChatTurn.CreatedAt)." .
+
+# SQL: CONSTRAINT UK_ChatTurn_ChatSessionId_Seq UNIQUE (ChatSessionId, Seq)
+# triad.ttl: triad:ChatTurn owl:hasKey ( triad:inSession triad:seq ).
+shape:UK_ChatTurn_ChatSessionId_Seq a sh:SPARQLConstraint ;
+    sh:message "Another triad:ChatTurn ({?value}) has the same values of triad:inSession and triad:seq. The key must be unique (UK_ChatTurn_ChatSessionId_Seq)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this ^triad:includes ?key1 ;
+                triad:seq ?key2 .
+            ?value ^triad:includes ?key1 ;
+                triad:seq ?key2 ;
+                a triad:ChatTurn .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# SQL: CONSTRAINT UK_ChatTurn_ChatSessionId_ClientTurnId UNIQUE (ChatSessionId, ClientTurnId)
+# triad.ttl: triad:ChatTurn owl:hasKey ( triad:inSession triad:clientTurnId ).
+shape:UK_ChatTurn_ChatSessionId_ClientTurnId a sh:SPARQLConstraint ;
+    sh:message "Another triad:ChatTurn ({?value}) has the same values of triad:inSession and triad:clientTurnId. The key must be unique (UK_ChatTurn_ChatSessionId_ClientTurnId)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this ^triad:includes ?key1 ;
+                triad:clientTurnId ?key2 .
+            ?value ^triad:includes ?key1 ;
+                triad:clientTurnId ?key2 ;
+                a triad:ChatTurn .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:Citation (the rows of the table Citation)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:CitationShape a sh:NodeShape ;
+    sh:targetClass triad:Citation ;
+    sh:property
+        shape:Citation-byTurn ,
+        shape:Citation-citedAssertion ,
+        shape:Citation-rank ;
+    sh:sparql shape:UK_Citation_ChatTurnId_AssertionId .
+
+# SQL: Citation.ChatTurnId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_Citation_ChatTurnId_2_ChatTurn_Id FOREIGN KEY (ChatTurnId) REFERENCES ChatTurn (Id)
+shape:Citation-byTurn a sh:PropertyShape ;
+    sh:path triad:byTurn ;
+    sh:class triad:ChatTurn ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Citation must have exactly one value of triad:byTurn. The value must be a triad:ChatTurn (Citation.ChatTurnId)." .
+
+# SQL: Citation.AssertionId INTEGER NOT NULL
+# SQL: CONSTRAINT FK_Citation_AssertionId_2_Assertion_Id FOREIGN KEY (AssertionId) REFERENCES Assertion (Id)
+shape:Citation-citedAssertion a sh:PropertyShape ;
+    sh:path triad:citedAssertion ;
+    sh:class triad:Assertion ;
+    sh:nodeKind sh:IRI ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Citation must have exactly one value of triad:citedAssertion. The value must be a triad:Assertion (Citation.AssertionId)." .
+
+# SQL: Citation.Rank INTEGER NOT NULL CHECK (Rank >= 1)
+shape:Citation-rank a sh:PropertyShape ;
+    sh:path triad:rank ;
+    sh:datatype xsd:integer ;
+    sh:minInclusive 1 ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:Citation must have exactly one value of triad:rank. The value must be an xsd:integer of 1 or more (Citation.Rank)." .
+
+# SQL: CONSTRAINT UK_Citation_ChatTurnId_AssertionId UNIQUE (ChatTurnId, AssertionId)
+# triad.ttl: triad:Citation owl:hasKey ( triad:byTurn triad:citedAssertion ).
+shape:UK_Citation_ChatTurnId_AssertionId a sh:SPARQLConstraint ;
+    sh:message "Another triad:Citation ({?value}) has the same values of triad:byTurn and triad:citedAssertion. The key must be unique (UK_Citation_ChatTurnId_AssertionId)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:byTurn ?key1 ;
+                triad:citedAssertion ?key2 .
+            ?value triad:byTurn ?key1 ;
+                triad:citedAssertion ?key2 ;
+                a triad:Citation .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# triad:AuditEvent (the rows of the table AuditEvent)
+# --------------------------------------------------------------------------------------------------------------
+
+shape:AuditEventShape a sh:NodeShape ;
+    sh:targetClass triad:AuditEvent ;
+    sh:property
+        shape:AuditEvent-identifierSystem ,
+        shape:AuditEvent-identifierValue ,
+        shape:AuditEvent-at ,
+        shape:AuditEvent-action ,
+        shape:AuditEvent-auditOutcome ,
+        shape:AuditEvent-actorRole ,
+        shape:AuditEvent-actorSystem ,
+        shape:AuditEvent-actorValue ,
+        shape:AuditEvent-subjectName ,
+        shape:AuditEvent-subjectDateOfBirth ,
+        shape:AuditEvent-path ,
+        shape:AuditEvent-inTurn ;
+    sh:sparql shape:UK_AuditEvent_Identifier .
+
+# SQL: AuditEvent.IdentifierSystem TEXT NOT NULL
+shape:AuditEvent-identifierSystem a sh:PropertyShape ;
+    sh:path triad:identifierSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:identifierSystem. The value must be an xsd:string (AuditEvent.IdentifierSystem)." .
+
+# SQL: AuditEvent.IdentifierValue TEXT NOT NULL
+shape:AuditEvent-identifierValue a sh:PropertyShape ;
+    sh:path triad:identifierValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:identifierValue. The value must be an xsd:string (AuditEvent.IdentifierValue)." .
+
+# SQL: AuditEvent.At TEXT NOT NULL CHECK (julianday(At) IS NOT NULL)
+shape:AuditEvent-at a sh:PropertyShape ;
+    sh:path triad:at ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:at. The value must be an xsd:dateTime (AuditEvent.At)." .
+
+# SQL: AuditEvent.Action TEXT NOT NULL CHECK (Action IN ('read', 'create', 'update', 'delete', 'ask', 'tell'))
+shape:AuditEvent-action a sh:PropertyShape ;
+    sh:path triad:action ;
+    sh:datatype xsd:string ;
+    sh:in ( "read" "create" "update" "delete" "ask" "tell" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:action. The value must be one of: read, create, update, delete, ask, tell (AuditEvent.Action)." .
+
+# SQL: AuditEvent.Outcome TEXT NOT NULL CHECK (Outcome IN ('Allowed', 'Denied'))
+shape:AuditEvent-auditOutcome a sh:PropertyShape ;
+    sh:path triad:auditOutcome ;
+    sh:datatype xsd:string ;
+    sh:in ( "Allowed" "Denied" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:auditOutcome. The value must be one of: Allowed, Denied (AuditEvent.Outcome)." .
+
+# SQL: AuditEvent.ActorRole TEXT NOT NULL CHECK (ActorRole IN ('Patient', 'Doctor', 'Nurse', 'MOA'))
+shape:AuditEvent-actorRole a sh:PropertyShape ;
+    sh:path triad:actorRole ;
+    sh:datatype xsd:string ;
+    sh:in ( "Patient" "Doctor" "Nurse" "MOA" ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:actorRole. The value must be one of: Patient, Doctor, Nurse, MOA (AuditEvent.ActorRole)." .
+
+# SQL: AuditEvent.ActorSystem TEXT NOT NULL
+shape:AuditEvent-actorSystem a sh:PropertyShape ;
+    sh:path triad:actorSystem ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:actorSystem. The value must be an xsd:string (AuditEvent.ActorSystem)." .
+
+# SQL: AuditEvent.ActorValue TEXT NOT NULL
+shape:AuditEvent-actorValue a sh:PropertyShape ;
+    sh:path triad:actorValue ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:actorValue. The value must be an xsd:string (AuditEvent.ActorValue)." .
+
+# SQL: AuditEvent.SubjectName TEXT NOT NULL
+shape:AuditEvent-subjectName a sh:PropertyShape ;
+    sh:path triad:subjectName ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:subjectName. The value must be an xsd:string (AuditEvent.SubjectName)." .
+
+# SQL: AuditEvent.SubjectDateOfBirth TEXT NOT NULL
+shape:AuditEvent-subjectDateOfBirth a sh:PropertyShape ;
+    sh:path triad:subjectDateOfBirth ;
+    sh:datatype xsd:date ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:subjectDateOfBirth. The value must be an xsd:date (AuditEvent.SubjectDateOfBirth)." .
+
+# SQL: AuditEvent.Path TEXT NOT NULL
+shape:AuditEvent-path a sh:PropertyShape ;
+    sh:path triad:path ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent must have exactly one value of triad:path. The value must be an xsd:string (AuditEvent.Path)." .
+
+# SQL: AuditEvent.ChatTurnId INTEGER
+# SQL: CONSTRAINT FK_AuditEvent_ChatTurnId_2_ChatTurn_Id FOREIGN KEY (ChatTurnId) REFERENCES ChatTurn (Id)
+shape:AuditEvent-inTurn a sh:PropertyShape ;
+    sh:path triad:inTurn ;
+    sh:class triad:ChatTurn ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:message "Each triad:AuditEvent can have at most one value of triad:inTurn. The value must be a triad:ChatTurn (AuditEvent.ChatTurnId)." .
+
+# SQL: CONSTRAINT UK_AuditEvent_Identifier UNIQUE (IdentifierSystem, IdentifierValue)
+# triad.ttl: triad:AuditEvent owl:hasKey ( triad:identifierSystem triad:identifierValue ).
+shape:UK_AuditEvent_Identifier a sh:SPARQLConstraint ;
+    sh:message "Another triad:AuditEvent ({?value}) has the same values of triad:identifierSystem and triad:identifierValue. The key must be unique (UK_AuditEvent_Identifier)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 .
+            ?value triad:identifierSystem ?key1 ;
+                triad:identifierValue ?key2 ;
+                a triad:AuditEvent .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# ===== END OF THE GENERATED PART. Write the hand-written rules below this line. =====
+
+# ==============================================================================================================
+# Part 2: the hand-written rules. build_shapes.py does not change this part.
+# ==============================================================================================================
+# Each rule below is a shape or a constraint. The lines "shape:<Class>Shape sh:property ..." and
+# "shape:<Class>Shape sh:sparql ..." add it to the node shape of its class in part 1.
+# The SPARQL constraints select $this (the focus node) and ?value (a node that shows the problem).
+# The patient of an assertion is the path triad:about/triad:during/^triad:hasVisit (triad:ofPatient in triad.ttl).
+
+# --------------------------------------------------------------------------------------------------------------
+# The date pairs: CHECK (EndDate >= StartDate)
+# --------------------------------------------------------------------------------------------------------------
+# sh:lessThanOrEquals compares two values with the SPARQL operator <=. Two xsd:dateTime values with a time zone
+# offset compare as instants: "2026-10-03T01:10:00+05:30" is earlier than "2026-10-02T16:05:30-04:00".
+# SQLite julianday() also compares instants. A missing end date gives no comparison (the SQL allows NULL).
+
+# SQL: Visit: CHECK (EndDate IS NULL OR julianday(EndDate) >= julianday(StartDate))
+shape:Visit-dates a sh:PropertyShape ;
+    sh:path triad:startDate ;
+    sh:lessThanOrEquals triad:endDate ;
+    sh:message "A triad:Visit must not end before it starts: triad:endDate must be the same as or later than triad:startDate (Visit.EndDate)." .
+
+# SQL: VisitLocation: CHECK (EndDate IS NULL OR julianday(EndDate) >= julianday(StartDate))
+shape:VisitLocation-dates a sh:PropertyShape ;
+    sh:path triad:startDate ;
+    sh:lessThanOrEquals triad:endDate ;
+    sh:message "A triad:VisitLocation must not end before it starts: triad:endDate must be the same as or later than triad:startDate (VisitLocation.EndDate)." .
+
+# SQL: WorksIn: CHECK (EndDate IS NULL OR StartDate IS NULL OR julianday(EndDate) >= julianday(StartDate))
+shape:WorksIn-dates a sh:PropertyShape ;
+    sh:path triad:roleStartDate ;
+    sh:lessThanOrEquals triad:roleEndDate ;
+    sh:message "A triad:WorksIn role must not end before it starts: triad:roleEndDate must be the same as or later than triad:roleStartDate (WorksIn.EndDate)." .
+
+shape:VisitShape sh:property shape:Visit-dates .
+shape:VisitLocationShape sh:property shape:VisitLocation-dates .
+shape:WorksInShape sh:property shape:WorksIn-dates .
+
+# --------------------------------------------------------------------------------------------------------------
+# The issuer of a message: CHECK (StaffId IS NOT NULL OR Origin = 'Patient')
+# --------------------------------------------------------------------------------------------------------------
+# This rule is a node shape of its own. pyshacl adds the sh:message of a node shape to each result of that shape,
+# also to the results of its SPARQL constraints. So shape:MessageShape has no sh:message.
+
+# SQL: Message: CHECK (StaffId IS NOT NULL OR Origin = 'Patient')
+shape:MessageIssuerShape a sh:NodeShape ;
+    sh:targetClass triad:Message ;
+    sh:or (
+        [ sh:path [ sh:inversePath triad:issues ] ; sh:minCount 1 ]
+        [ sh:path triad:origin ; sh:hasValue "Patient" ]
+    ) ;
+    sh:message "A triad:Message with no issuer must come from the patient: a triad:Staff must issue it (triad:issues), or its triad:origin must be Patient (Message.StaffId, Message.Origin)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# The staff member of a language
+# --------------------------------------------------------------------------------------------------------------
+# A StaffLanguage row is one triad:language triple of its staff member. So its foreign key is a rule on the
+# subject of the triple. (The other foreign keys are rules on the values: sh:class in part 1.)
+
+# SQL: CONSTRAINT FK_StaffLanguage_StaffId_2_Staff_Id FOREIGN KEY (StaffId) REFERENCES Staff (Id)
+shape:language-subject a sh:PropertyShape ;
+    sh:targetSubjectsOf triad:language ;
+    sh:path rdf:type ;
+    sh:hasValue triad:Staff ;
+    sh:message "Only a triad:Staff can have a value of triad:language (StaffLanguage.StaffId)." .
+
+# --------------------------------------------------------------------------------------------------------------
+# Supersedes: the CHECK and the trigger TR_Assertion_Supersede_Check
+# --------------------------------------------------------------------------------------------------------------
+
+shape:AssertionShape sh:sparql
+    shape:Assertion-supersedes-not-reflexive ,
+    shape:Assertion-supersedes-no-cycle ,
+    shape:Assertion-supersedes-not-newer ,
+    shape:Assertion-supersedes-same-patient .
+
+# SQL: Assertion: CHECK (SupersedesId IS NULL OR SupersedesId <> Id)
+# triad.ttl: triad:supersedes is Irreflexive and Asymmetric. A reasoner finds this error; this check finds it
+# without a reasoner.
+shape:Assertion-supersedes-not-reflexive a sh:SPARQLConstraint ;
+    sh:message "The assertion supersedes itself. An assertion can supersede only another assertion (CHECK SupersedesId <> Id)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+            $this triad:supersedes $this .
+        }
+        """ .
+
+# SQL: no constraint. In SQLite a cycle cannot occur: a new row can point only to an old row (FOREIGN KEY), and
+# the rows do not change (TR_Assertion_NoUpdate). A graph has no such order, so this rule is new (plan 1.7).
+# OWL 2 DL cannot hold it: it does not allow Irreflexive on the transitive triad:supersedesTransitively.
+shape:Assertion-supersedes-no-cycle a sh:SPARQLConstraint ;
+    sh:message "The assertion is in a cycle of triad:supersedes links ({?value} is in the same cycle). A chain of revisions must have an end (new in Milestone 5)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:supersedes ?value .
+            ?value triad:supersedes+ $this .
+            FILTER (?value != $this)
+        }
+        """ .
+
+# SQL: TR_Assertion_Supersede_Check, 'The superseded assertion is newer than the new assertion.'
+# The SPARQL operator > compares two xsd:dateTime values as instants, as julianday() does in SQLite.
+shape:Assertion-supersedes-not-newer a sh:SPARQLConstraint ;
+    sh:message "The superseded assertion {?value} is newer than this assertion. An assertion can supersede only an assertion that is not newer (TR_Assertion_Supersede_Check)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:supersedes ?value ;
+                triad:assertedAt ?newAt .
+            ?value triad:assertedAt ?oldAt .
+            FILTER (?oldAt > ?newAt)
+        }
+        """ .
+
+# SQL: TR_Assertion_Supersede_Check, 'The superseded assertion is about another patient.'
+shape:Assertion-supersedes-same-patient a sh:SPARQLConstraint ;
+    sh:message "The superseded assertion {?value} is about another patient. An assertion can supersede only an assertion about the same patient (TR_Assertion_Supersede_Check)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:supersedes ?value ;
+                triad:about/triad:during/^triad:hasVisit ?patient .
+            ?value triad:about/triad:during/^triad:hasVisit ?oldPatient .
+            FILTER (?oldPatient != ?patient)
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# The other triggers of Assertion
+# --------------------------------------------------------------------------------------------------------------
+
+shape:ClinicalEntryShape sh:sparql shape:ClinicalEntry-one-head .
+shape:MessageShape sh:sparql shape:Message-one-patient .
+
+# SQL: TR_Assertion_One_Head_Per_Entry, 'The entry has a current assertion. The new assertion must supersede it.'
+# The current assertion (the head) of an entry is an assertion about the entry that no assertion supersedes.
+# "No triple" means "false" here: this is a closed-world rule (ontology.md section 8).
+shape:ClinicalEntry-one-head a sh:SPARQLConstraint ;
+    sh:message "The entry has more than one current assertion ({?value} and {?other}). A new assertion about an entry must supersede its current assertion (TR_Assertion_One_Head_Per_Entry)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value ?other
+        WHERE {
+            ?value triad:about $this .
+            ?other triad:about $this .
+            FILTER (STR(?value) < STR(?other))
+            FILTER NOT EXISTS { ?newer triad:supersedes ?value }
+            FILTER NOT EXISTS { ?newer triad:supersedes ?other }
+        }
+        """ .
+
+# SQL: TR_Assertion_One_Patient_Per_Message, 'All assertions of a message must be about one patient.'
+shape:Message-one-patient a sh:SPARQLConstraint ;
+    sh:message "The assertions of this message are about more than one patient ({?value} and {?other}). All assertions of a message must be about one patient (TR_Assertion_One_Patient_Per_Message)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value ?other
+        WHERE {
+            $this triad:contains ?value , ?other .
+            ?value triad:about/triad:during/^triad:hasVisit ?patient .
+            ?other triad:about/triad:during/^triad:hasVisit ?otherPatient .
+            FILTER (?otherPatient != ?patient && STR(?value) < STR(?other))
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# The care team, the agent layer and the audit log
+# --------------------------------------------------------------------------------------------------------------
+
+shape:CareTeamMemberShape sh:sparql shape:CareTeamMember-staff .
+shape:CitationShape sh:sparql shape:Citation-assistant-turn , shape:Citation-patient .
+shape:AuditEventShape sh:sparql shape:AuditEvent-subject .
+
+# SQL: TR_CareTeamMember_Staff_Check, 'The care-team member is not a staff member.'
+# A member keeps the identifier of a staff member as values (a FHIR reference by identifier), not as a link.
+shape:CareTeamMember-staff a sh:SPARQLConstraint ;
+    sh:message "The care-team member is not a staff member: no triad:Staff has its triad:memberSystem and triad:memberValue as identifier (TR_CareTeamMember_Staff_Check)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this
+        WHERE {
+            $this triad:memberSystem ?system ;
+                triad:memberValue ?identifier .
+            FILTER NOT EXISTS {
+                ?staff triad:identifierSystem ?system ;
+                    triad:identifierValue ?identifier ;
+                    a triad:Staff .
+            }
+        }
+        """ .
+
+# SQL: TR_Citation_Check, 'Only an assistant turn can cite an assertion.'
+shape:Citation-assistant-turn a sh:SPARQLConstraint ;
+    sh:message "The citation comes from the turn {?value}, which is not an assistant turn. Only an assistant turn can cite an assertion (TR_Citation_Check)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:byTurn ?value .
+            ?value triad:speaker ?speaker .
+            FILTER (?speaker != "Assistant")
+        }
+        """ .
+
+# SQL: TR_Citation_Check, 'The cited assertion is not about the patient of the chat session.'
+# The session keeps its patient as values (triad:subjectName, triad:subjectDateOfBirth): the key of the patient.
+shape:Citation-patient a sh:SPARQLConstraint ;
+    sh:message "The cited assertion {?value} is not about the patient of the chat session. A turn can cite only an assertion about the patient of its session (TR_Citation_Check)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:byTurn ?turn ;
+                triad:citedAssertion ?value .
+            FILTER NOT EXISTS {
+                ?session triad:includes ?turn ;
+                    triad:subjectName ?name ;
+                    triad:subjectDateOfBirth ?dateOfBirth .
+                ?value triad:about/triad:during/^triad:hasVisit ?patient .
+                ?patient triad:name ?name ;
+                    triad:dateOfBirth ?dateOfBirth .
+            }
+        }
+        """ .
+
+# SQL: TR_AuditEvent_Subject_Check, 'The audit subject is not the patient of the chat session.'
+shape:AuditEvent-subject a sh:SPARQLConstraint ;
+    sh:message "The audit subject is not the patient of the chat session of the turn {?value}. An audit record of a chat turn must have the patient of that session as its subject (TR_AuditEvent_Subject_Check)." ;
+    sh:prefixes <https://github.com/MohamedKhalidmk/TRIAD/shapes/triad> ;
+    sh:select """
+        SELECT $this ?value
+        WHERE {
+            $this triad:inTurn ?value ;
+                triad:subjectName ?name ;
+                triad:subjectDateOfBirth ?dateOfBirth .
+            FILTER NOT EXISTS {
+                ?session triad:includes ?value ;
+                    triad:subjectName ?name ;
+                    triad:subjectDateOfBirth ?dateOfBirth .
+            }
+        }
+        """ .
+
+# --------------------------------------------------------------------------------------------------------------
+# The SQL rules that have no shape
+# --------------------------------------------------------------------------------------------------------------
+# - TR_Assertion_NoUpdate, TR_Assertion_NoDelete, TR_AuditEvent_NoUpdate, TR_AuditEvent_NoDelete (append-only) and
+#   TR_Patient_Key_NoUpdate: a graph has no "update" event. The SPARQL delete helper and the use cases hold them
+#   (plan 1.7 and 5.4).
+# - UK_StaffLanguage_StaffId_Language: a graph holds each triple once, so a language cannot repeat.
+# - UK_Staff_Id_Role, UK_ClinicalEntry_Id_Category: the targets of the composite foreign keys of the subtypes. The
+#   Id is in the IRI, and the subtype is a type of the same individual (the rules shape:<Subtype>-type).

@@ -11,12 +11,15 @@ authors:
     affiliation: University of Victoria
 repository-code: "https://github.com/MohamedKhalidmk/TRIAD"
 license: CC-BY-NC-SA-4.0
-date-released: 2026-11-04
+version: 5.0.0
+date-released: 2026-11-25
 abstract: >-
   A data model for clinical records that many people make and change over time.
   Each clinical fact is an assertion with an author and a source, and a new assertion
   supersedes the old one, so the current state is the result of a traversal.
-  The Milestone 4 prototype is a hospital web app on SQLite with a Care Assistant chat.
+  The prototype is a hospital web app with a Care Assistant chat. Milestone 4 keeps the data in SQLite.
+  Milestone 5 adds an OWL 2 ontology, a W3C R2RML mapping to an RDF knowledge graph in Virtuoso 7.2,
+  SPARQL 1.1 scripts, and SPARQL adapters, so the same app runs on SQLite, Virtuoso or Oxigraph.
   The clinical entities follow HL7 FHIR R4. All data is synthetic (Synthea).
 keywords:
   - clinical records
@@ -24,6 +27,11 @@ keywords:
   - HL7 FHIR
   - relational database
   - SQLite
+  - RDF
+  - OWL
+  - SPARQL
+  - knowledge graph
+  - Virtuoso
 references:
   - type: article
     title: "Synthea: An approach, method, and software mechanism for generating synthetic patients and the synthetic electronic health care record"
@@ -42,3 +50,177 @@ references:
     authors:
       - name: HL7 International
     url: "https://hl7.org/fhir/R4/"
+  - type: standard
+    title: "OWL 2 Web Ontology Language Document Overview (Second Edition)"
+    authors:
+      - name: W3C OWL Working Group
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2012-12-11
+    url: "https://www.w3.org/TR/owl2-overview/"
+  - type: standard
+    title: "RDF 1.1 Concepts and Abstract Syntax"
+    authors:
+      - family-names: Cyganiak
+        given-names: Richard
+      - family-names: Wood
+        given-names: David
+      - family-names: Lanthaler
+        given-names: Markus
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2014-02-25
+    url: "https://www.w3.org/TR/rdf11-concepts/"
+  - type: standard
+    title: "RDF 1.1 XML Syntax"
+    authors:
+      - family-names: Gandon
+        given-names: Fabien
+      - family-names: Schreiber
+        given-names: Guus
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2014-02-25
+    url: "https://www.w3.org/TR/rdf-syntax-grammar/"
+  - type: standard
+    title: "SPARQL 1.1 Query Language"
+    authors:
+      - family-names: Harris
+        given-names: Steve
+      - family-names: Seaborne
+        given-names: Andy
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2013-03-21
+    url: "https://www.w3.org/TR/sparql11-query/"
+  - type: standard
+    title: "SPARQL 1.1 Update"
+    authors:
+      - family-names: Gearon
+        given-names: Paula
+      - family-names: Passant
+        given-names: Alexandre
+      - family-names: Polleres
+        given-names: Axel
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2013-03-21
+    url: "https://www.w3.org/TR/sparql11-update/"
+  - type: standard
+    title: "SPARQL 1.1 Protocol"
+    authors:
+      - family-names: Feigenbaum
+        given-names: Lee
+      - family-names: Williams
+        given-names: Gregory Todd
+      - family-names: Clark
+        given-names: Kendall Grant
+      - family-names: Torres
+        given-names: Elias
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2013-03-21
+    url: "https://www.w3.org/TR/sparql11-protocol/"
+  - type: standard
+    title: "R2RML: RDB to RDF Mapping Language"
+    authors:
+      - family-names: Das
+        given-names: Souripriya
+      - family-names: Sundara
+        given-names: Seema
+      - family-names: Cyganiak
+        given-names: Richard
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2012-09-27
+    url: "https://www.w3.org/TR/r2rml/"
+  - type: standard
+    title: "A Direct Mapping of Relational Data to RDF"
+    authors:
+      - family-names: Arenas
+        given-names: Marcelo
+      - family-names: Bertails
+        given-names: Alexandre
+      - family-names: Prud'hommeaux
+        given-names: Eric
+      - family-names: Sequeda
+        given-names: Juan
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2012-09-27
+    url: "https://www.w3.org/TR/rdb-direct-mapping/"
+  - type: standard
+    title: "Shapes Constraint Language (SHACL)"
+    authors:
+      - family-names: Knublauch
+        given-names: Holger
+      - family-names: Kontokostas
+        given-names: Dimitris
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2017-07-20
+    url: "https://www.w3.org/TR/shacl/"
+  - type: standard
+    title: "PROV-O: The PROV Ontology"
+    authors:
+      - family-names: Lebo
+        given-names: Timothy
+      - family-names: Sahoo
+        given-names: Satya
+      - family-names: McGuinness
+        given-names: Deborah
+    publisher:
+      name: World Wide Web Consortium (W3C)
+    date-released: 2013-04-30
+    url: "https://www.w3.org/TR/prov-o/"
+  - type: software
+    title: "Virtuoso Open-Source Edition"
+    authors:
+      - name: OpenLink Software
+    version: "7.2.17"
+    repository-code: "https://github.com/openlink/virtuoso-opensource"
+  - type: article
+    title: "Morph-KGC: Scalable knowledge graph materialization with mapping partitions"
+    authors:
+      - family-names: Arenas-Guerrero
+        given-names: Julián
+      - family-names: Chaves-Fraga
+        given-names: David
+      - family-names: Toledo
+        given-names: Jhon
+      - family-names: Pérez
+        given-names: María S.
+      - family-names: Corcho
+        given-names: Oscar
+    journal: "Semantic Web"
+    volume: 15
+    issue: 1
+    start: 1
+    end: 20
+    year: 2024
+    doi: 10.3233/SW-223135
+  - type: software
+    title: "Oxigraph"
+    authors:
+      - family-names: Pellissier Tanon
+        given-names: Thomas
+    version: "0.3.22"
+    repository-code: "https://github.com/oxigraph/oxigraph"
+  - type: software
+    title: "SPARQLWrapper"
+    authors:
+      - name: The RDFLib team
+    version: "2.0.0"
+    repository-code: "https://github.com/RDFLib/sparqlwrapper"
+  - type: article
+    title: "The Protégé project: a look back and a look forward"
+    authors:
+      - family-names: Musen
+        given-names: Mark A.
+    journal: "AI Matters"
+    volume: 1
+    issue: 4
+    start: 4
+    end: 12
+    year: 2015
+    doi: 10.1145/2757001.2757003

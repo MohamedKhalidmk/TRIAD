@@ -41,9 +41,14 @@ export async function openAs(page: Page, user: string, path: string, tab?: strin
 // ----- Screenshots -----
 
 const here = dirname(fileURLToPath(import.meta.url));
-/** "npm run e2e:screens" (TRIAD_SCREENS=1) writes to doc/screenshots/. A normal run writes to test-results/. */
+/**
+ * "npm run e2e:screens" (TRIAD_SCREENS=1) writes to doc/screenshots/. With a knowledge-graph store
+ * (TRIAD_E2E_STORE is oxigraph or virtuoso) it writes to doc/screenshots/m5/, so the screenshots of Milestone 4 stay.
+ * A normal run writes to test-results/.
+ */
+const KG_STORE = (process.env.TRIAD_E2E_STORE ?? 'sqlite') !== 'sqlite';
 export const SCREEN_DIR = process.env.TRIAD_SCREENS === '1'
-  ? resolve(here, '..', '..', '..', 'doc', 'screenshots')
+  ? resolve(here, '..', '..', '..', 'doc', 'screenshots', ...(KG_STORE ? ['m5'] : []))
   : resolve(here, '..', 'test-results', 'screenshots');
 
 /** The largest panel in CSS pixels. At deviceScaleFactor 2 the PNG is two times larger. */

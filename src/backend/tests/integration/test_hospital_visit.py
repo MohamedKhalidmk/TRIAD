@@ -1,19 +1,20 @@
 """The hospital-visit journey of USER_FLOWS.md section 3 (Use cases 0 to 9), through the API.
 
 The test uses a copy of the full database, the fake chat mode and the fixed demo time.
-The use cases share one database, so they run in the order of this file.
+The use cases share one copy of the data, so they run in the order of this file: on SQLite, then on the knowledge
+graph (the fixture `module_full_store`; Virtuoso with TRIAD_TEST_STORES). The stored rows come from the probe of
+the store. Times compare as instants (D11: a KG store can give another text of the same time).
 """
 from __future__ import annotations
 
 import json
-import shutil
-import sqlite3
 import uuid
 
 import pytest
 
 from domain.access import CARE_TEAM_DENIED
-from tests.conftest import all_items, as_user, make_client
+from domain.rules import parse_time
+from tests.conftest import all_items, as_user
 
 pytestmark = pytest.mark.slow
 
@@ -29,8 +30,8 @@ OLD_WORDS = ("asthma", "inhaler", "albuterol", "salbutamol")
 class Journey:
     """The client and the ids that the use cases share."""
 
-    def __init__(self, client, db_path):
-        self.client, self.db_path = client, db_path
+    def __init__(self, store):
+        self.store, self.client = store, store.client()
         self.ids: dict[str, int] = {}
         self.sessions: dict[tuple[str, int], int] = {}
 
@@ -72,13 +73,6 @@ class Journey:
         return self.call("PUT", f"/api/visits/{self.ids['visit']}/care-team", SOFIA,
                          json={"members": [{"system": EMPLOYEE, "value": v} for v in values]})
 
-    def sql(self, query: str, *args):
-        conn = sqlite3.connect(self.db_path)
-        try:
-            return conn.execute(query, args).fetchall()
-        finally:
-            conn.close()
-
 
 def new_entry(category, code, system, display, statement, intent, verification, details=None, supersedes=None):
     item = {"newEntry": {"category": category, "code": code, "codeSystem": system, "display": display,
@@ -90,10 +84,8 @@ def new_entry(category, code, system, display, statement, intent, verification, 
 
 
 @pytest.fixture(scope="module")
-def j(full_db, tmp_path_factory) -> Journey:
-    path = tmp_path_factory.mktemp("journey") / "journey.db"
-    shutil.copy(full_db, path)
-    return Journey(make_client(path), path)
+def j(module_full_store) -> Journey:
+    return Journey(module_full_store)
 
 
 def test_use_case0_the_3mt_slide(j):
@@ -135,7 +127,8 @@ def test_use_case1_arrival_at_the_front_desk(j):
         {"E1002", "E1005"}, {"E1002", "E1005", "E1004"}, {"E1002", "E1005"}]
     assert all(v["author"]["name"] == "Sofia Alvarez" for v in team["chain"])
     assert [v["isCurrent"] for v in team["chain"]] == [True, False, False]
-    assert team["chain"][0]["assertedAt"] > team["chain"][1]["assertedAt"] > team["chain"][2]["assertedAt"]
+    times = [parse_time(v["assertedAt"]) for v in team["chain"]]
+    assert times[0] > times[1] > times[2]
     assert j.get(f"/api/visits/{j.ids['visit']}/care-team", SOFIA) == team
 
     intake = j.record(SOFIA, "Shortness of breath since this morning.", new_entry(
@@ -170,8 +163,8 @@ def test_use_case2_waiting_room_patient_report(j):
     assert (report["channel"], report["origin"]) == ("App", "Patient")
     assert report["author"] == {"name": "Marlin805 Reggie481 Nienow652", "role": "Patient", "staffId": None,
                                 "label": "Patient"}
-    assert j.sql("SELECT StaffId, Origin, Channel FROM Message WHERE Id = ?", result["messageId"]) == [
-        (None, "Patient", "App")]
+    message = j.store.probe.row("message", result["messageId"])
+    assert (message["issues"], message["origin"], message["channel"]) == (None, "Patient", "App")
     assert [a["id"] for a in j.chain(report["id"])][:2] == [report["id"], metformin["id"]]
     assert [a["id"] for a in j.chain(report["id"], PATIENT_B)] == [report["id"]]   # a patient sees the head only
 
@@ -205,7 +198,7 @@ def test_use_case3_triage_by_the_nurse(j):
 
     visit = j.post(f"/api/visits/{j.ids['visit']}/locations", NAIR, json={"locationId": j.location("ER-BED-2")})
     assert [loc["name"] for loc in visit["locations"]] == ["ER Waiting", "ER Bed 2"]
-    assert visit["locations"][0]["endDate"] == visit["locations"][1]["startDate"]
+    assert parse_time(visit["locations"][0]["endDate"]) == parse_time(visit["locations"][1]["startDate"])
 
     turn = j.ask(NAIR, b, "Any allergies?")
     assert "no allergy is recorded" in turn["text"].lower()
@@ -322,11 +315,12 @@ def test_use_case8_directory(j):
 def test_use_case9_discharge(j):
     visit = j.post(f"/api/visits/{j.ids['visit']}/end", OKAFOR)
     assert visit["endDate"] and not visit["isOpen"]
-    assert visit["locations"][-1]["endDate"] == visit["endDate"]
+    assert parse_time(visit["locations"][-1]["endDate"]) == parse_time(visit["endDate"])
     history = {a["id"]: a for a in j.items(f"/api/patients/{j.ids['B']}/chart", OKAFOR, history="true")}
     journey_ids = {v for k, v in j.ids.items() if k not in ("B", "visit")}
     assert journey_ids <= set(history)
     assert all(history[i]["author"]["name"] for i in journey_ids)
     assert not history[j.ids["asthma"]]["isCurrent"] and not history[j.ids["inhaler"]]["isCurrent"]
     # Each write gets a later time than the demo time, so the times always increase.
-    assert all(history[i]["assertedAt"] > "2026-10-30T09:00:00-04:00" for i in journey_ids if i != j.ids["metformin"])
+    demo = parse_time("2026-10-30T09:00:00-04:00")
+    assert all(parse_time(history[i]["assertedAt"]) > demo for i in journey_ids if i != j.ids["metformin"])

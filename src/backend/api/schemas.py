@@ -61,6 +61,9 @@ class Health(Model):
     mode: str
     now: str
     clock: Literal["system", "fixed"]
+    store: Literal["sqlite", "virtuoso", "oxigraph"]
+    ontology_version: Optional[str]
+    sparql_url: Optional[str] = None
 
 
 # ----- users and patients -----
@@ -80,6 +83,7 @@ class Permissions(Model):
     chat: bool
     tell: bool
     edit_demographics: bool
+    delete_patient: bool
     check_in: bool
     end_visit: bool
     move_location: bool

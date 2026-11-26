@@ -87,6 +87,21 @@ Each GET that gives a list of rows gives one page of the list.
 - **Not paged:** `/health`, `/me`, `/users/{key}`, `/patients/{id}`, `/visits/{id}/care-team`, `/chat/sessions/{id}` and `/codes`.
   They give one row or one object, or a fixed list in the code.
 
+### 1.6 Data store (Milestone 5)
+
+- The environment variable `TRIAD_STORE` (or `main.py serve --store`) selects the data store of the backend:
+  - `sqlite` (the default): the relational database (Milestone 4).
+  - `virtuoso` or `oxigraph`: the knowledge graph (RDF, SPARQL). The API, the types and the rules of this file stay the same.
+- `GET /api/health` gives `store` (the value of `TRIAD_STORE`) and `ontologyVersion`: the version of the TRIAD ontology
+  of the knowledge graph (for example `'5.0.0'`), or `null` for `sqlite`. `schemaVersion` stays: the knowledge graph is
+  built from a database of that schema version.
+- `GET /api/health` also gives `sparqlUrl`: the value of `TRIAD_SPARQL_QUERY_URL` (for example
+  `'http://127.0.0.1:8890/sparql'`) when `store` is `virtuoso`, and `null` for the other stores. The Demo guide uses it
+  to link to the SPARQL page of Virtuoso, so the frontend has no fixed port.
+- Health reads no triple count. The frontend reads health after each write, so it must stay fast.
+- With a knowledge-graph store, a time can come back with a different text form of the same instant: the stores drop
+  the trailing zeros of the seconds (`09:00:00.100-04:00` becomes `09:00:00.1-04:00`). The offset does not change.
+
 ## 2. Types (TypeScript notation)
 
 The backend sends exactly these shapes. `T | null` means the field is always present and can be null.
@@ -118,7 +133,7 @@ interface UserView {
 
 // Patients
 interface Permissions {      // what the current user can do for this patient. The UI uses it to show buttons. The backend checks again.
-  viewChart: boolean; chat: boolean; tell: boolean; editDemographics: boolean;
+  viewChart: boolean; chat: boolean; tell: boolean; editDemographics: boolean; deletePatient: boolean;
   checkIn: boolean; endVisit: boolean; moveLocation: boolean; manageCareTeam: boolean; viewAudit: boolean;
   recordIntents: Intent[];   // the intents that the user can record
 }
@@ -235,7 +250,7 @@ interface Medication { id: number; code: string; codeSystem: string; name: strin
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed' }` | all, no header |
+| `GET /api/health` | — | `{ status: 'ok', schemaVersion: number, mode: ChatMode, now: string, clock: 'system' \| 'fixed', store: 'sqlite' \| 'virtuoso' \| 'oxigraph', ontologyVersion: string \| null, sparqlUrl: string \| null }` (section 1.6) | all, no header |
 | `GET /api/users?role=&q=&limit=&offset=` | — | `Page<UserView>` (the demo users first, in the order of section 1.1; then by name, then key) | all, no header |
 | `GET /api/users/{key}` | — | `UserView` | all, no header |
 | `GET /api/me` | — | `UserView` | any user |
@@ -273,7 +288,7 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 
 | Method and path | Body | Response | Who |
 |---|---|---|---|
-| `GET /api/patients/{id}/chart?visitId=&category=&history=false&q=&limit=&offset=` | — | `Chart` (one page) | self (patient-visible items only), care team |
+| `GET /api/patients/{id}/chart?visitId=&category=&history=false&q=&from=&to=&limit=&offset=` | — | `Chart` (one page) | self (patient-visible items only), care team |
 | `GET /api/assertions/{id}/chain?limit=&offset=` | — | `Chain` (one page, newest first) | self (head only), care team |
 | `POST /api/messages` | `NewMessage` | 201 `RecordResult` | see USER_FLOWS.md section 2 |
 
@@ -281,7 +296,11 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
 - **Chart order.** The category in this order: Allergy, Diagnosis, Prescription, Observation, LabOrder, LabReport, Procedure, CareTeam.
   Then the newest first, then the Id. So the items of one category stay together across pages.
 - **Chart search.** `q` searches part of the display, the statement and the author name (case is not important). A blank `q` is no search.
-- **Chart counts.** `counts` uses the same filters as the page (`visitId`, `history`, `q` and the patient-visible rule), but not `category`.
+- **Chart dates.** `from` and `to` are date-only values (`YYYY-MM-DD`). Both are optional and both include their day.
+  The chart keeps an item when the local date of its `assertedAt` (the first 10 characters, as written) is not before `from` and not after `to`.
+  The filter works on the page, on `total` and on `counts`. A value in another format, or a date that does not exist, gives 422 with `fields.from` or `fields.to`.
+  A `from` after `to` also gives 422 (`fields.from`).
+- **Chart counts.** `counts` uses the same filters as the page (`visitId`, `history`, `q`, `from`, `to` and the patient-visible rule), but not `category`.
   `total` also uses `category`. For a patient, the patient-visible rule is in the SQL WHERE clause (the predicate of query Q12), so `total` and the pages are correct.
 - **Visit of a new entry.** The default is the open visit. A staff user must have an open visit (else 422). For a patient report about a new fact with no open visit, the backend makes a VR visit that ends at once (EndDate = StartDate).
 - **The entry and version rule.** A new claim about the same fact (confirm, refute, a report on the item) is a new assertion on the same entry (`entryId`).
@@ -298,8 +317,12 @@ of this visit, if there is one. Each member must be a staff identifier (else 422
   - LabReport: `issuedDate`, `conclusion`
   - Prescription: `medicationCode`, `medicationSystem`, `medicationName`, `dosage`, `frequency`, `status` (`active`, `draft`, `stopped`, `completed`).
     The backend finds the Medication by (code, system). If it does not exist, the backend adds it.
+- **The dates of the details** (`onsetDate`, `abatementDate`, `performedDate`, `issuedDate`) are ISO 8601. The backend keeps each one in the full form (the date, the time with seconds, the offset), on each store:
+  a date-only value (`YYYY-MM-DD`, from the date field of the record form) becomes midnight UTC (`2026-09-01` → `2026-09-01T00:00:00+00:00`), a time with no seconds gets `:00`, and a time with no offset is UTC.
+  A value in the full form does not change. The date (the first 10 characters) and the instant do not change. A value that is not ISO 8601 gives 422 (`fields` names the detail).
+  The knowledge graph keeps these values as `xsd:dateTime` (the range of the ontology), and a date-only value is not an `xsd:dateTime`.
 - In an `AssertionView`, `details` of a Prescription has `medication` (the name), `dosage`, `frequency` and `status`.
-  `details` of a CareTeam has `name`, `status` and `members` (the member names, separated by commas).
+  `details` of a CareTeam has `name`, `status` and `members` (the member names, separated by commas). The names are in the order of the member identifier (the system, then the value), on each store; a member that is not a staff member shows its value. The `members` list of a `CareTeamVersion` keeps the order of the request.
 
 ### 3.5 Care Assistant (chat)
 
@@ -381,6 +404,9 @@ The search `q` (case is not important):
 - departments and locations: part of the name or part of the identifier value;
 - staff: part of the name, or the exact identifier value;
 - medications: part of the name, or the exact code.
+
+The `languages` of a `Staff` are in alphabetical order (by the text, for example `["de", "en"]`), on each store.
+Milestone 4 gave them in the order of entry (Milestone 5 changes this, because the knowledge graph has no order of entry).
 
 The backend makes the identifier of a new row when the body has none
 (system `https://triad.example/fhir/sid/<organization|location|employee>`, a new value).

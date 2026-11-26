@@ -1,0 +1,76 @@
+# TRIAD debug queries (Milestone 5): the queries of Appendix B of the course manual, and the counts per class.
+# They read the store and change nothing.
+#
+# Run: ./src/scripts/kg.sh sparql 06_debug.sparql [--only B.1,B.4]
+#      or copy one query into the Conductor SPARQL page (http://127.0.0.1:8890/sparql).
+# Virtuoso also has its own system graphs (for example http://www.openlinksw.com/schemas/virtrdf#), so the
+# queries B.1 and B.4 show more graphs than the four TRIAD graphs. The query B.1a gives the TRIAD graphs only.
+# (A comment line must not start with an ID and a period, for example "B.4" or "Q1.": that starts an operation.)
+
+PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl:   <http://www.w3.org/2002/07/owl#>
+PREFIX triad: <https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#>
+
+# B.1 All graphs: each named graph of the store that holds at least one triple.
+SELECT DISTINCT ?g
+WHERE { GRAPH ?g { ?s ?p ?o } }
+ORDER BY ?g
+
+# B.1a The TRIAD graphs and the number of triples in each one (0 for an empty graph).
+#      VALUES ?g gives the list of graphs: a GROUP BY ?g over all graphs once gave a wrong IRI on Virtuoso.
+#      SUM(IF(BOUND(?s), 1, 0)), not COUNT(?s): Oxigraph 0.3 counts the unbound ?s of an empty graph as 1.
+SELECT ?g (SUM(IF(BOUND(?s), 1, 0)) AS ?triples)
+WHERE {
+  VALUES ?g {
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/scratch>
+    <https://github.com/MohamedKhalidmk/TRIAD/graph/meta>
+  }
+  OPTIONAL { GRAPH ?g { ?s ?p ?o } }
+}
+GROUP BY ?g
+ORDER BY ?g
+
+# B.2 All triples of one graph: the TBox graph (the ontology, some thousand triples).
+#     For another graph, change the IRI in FROM. The ABox graph has 1.3 million triples: use B.2a for it.
+SELECT ?s ?p ?o
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+WHERE { ?s ?p ?o }
+
+# B.2a The first 100 triples of the ABox graph (the data).
+SELECT ?s ?p ?o
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE { ?s ?p ?o }
+LIMIT 100
+
+# B.3 The classes of one graph: the classes that the nodes of the ABox graph have (rdf:type).
+SELECT DISTINCT ?class
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE { ?node a ?class }
+ORDER BY ?class
+
+# B.3a The classes that the TBox graph declares (owl:Class): the 28 TRIAD classes and 3 PROV-O classes.
+SELECT ?class ?label
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/tbox>
+WHERE {
+  ?class a owl:Class .
+  FILTER (isIRI(?class))
+  OPTIONAL { ?class rdfs:label ?label }
+}
+ORDER BY ?class
+
+# B.4 The classes of all graphs: each graph and each class that a node of the graph has.
+SELECT DISTINCT ?g ?class
+WHERE { GRAPH ?g { ?node a ?class } }
+ORDER BY ?g ?class
+
+# B.5 The number of nodes of each class in the ABox graph.
+#     A subtype node also has the type of its parent class, so Staff = Doctor + Nurse + MOA, and ClinicalEntry = the
+#     sum of the 8 entry types.
+SELECT ?class (COUNT(?node) AS ?nodes)
+FROM <https://github.com/MohamedKhalidmk/TRIAD/graph/abox>
+WHERE { ?node a ?class }
+GROUP BY ?class
+ORDER BY ?class

@@ -2,11 +2,15 @@
 
 For each list: page 1 and page 2 are slices of the full order, `total` is correct, an offset after the end
 gives no items, and a limit or an offset out of range gives 422. The chart also has `counts` and `q`.
+
+The tests run on each store: one copy of the full data for all tests of this module (`module_full_store`), on
+SQLite, then on the knowledge graph. The full orders come from the port of the store (`store.open_ctx()`), and
+queries Q12 and Q14 run in the language of the store (SQL or SPARQL). The test inputs (the head of the longest
+chain) come from the SQLite copy of the same data (`store.db_path`): the tests do not change these rows.
 """
 from __future__ import annotations
 
 import re
-import shutil
 import sqlite3
 
 import pytest
@@ -17,8 +21,8 @@ from domain.rules import parse_time
 from infrastructure import config
 from infrastructure.sqlite.connection import connect
 from infrastructure.sqlite.records_repository import CHART_CATEGORIES, SqliteRecordRepository
-from tests.conftest import all_items, as_user, make_client
-from tests.integration.test_api import q12_ids
+from tests.conftest import all_items, as_user
+from tests.integration.test_api import q12_ids, sparql_query, sql_q12_ids
 
 pytestmark = pytest.mark.slow
 
@@ -30,7 +34,7 @@ LONG_PATIENT, LONG_DOCTOR = 61, "Doctor:9999948794"   # the patient with the lon
 
 
 def head_of_longest_chain(path, patient_id: int) -> int:
-    """The current assertion of the longest chain of the patient."""
+    """The current assertion of the longest chain of the patient (from the SQLite copy of the data)."""
     conn = connect(path)
     try:
         repo = SqliteRecordRepository(conn)
@@ -44,20 +48,37 @@ def head_of_longest_chain(path, patient_id: int) -> int:
 
 
 @pytest.fixture(scope="module")
-def api(full_db, tmp_path_factory):
-    """One API client for the read tests of this module, with 4 more chat sessions of Dr. Okafor about Elena."""
-    path = tmp_path_factory.mktemp("pages") / "pages.db"
-    shutil.copy(full_db, path)
-    client = make_client(path)
+def store(module_full_store):
+    """The store of this module, with 4 more chat sessions of Dr. Okafor about Elena."""
+    client = module_full_store.client()
     for _ in range(4):
         assert client.post("/api/patients/1/chat/sessions", headers=as_user(OKAFOR)).status_code == 201
-    client.db_path = path
-    return client
+    return module_full_store
 
 
 @pytest.fixture(scope="module")
-def b_chain(api) -> int:
-    return head_of_longest_chain(api.db_path, B_ID)
+def api(store):
+    """One API client for the tests of this module."""
+    return store.client()
+
+
+@pytest.fixture(scope="module")
+def records(store):
+    """The record port of the store (for the full orders)."""
+    ctx = store.open_ctx()
+    yield ctx.records
+    ctx.close()
+
+
+@pytest.fixture(scope="module")
+def longest_chart(records) -> list:
+    """The full current chart of the longest chart (12,471 items) in one call of the port of the store."""
+    return records.items_page(LONG_PATIENT, page=PageRequest(limit=20000)).items
+
+
+@pytest.fixture(scope="module")
+def b_chain(store) -> int:
+    return head_of_longest_chain(store.db_path, B_ID)
 
 
 def lists(b_chain: int) -> list[tuple[str, str, str | None, dict]]:
@@ -162,28 +183,25 @@ def chart_key(a: dict):
     return CHART_CATEGORIES.index(a["category"]), -parse_time(a["assertedAt"]).timestamp(), -a["id"]
 
 
-def test_the_chart_is_in_the_category_order_then_newest_first(api):
+def test_the_chart_is_in_the_category_order_then_newest_first(api, longest_chart):
     for params in ({}, {"history": "true"}):
         items = all_items(api, f"/api/patients/{B_ID}/chart", B_DOCTOR, **params)
         assert items == sorted(items, key=chart_key)
-    # The longest chart: the full order in one repository call, and the last API page is its end.
-    conn = connect(api.db_path)
-    views = SqliteRecordRepository(conn).items_page(LONG_PATIENT, page=PageRequest(limit=20000)).items
-    conn.close()
-    rows = [{"category": a.category, "assertedAt": a.asserted_at, "id": a.id} for a in views]
+    # The longest chart (plan 5.5, the largest-chart count): the full order in one call of the port of the store.
+    # On a KG store, one query gives all 12,471 rows: no row limit of the store cuts them (the Virtuoso client
+    # raises an error when the header X-SPARQL-MaxRows shows a cut result). The last API page is its end.
+    rows = [{"category": a.category, "assertedAt": a.asserted_at, "id": a.id} for a in longest_chart]
     assert len(rows) == 12471 and rows == sorted(rows, key=chart_key)
     last = get(api, f"/api/patients/{LONG_PATIENT}/chart", LONG_DOCTOR, limit=200, offset=12400)
     assert [a["id"] for a in last["items"]] == [r["id"] for r in rows[12400:]] and last["total"] == 12471
 
 
-def test_the_longest_chain_in_pages_of_200(api):
-    head = head_of_longest_chain(api.db_path, LONG_PATIENT)
+def test_the_longest_chain_in_pages_of_200(api, store, records):
+    head = head_of_longest_chain(store.db_path, LONG_PATIENT)
     first = get(api, f"/api/assertions/{head}/chain", LONG_DOCTOR, limit=200)
     second = get(api, f"/api/assertions/{head}/chain", LONG_DOCTOR, limit=200, offset=200)
     assert first["total"] == second["total"] == 222 and len(first["items"]) == 200 and len(second["items"]) == 22
-    conn = connect(api.db_path)
-    order = [a.id for a in SqliteRecordRepository(conn).chain(head)]
-    conn.close()
+    order = [a.id for a in records.chain(head)]
     assert [a["id"] for a in first["items"] + second["items"]] == order
     middle = first["items"][100]["id"]                     # the chain of any assertion in it is the same chain
     assert get(api, f"/api/assertions/{middle}/chain", LONG_DOCTOR, limit=3)["headId"] == head
@@ -227,10 +245,10 @@ def test_the_chart_search_is_in_the_display_the_statement_and_the_author_name(ap
         assert expected and len(expected) < len(full)
 
 
-def test_the_patient_chart_total_is_the_size_of_the_q12_set(api):
+def test_the_patient_chart_total_is_the_size_of_the_q12_set(api, store):
     for key, pid, name, dob in ((ELENA, 1, "Elena Marsh", "1971-05-14"), (PATIENT_B, B_ID, B_NAME, B_DOB)):
         page = get(api, f"/api/patients/{pid}/chart", key, limit=1, history="true")    # history is staff only
-        q12 = q12_ids(api.db_path, name, dob)
+        q12 = q12_ids(store, name, dob)
         assert page["total"] == len(q12) == sum(page["counts"].values())
         items = all_items(api, f"/api/patients/{pid}/chart", key)
         assert {a["id"] for a in items} == q12 and all(a["patientVisible"] and a["isCurrent"] for a in items)
@@ -238,30 +256,55 @@ def test_the_patient_chart_total_is_the_size_of_the_q12_set(api):
     assert staff > get(api, f"/api/patients/{B_ID}/chart", PATIENT_B, limit=1)["total"]
 
 
-def test_the_sql_patient_visible_rule_is_the_rules_py_rule_for_each_patient(db, full_db):
-    """The predicate of Q12 in the chart query gives the same items as domain.rules.is_patient_visible."""
-    repo = SqliteRecordRepository(db)
-    patients = db.execute("SELECT Id, Name, DateOfBirth FROM Patient").fetchall()
+def test_the_patient_visible_rule_of_the_store_is_the_rules_py_rule(store, records, longest_chart):
+    """The predicate of Q12 in the chart query of the store gives the same items as domain.rules.is_patient_visible
+    (the flag of each view), and the same items as query Q12 (SQL, and SPARQL on a KG store).
+
+    SQLite: each of the 113 patients. A KG store: Patient A, Patient B and the longest chart (all patients take
+    35 s on Oxigraph; test_sparql_fragments.py checks the KG predicate row by row on the planted data). The SPARQL
+    Q12 of the script runs for Patient A and Patient B only: on the longest chart it takes 26 s on Oxigraph."""
+    conn = sqlite3.connect(f"file:{store.db_path}?mode=ro", uri=True)
+    patients = conn.execute("SELECT Id, Name, DateOfBirth FROM Patient ORDER BY Id").fetchall()
+    conn.close()
     assert len(patients) == 113
+    if store.is_kg:
+        patients = [p for p in patients if p[0] in (1, B_ID, LONG_PATIENT)]
     for pid, name, dob in patients:
-        rules = {a.id for a in repo.assertions(pid, current_only=True) if a.patient_visible}
-        page = repo.items_page(pid, visible_only=True, page=PageRequest(limit=20000))
-        sql = {a.id for a in page.items}
-        assert sql == rules == q12_ids(full_db, name, dob), name
-        assert page.total == len(sql) == sum(repo.category_counts(pid, visible_only=True).values())
+        current = longest_chart if pid == LONG_PATIENT else \
+            records.items_page(pid, page=PageRequest(limit=20000)).items
+        rules = {a.id for a in current if a.patient_visible}
+        page = records.items_page(pid, visible_only=True, page=PageRequest(limit=20000))
+        found = {a.id for a in page.items}
+        assert found == rules == sql_q12_ids(store.db_path, name, dob), name      # the same data on each store
+        if pid in (1, B_ID):
+            assert found == q12_ids(store, name, dob), name
+        assert page.total == len(found) == sum(records.category_counts(pid, visible_only=True).values())
 
 
-def test_query_q14_is_the_second_chart_page_of_patient_b(api):
-    """Q14a and Q14b of dml/03_select_queries.sql give the page and the total of the API."""
+def q14(store) -> tuple[list[int], int]:
+    """The ids of the page of query Q14a and the total of Q14b, in the language of the store."""
+    if store.is_kg:
+        page = sparql_query("Q14a").replace("SELECT ?category ?display ?verification ?date ?author", "SELECT ?id", 1)
+        count = sparql_query("Q14b")
+        assert "SELECT ?id\n" in page
+        client = store.probe.client
+        return [int(r["id"]) for r in client.select(page)], int(client.select(count)[0]["items"])
     text = (config.DML_DIR / "03_select_queries.sql").read_text(encoding="utf-8")
     page_sql = re.search(r"-- Q14a\..*?(SELECT e\.Category.*?;)", text, re.S).group(1)
     count_sql = re.search(r"-- Q14b\..*?(SELECT COUNT.*?;)", text, re.S).group(1)
     page_sql = re.sub(r"SELECT e\.Category.*?FROM Patient p", "SELECT a.Id FROM Patient p", page_sql, count=1,
                       flags=re.S)
-    conn = sqlite3.connect(api.db_path)
-    ids = [r[0] for r in conn.execute(page_sql)]
-    total = conn.execute(count_sql).fetchone()[0]
-    conn.close()
+    conn = sqlite3.connect(store.db_path)
+    try:
+        return [r[0] for r in conn.execute(page_sql)], conn.execute(count_sql).fetchone()[0]
+    finally:
+        conn.close()
+
+
+def test_query_q14_is_the_second_chart_page_of_patient_b(api, store):
+    """Q14a and Q14b (dml/03_select_queries.sql, or 03_select_queries.sparql on a KG store) give the page and the
+    total of the API."""
+    ids, total = q14(store)
     page = get(api, f"/api/patients/{B_ID}/chart", B_DOCTOR, limit=25, offset=25)
     assert [a["id"] for a in page["items"]] == ids and len(ids) == 25
     assert page["total"] == total == 574
@@ -279,35 +322,27 @@ def test_a_patient_gets_one_row_in_the_patient_list_and_in_the_chain(api, b_chai
     assert get(api, "/api/patients", SOFIA, scope="care-team")["total"] == 0          # an MOA has no care team
 
 
-def count_audit(path) -> int:
-    conn = sqlite3.connect(path)
-    try:
-        return conn.execute("SELECT COUNT(*) FROM AuditEvent").fetchone()[0]
-    finally:
-        conn.close()
-
-
-def test_each_chart_or_chain_page_writes_one_audit_record_and_a_list_writes_none(client, full_copy):
-    before = count_audit(full_copy)
+def test_each_chart_or_chain_page_writes_one_audit_record_and_a_list_writes_none(api, store):
+    before = store.probe.count("audit-event")
     for offset in (0, 25, 5000):
-        get(client, f"/api/patients/{B_ID}/chart", B_DOCTOR, offset=offset)
-    get(client, "/api/assertions/1/chain", OKAFOR, limit=1, offset=1)
-    assert count_audit(full_copy) == before + 4
+        get(api, f"/api/patients/{B_ID}/chart", B_DOCTOR, offset=offset)
+    get(api, "/api/assertions/1/chain", OKAFOR, limit=1, offset=1)
+    assert store.probe.count("audit-event") == before + 4
     for url, user in (("/api/users", None), ("/api/patients", SOFIA), (f"/api/patients/{B_ID}/visits", SOFIA),
                       ("/api/patients/1/chat/sessions", OKAFOR), ("/api/departments", SOFIA),
                       ("/api/locations", SOFIA), ("/api/staff", SOFIA), ("/api/medications", SOFIA)):
-        get(client, url, user, limit=3, offset=3)
-    assert count_audit(full_copy) == before + 4
+        get(api, url, user, limit=3, offset=3)
+    assert store.probe.count("audit-event") == before + 4
 
 
-def test_the_audit_pages_and_the_denied_count(client, full_copy):
+def test_the_audit_pages_and_the_denied_count(api):
     """Each audit read adds one record at the top, so a later page starts one row later in the older list."""
-    assert client.get("/api/patients/1/chart", headers=as_user("Nurse:E1004")).status_code == 403
-    full = all_items(client, "/api/patients/1/audit", OKAFOR)
+    assert api.get("/api/patients/1/chart", headers=as_user("Nurse:E1004")).status_code == 403
+    full = all_items(api, "/api/patients/1/audit", OKAFOR)
     assert full[0]["action"] == "read" and full[0]["actorKey"] == OKAFOR
-    second = get(client, "/api/patients/1/audit", OKAFOR, limit=3, offset=3)       # one more record at the top
+    second = get(api, "/api/patients/1/audit", OKAFOR, limit=3, offset=3)       # one more record at the top
     assert second["items"] == full[2:5] and second["total"] == len(full) + 1
     denied = sum(e["outcome"] == "Denied" for e in full)
     assert denied >= 2 and second["denied"] == denied                               # all pages, not this page
-    past = get(client, "/api/patients/1/audit", OKAFOR, offset=1000)
+    past = get(api, "/api/patients/1/audit", OKAFOR, offset=1000)
     assert past["items"] == [] and past["total"] == len(full) + 2 and past["denied"] == denied

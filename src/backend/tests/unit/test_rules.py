@@ -6,8 +6,8 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from domain.errors import Conflict
-from domain.rules import (author_label, check_head, is_patient_visible, next_write_time, parse_time, plan_visit,
-                          short_date)
+from domain.rules import (author_label, check_head, full_time, is_patient_visible, next_write_time, parse_time,
+                          plan_visit, short_date)
 from infrastructure.clock import DemoClock
 
 
@@ -72,6 +72,25 @@ def test_times():
     assert short_date("2026-10-02T11:40:00-04:00") == "Oct 2, 2026"
     assert short_date("1966-02-18") == "Feb 18, 1966"
     assert parse_time("2026-10-30T13:00:00Z") == parse_time("2026-10-30T09:00:00-04:00")
+
+
+@pytest.mark.parametrize("value,full", [
+    ("2026-09-01", "2026-09-01T00:00:00+00:00"),                         # a date is midnight UTC
+    ("2026-09-01T10:30-04:00", "2026-09-01T10:30:00-04:00"),             # no seconds
+    ("2026-09-01T10:30:00", "2026-09-01T10:30:00+00:00"),                # no offset: UTC
+    ("2026-09-01 10:30:00-04:00", "2026-09-01T10:30:00-04:00"),
+    (" 2026-09-01T10:30:15.250-07:00 ", "2026-09-01T10:30:15.250-07:00"),  # the full form does not change
+    ("2026-09-01T14:30:00Z", "2026-09-01T14:30:00Z"),
+])
+def test_full_time_keeps_the_date_and_the_instant(value, full):
+    assert full_time(value) == full and full[:10] == "2026-09-01"
+    assert parse_time(full) == parse_time(value)
+
+
+@pytest.mark.parametrize("value", ["2026-1-5", "05/10/2026", "2026-02-30", "yesterday", ""])
+def test_full_time_refuses_a_text_that_is_not_iso_8601(value):
+    with pytest.raises(ValueError):
+        full_time(value)
 
 
 def test_each_write_is_one_minute_after_the_latest_time():

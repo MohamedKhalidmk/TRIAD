@@ -8,6 +8,7 @@
 """
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
 
@@ -96,6 +97,23 @@ def parse_time(value: str) -> datetime:
         text += "T00:00:00+00:00"
     moment = datetime.fromisoformat(text)
     return moment if moment.tzinfo else moment.replace(tzinfo=timezone.utc)
+
+
+FULL_TIME = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})")
+
+
+def full_time(value: str) -> str:
+    """The full ISO 8601 form of a time that parse_time accepts: the date, the time with seconds, and the offset.
+
+    A text in the full form does not change (keep the source form). A short form gets the form of its instant
+    (parse_time): a date is midnight UTC ("2026-09-01" -> "2026-09-01T00:00:00+00:00"), a time with no offset is
+    UTC, and a time with no seconds gets ":00". The date and the instant do not change. The knowledge graph keeps
+    these values as xsd:dateTime, and a date or a time with no seconds is not an xsd:dateTime.
+    Raise ValueError for a text that is not ISO 8601."""
+    text = value.strip()
+    if FULL_TIME.fullmatch(text):
+        return text
+    return parse_time(text).isoformat()
 
 
 def next_write_time(base: datetime, latest: Optional[datetime], step: timedelta = ONE_MINUTE) -> datetime:

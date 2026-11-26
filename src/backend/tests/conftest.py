@@ -1,4 +1,18 @@
-"""Shared test fixtures: the scenario database (01 + 02), the full database (onboarding) and the API client."""
+"""Shared test fixtures: the scenario database (01 + 02), the full database (onboarding) and the API client.
+
+The store fixtures (Milestone 5; tests/fixtures/stores.py) run one test on each data store:
+    store          the scenario data (fast)
+    planted_store  the planted data (tests/fixtures/plant.py; fast)
+    full_store     the full data (the marker "slow")
+    module_full_store  the full data, one copy for all tests of a module (the journey; "slow")
+Each one is parametrized over TRIAD_TEST_STORES (default: sqlite,oxigraph; add virtuoso for a running Virtuoso).
+A test that needs only some stores has @pytest.mark.stores("oxigraph"). The KG parameters have the marker "kg",
+so -m "not kg" runs only SQLite. Example (the pattern of tests/integration/test_store_users.py):
+
+    def test_the_demo_users_come_first(store):
+        page = store.client().get("/api/users").json()
+        assert store.probe.count("patient") == ...
+"""
 from __future__ import annotations
 
 import shutil
@@ -10,6 +24,8 @@ import pytest
 from infrastructure import config
 from infrastructure.sqlite.connection import connect
 from infrastructure.sqlite.schema import ensure_db
+from tests.fixtures.stores import (KG_STORES, StoreHandle, base_settings, cached_oxigraph, oxigraph_handle,
+                                   selected_stores, sqlite_handle, virtuoso_answers, virtuoso_handle)
 
 
 def run_sql_file(conn: sqlite3.Connection, path: Path) -> None:
@@ -55,11 +71,14 @@ DEMO_NOW = "2026-10-30T09:00:00-04:00"
 
 
 def make_client(db_path: Path, **settings):
-    """A FastAPI TestClient on `db_path` (fake chat mode, fixed demo time, no SQL log, no frontend)."""
+    """A FastAPI TestClient on `db_path` (fake chat mode, fixed demo time, no SQL log, no frontend, SQLite).
+
+    The store is SQLite unless the test gives another store, also when the shell sets TRIAD_STORE.
+    """
     import main
     from fastapi.testclient import TestClient
     values = dict(db_path=db_path, now=DEMO_NOW, llm_mode="fake", frontend_dist=db_path.parent / "no-frontend",
-                  sql_log="off")
+                  sql_log="off", sparql_log="off", store="sqlite")
     values.update(settings)
     return TestClient(main.create_app(config.Settings.from_env(**values)))
 
@@ -95,3 +114,133 @@ def all_items(client, url: str, user: str | None = None, **params) -> list[dict]
         if not page["items"] or len(items) >= page["total"]:
             assert len(items) == page["total"]
             return items
+
+
+@pytest.fixture
+def planted_db(scenario_db, tmp_path) -> Path:
+    """A copy of the scenario database (cheap: no onboarding) with the planted rows of tests/fixtures/plant.py."""
+    from tests.fixtures.plant import plant
+    path = tmp_path / "planted.db"
+    shutil.copy(scenario_db, path)
+    plant(path)
+    return path
+
+
+# ----- the store fixtures (Milestone 5; tests/fixtures/stores.py) -----
+
+def store_params(*extra_marks) -> list:
+    """The parameters of a store fixture: TRIAD_TEST_STORES, with the markers kg and virtuoso."""
+    out = []
+    for name in selected_stores():
+        marks = list(extra_marks)
+        if name in KG_STORES:
+            marks.append(pytest.mark.kg)
+        if name == "virtuoso":
+            marks.append(pytest.mark.virtuoso)
+        out.append(pytest.param(name, marks=marks, id=name))
+    return out
+
+
+@pytest.fixture(scope="session")
+def kg_cache(request, tmp_path_factory) -> Path:
+    """The folder of the built Oxigraph stores: .pytest_cache/d/triad-kg (it stays between test runs)."""
+    cache = getattr(request.config, "cache", None)
+    return Path(cache.mkdir("triad-kg")) if cache is not None else tmp_path_factory.mktemp("triad-kg")
+
+
+def built_oxigraph(db: Path, kg_cache: Path, tmp_path_factory) -> Path:
+    """The built Oxigraph store of a database (from the cache). Another test run can hold the cached store open:
+    then this run builds its own store."""
+    pytest.importorskip("pyoxigraph")
+    pytest.importorskip("morph_kgc")
+    from infrastructure.rdf import oxigraph_store
+    try:
+        built = cached_oxigraph(db, kg_cache)
+        oxigraph_store.open_store(built)
+    except OSError:
+        built = cached_oxigraph(db, tmp_path_factory.mktemp("triad-kg-private"))
+    return built
+
+
+STORE_FIXTURES = ("store", "planted_store", "full_store", "module_full_store")
+
+
+def virtuoso_group(item) -> int:
+    """The place of a test in the run order: 0 for a test that does not use Virtuoso, then the Virtuoso tests of
+    `store`, `planted_store` and `full_store`, then the other Virtuoso tests (they read the full graph)."""
+    params = getattr(getattr(item, "callspec", None), "params", {})
+    for group, name in enumerate(STORE_FIXTURES, start=1):
+        if params.get(name) == "virtuoso":
+            return group
+    return len(STORE_FIXTURES) + 1 if item.get_closest_marker("virtuoso") is not None else 0
+
+
+def pytest_collection_modifyitems(config, items):
+    """@pytest.mark.stores("oxigraph", ...): deselect the parameters of the other stores.
+
+    With Virtuoso in TRIAD_TEST_STORES, the Virtuoso tests run last, in the order of their data set (the sort keeps
+    the order of the tests in a group). Virtuoso has one ABox graph, so a session then loads each data set one time
+    (tests/fixtures/stores.py)."""
+    keep, drop = [], []
+    for item in items:
+        only = item.get_closest_marker("stores")
+        params = getattr(getattr(item, "callspec", None), "params", {})
+        names = [params[f] for f in STORE_FIXTURES if f in params]
+        (drop if only and any(n not in only.args for n in names) else keep).append(item)
+    if drop:
+        config.hook.pytest_deselected(items=drop)
+        items[:] = keep
+    if "virtuoso" in selected_stores():
+        items.sort(key=virtuoso_group)
+
+
+def open_store_handle(request, db_source: Path, tmp_path: Path, kg_cache: Path, tmp_path_factory,
+                      seed: bool) -> StoreHandle:
+    name = request.param
+    copy = tmp_path / f"{name}.db"
+    shutil.copy(db_source, copy)
+    if name == "sqlite":
+        return sqlite_handle(copy)
+    if name == "oxigraph":
+        return oxigraph_handle(copy, built_oxigraph(db_source, kg_cache, tmp_path_factory), tmp_path / "oxigraph")
+    pytest.importorskip("SPARQLWrapper")
+    if not virtuoso_answers(base_settings(copy, store="virtuoso")):
+        pytest.skip("Virtuoso does not answer on TRIAD_SPARQL_QUERY_URL (start it with: ./src/scripts/kg.sh up).")
+    return virtuoso_handle(copy, db_source, seed=seed, export_cache=kg_cache / "virtuoso-export")
+
+
+@pytest.fixture(params=store_params())
+def store(request, scenario_db, tmp_path, kg_cache, tmp_path_factory):
+    """The scenario data (01 + 02) on each store of TRIAD_TEST_STORES. A new copy for each test."""
+    handle = open_store_handle(request, scenario_db, tmp_path, kg_cache, tmp_path_factory, seed=True)
+    yield handle
+    handle.close()
+
+
+@pytest.fixture(params=store_params())
+def planted_store(request, planted_db, tmp_path, kg_cache, tmp_path_factory):
+    """The planted data (tests/fixtures/plant.py) on each store. On Virtuoso, the export of the planted data."""
+    handle = open_store_handle(request, planted_db, tmp_path, kg_cache, tmp_path_factory, seed=False)
+    yield handle
+    handle.close()
+
+
+@pytest.fixture(params=store_params(pytest.mark.slow))
+def full_store(request, full_db, tmp_path, kg_cache, tmp_path_factory):
+    """The full data (the onboarding) on each store ("slow"). The first run builds the full graph (about 15 s)."""
+    handle = open_store_handle(request, full_db, tmp_path, kg_cache, tmp_path_factory, seed=False)
+    yield handle
+    handle.close()
+
+
+@pytest.fixture(scope="module", params=store_params(pytest.mark.slow))
+def module_full_store(request, full_db, kg_cache, tmp_path_factory):
+    """The full data on each store, ONE copy for all tests of a module ("slow"). For tests that share their data:
+    the use cases of the journey, or read tests that need no new copy each. pytest runs the tests of the module in
+    their order for one store, then for the next store.
+
+    Do not use full_store in the same module: on Virtuoso (one store), its load would replace the module data."""
+    folder = tmp_path_factory.mktemp(f"module-{request.param}")
+    handle = open_store_handle(request, full_db, folder, kg_cache, tmp_path_factory, seed=False)
+    yield handle
+    handle.close()

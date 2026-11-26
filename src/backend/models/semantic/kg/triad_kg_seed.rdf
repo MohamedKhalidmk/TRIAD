@@ -1,0 +1,1369 @@
+<?xml version="1.0" encoding="UTF-8"?><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/10">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/8"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T12:00:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Report</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh care team</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Confirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/1"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-06-12T10:15:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Report</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Patient report: rash after penicillin as a child.</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Unconfirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/1"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-03-05T14:00:00-05:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Report</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Penicillin allergy (copied from Lakeside Family Clinic).</statement>
+  <supersedes xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/1"/>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Unconfirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/1"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T11:40:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Decision</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Not allergic. Allergy test negative.</statement>
+  <supersedes xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/2"/>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Refuted</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/2"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:05:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Report</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Blood pressure panel with all children optional: Systolic blood pressure: 152 mm[Hg]; Diastolic blood pressure: 96 mm[Hg]</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Confirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/5">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/3"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:05:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Decision</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Essential hypertension. Two high readings.</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Confirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/6">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/4"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:05:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Decision</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Start amlodipine 5 mg daily.</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Confirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/7">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/5"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:05:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Decision</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">4</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel with direct LDL - Serum or Plasma</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Confirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/8">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/6"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-22T16:00:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Report</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel with direct LDL - Serum or Plasma</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Confirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/9">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Assertion"/>
+  <about xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/7"/>
+  <assertedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T11:40:00-04:00</assertedAt>
+  <intent xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Decision</intent>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</seq>
+  <source xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Human</source>
+  <statement xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Penicillin skin test and oral challenge</statement>
+  <verification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Confirmed</verification>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/audit-event/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#AuditEvent"/>
+  <action xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">read</action>
+  <actorRole xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Doctor</actorRole>
+  <actorSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</actorSystem>
+  <actorValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1005</actorValue>
+  <at xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-29T14:59:00-04:00</at>
+  <auditOutcome xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Allowed</auditOutcome>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/audit-event</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">AUDIT-0001</identifierValue>
+  <path xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">/api/patients/{patient}/chart</path>
+  <subjectDateOfBirth xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1971-05-14</subjectDateOfBirth>
+  <subjectName xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh</subjectName>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/audit-event/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#AuditEvent"/>
+  <action xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ask</action>
+  <actorRole xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Doctor</actorRole>
+  <actorSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</actorSystem>
+  <actorValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1005</actorValue>
+  <at xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-29T15:00:06-04:00</at>
+  <auditOutcome xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Allowed</auditOutcome>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/audit-event</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">AUDIT-0002</identifierValue>
+  <inTurn xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/chat-turn/2"/>
+  <path xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">/api/chat/sessions/{session}/turns</path>
+  <subjectDateOfBirth xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1971-05-14</subjectDateOfBirth>
+  <subjectName xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh</subjectName>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/audit-event/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#AuditEvent"/>
+  <action xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">read</action>
+  <actorRole xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Nurse</actorRole>
+  <actorSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</actorSystem>
+  <actorValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1004</actorValue>
+  <at xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-29T16:20:00-04:00</at>
+  <auditOutcome xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Denied</auditOutcome>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/audit-event</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">AUDIT-0003</identifierValue>
+  <path xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">/api/patients/{patient}/chart</path>
+  <subjectDateOfBirth xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1971-05-14</subjectDateOfBirth>
+  <subjectName xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh</subjectName>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/audit-event/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#AuditEvent"/>
+  <action xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">read</action>
+  <actorRole xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Patient</actorRole>
+  <actorSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/mrn</actorSystem>
+  <actorValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MRN-000001</actorValue>
+  <at xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-29T18:00:00-04:00</at>
+  <auditOutcome xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Allowed</auditOutcome>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/audit-event</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">AUDIT-0004</identifierValue>
+  <path xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">/api/audit</path>
+  <subjectDateOfBirth xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1971-05-14</subjectDateOfBirth>
+  <subjectName xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh</subjectName>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/care-team-member/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#CareTeamMember"/>
+  <memberRole xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Doctor</memberRole>
+  <memberSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</memberSystem>
+  <memberValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1005</memberValue>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/care-team-member/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#CareTeamMember"/>
+  <memberRole xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Doctor</memberRole>
+  <memberSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</memberSystem>
+  <memberValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1006</memberValue>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/chat-session/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ChatSession"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/chat-session</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">CHAT-0001</identifierValue>
+  <includes xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/chat-turn/1"/>
+  <includes xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/chat-turn/2"/>
+  <mode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">rules</mode>
+  <startedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-29T15:00:00-04:00</startedAt>
+  <subjectDateOfBirth xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1971-05-14</subjectDateOfBirth>
+  <subjectName xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh</subjectName>
+  <userRole xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Doctor</userRole>
+  <userSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</userSystem>
+  <userValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1005</userValue>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/chat-turn/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ChatTurn"/>
+  <clientTurnId xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">demo-0001-1</clientTurnId>
+  <createdAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-29T15:00:05-04:00</createdAt>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</seq>
+  <speaker xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">User</speaker>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Is she allergic to penicillin?</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/chat-turn/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ChatTurn"/>
+  <clientTurnId xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">demo-0001-2</clientTurnId>
+  <createdAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-29T15:00:06-04:00</createdAt>
+  <seq xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</seq>
+  <speaker xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Assistant</speaker>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">No. A physician ruled it out with an allergy test on Oct 2, 2026.</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/citation/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Citation"/>
+  <byTurn xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/chat-turn/2"/>
+  <citedAssertion xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/3"/>
+  <rank xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</rank>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Allergy"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <allergyCategory xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">medication</allergyCategory>
+  <allergyType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">allergy</allergyType>
+  <clinicalStatus xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">inactive</clinicalStatus>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">91936005</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">http://snomed.info/sct</codeSystem>
+  <criticality xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">low</criticality>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Allergy to penicillin</display>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/1"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">AllergyIntolerance/ai-elena-penicillin</identifierValue>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-06-12T10:15:00-04:00</recordedAt>
+  <substance xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Allergy to penicillin</substance>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Allergy to penicillin</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Observation"/>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">85354-9</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">http://loinc.org</codeSystem>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Blood pressure panel with all children optional</display>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Observation/obs-elena-bp-2025-08-20</identifierValue>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T09:40:00-04:00</recordedAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Blood pressure panel with all children optional</text>
+  <value xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Systolic blood pressure: 152 mm[Hg]; Diastolic blood pressure: 96 mm[Hg]</value>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Diagnosis"/>
+  <clinicalStatus xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">active</clinicalStatus>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">59621000</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">http://snomed.info/sct</codeSystem>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Essential hypertension</display>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Condition/cond-elena-hypertension</identifierValue>
+  <onsetDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T09:40:00-04:00</onsetDate>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:00:00-04:00</recordedAt>
+  <severity xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Moderate</severity>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Essential hypertension</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Prescription"/>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">197361</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">http://www.nlm.nih.gov/research/umls/rxnorm</codeSystem>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Amlodipine 5 MG Oral Tablet</display>
+  <dosage xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">5 mg</dosage>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2"/>
+  <frequency xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 per 1 d</frequency>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MedicationRequest/mr-elena-amlodipine</identifierValue>
+  <prescribes xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/medication/1"/>
+  <prescriptionStatus xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">active</prescriptionStatus>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:00:00-04:00</recordedAt>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/5">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#LabOrder"/>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">57698-3</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">http://loinc.org</codeSystem>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel with direct LDL - Serum or Plasma</display>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ServiceRequest/sr-elena-lipid-panel</identifierValue>
+  <priority xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">routine</priority>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:00:00-04:00</recordedAt>
+  <specimen xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Serum</specimen>
+  <testName xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel with direct LDL - Serum or Plasma</testName>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel with direct LDL - Serum or Plasma</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/6">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#LabReport"/>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">57698-3</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">http://loinc.org</codeSystem>
+  <conclusion xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">LDL cholesterol is 112 mg/dL. It is in the target range.</conclusion>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel with direct LDL - Serum or Plasma</display>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">DiagnosticReport/dr-elena-lipid-panel</identifierValue>
+  <issuedDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-22T15:30:00-04:00</issuedDate>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-22T15:30:00-04:00</recordedAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel with direct LDL - Serum or Plasma</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/7">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Procedure"/>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">penicillin-allergy-test</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/CodeSystem/local</codeSystem>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Penicillin skin test and oral challenge</display>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/3"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Procedure/proc-elena-penicillin-test</identifierValue>
+  <performedDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T10:10:00-04:00</performedDate>
+  <procedureOutcome xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Negative. No reaction.</procedureOutcome>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T10:10:00-04:00</recordedAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Penicillin skin test and oral challenge</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/clinical-entry/8">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#CareTeam"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#ClinicalEntry"/>
+  <careTeamStatus xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">active</careTeamStatus>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">care-team</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/CodeSystem/local</codeSystem>
+  <display xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh care team</display>
+  <during xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/3"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">CareTeam/ct-elena</identifierValue>
+  <member xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/care-team-member/1"/>
+  <member xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/care-team-member/2"/>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh care team</name>
+  <recordedAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T12:00:00-04:00</recordedAt>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-EMER</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0110</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-INPAT</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Inpatient Medicine</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0120</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-FAMMED</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Family Medicine</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0130</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-URGENT</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Urgent Care</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0140</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/5">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-HOME</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Home Health</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0150</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/6">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-VIRT</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Virtual Care</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0160</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/7">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-CARD</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0170</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/department/8">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Department"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <departmentType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Hospital Department</departmentType>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/organization</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">TRIAD-GH-FRONT</identifierValue>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Front Office</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0180</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/10">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">FAMMED-ROOM1</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Family Medicine</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Family Medicine Room 1</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Room</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/11">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">URGENT-ROOM1</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Urgent Care</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Urgent Care Room 1</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Room</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/12">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">INPAT-WARD3</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Inpatient Medicine</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Inpatient Ward 3</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Ward</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/13">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">PATIENT-HOME</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Home Health</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Patient Home</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">House</physicalType>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/14">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">VIRTUAL-VISIT</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Virtual Care</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Virtual Visit</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Virtual</physicalType>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/15">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">DESK-MAIN</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Front Office</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Main Front Desk</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Area</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/16">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">DESK-ER</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency Registration Desk</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Area</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/17">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">DESK-FAMMED</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Family Medicine</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Family Medicine Desk</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Area</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/18">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">DESK-CARD</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology Desk</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Area</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/19">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">STORE-OLD</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Front Office</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Old Storage Room</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Room</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER-UNIT</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency Unit</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Wing</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER-WAIT</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER Waiting</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Area</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER-BED-1</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER Bed 1</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Bed</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER-BED-2</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER Bed 2</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Bed</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/5">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER-BED-3</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER Bed 3</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Bed</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/6">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER-BED-4</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ER Bed 4</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Bed</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/7">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">CARD-WARD</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology Ward</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Ward</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/8">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">CARD-401</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology Room 401</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Room</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/location/9">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Location"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/location</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">CARD-402</identifierValue>
+  <locationType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology</locationType>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology Room 402</name>
+  <physicalType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Room</physicalType>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01608</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">1 Triad Way</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/medication/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Medication"/>
+  <code xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">197361</code>
+  <codeSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">http://www.nlm.nih.gov/research/umls/rxnorm</codeSystem>
+  <form xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Tablet</form>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Amlodipine 5 MG Oral Tablet</name>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/message/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Message"/>
+  <channel xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Phone</channel>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/1"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/message</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MSG-ELENA-2019-06-12</identifierValue>
+  <origin xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Patient</origin>
+  <sentAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-06-12T10:15:00-04:00</sentAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Phone call. The patient says that she had a rash after penicillin as a child.</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/message/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Message"/>
+  <channel xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Transfer</channel>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/2"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/message</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MSG-ELENA-2024-03-05</identifierValue>
+  <origin xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">OtherClinic</origin>
+  <sentAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2024-03-05T14:00:00-05:00</sentAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Records copied from Lakeside Family Clinic. The records list a penicillin allergy.</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/message/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Message"/>
+  <channel xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">InPerson</channel>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/4"/>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/5"/>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/6"/>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/7"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/message</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MSG-ELENA-2025-08-20</identifierValue>
+  <origin xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Staff</origin>
+  <sentAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:05:00-04:00</sentAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Visit note. Blood pressure is high on two readings. Diagnosis: essential hypertension. Start amlodipine 5 mg daily. Order a lipid panel.</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/message/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Message"/>
+  <channel xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Transfer</channel>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/8"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/message</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MSG-ELENA-2025-08-22</identifierValue>
+  <origin xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lab</origin>
+  <sentAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-22T16:00:00-04:00</sentAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lipid panel result received. LDL cholesterol is 112 mg/dL.</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/message/5">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Message"/>
+  <channel xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">InPerson</channel>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/3"/>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/9"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/message</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MSG-ELENA-2026-10-02</identifierValue>
+  <origin xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Staff</origin>
+  <sentAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T11:40:00-04:00</sentAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Visit note. The penicillin skin test and the oral challenge are negative. The patient is not allergic to penicillin.</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/message/6">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Message"/>
+  <channel xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Transfer</channel>
+  <contains xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/assertion/10"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/message</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MSG-CT-ELENA</identifierValue>
+  <origin xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Staff</origin>
+  <sentAt xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T12:00:00-04:00</sentAt>
+  <text xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Care team set: Amara Okafor, Lucas Brennan.</text>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/patient-identifier/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#PatientIdentifier"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/mrn</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MRN-000001</identifierValue>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/patient-identifier/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#PatientIdentifier"/>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://fhir.infoway-inforoute.ca/NamingSystem/ca-bc-patient-healthcare-id</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">9995267502</identifierValue>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/patient/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Patient"/>
+  <city xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Worcester</city>
+  <country xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">US</country>
+  <dateOfBirth xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">1971-05-14</dateOfBirth>
+  <hasVisit xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/1"/>
+  <hasVisit xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2"/>
+  <hasVisit xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/3"/>
+  <identifier xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/patient-identifier/1"/>
+  <identifier xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/patient-identifier/2"/>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elena Marsh</name>
+  <patientSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</patientSex>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-0142</phoneNumber>
+  <postalCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">01609</postalCode>
+  <region xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MA</region>
+  <street xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">42 Elm Street</street>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/10">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">aisha.ortega@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1010</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-14686</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Aisha Ortega</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2010</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/11">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">NP</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">elif.sato@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1011</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-48680</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Elif Sato</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2011</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/12">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">farid.dubois@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1012</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-27595</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Farid Dubois</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2012</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/13">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">felix.moreau@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1013</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">fr</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-93822</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Felix Moreau</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2013</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/14">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">farid.castillo@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1014</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ar</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-27451</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Farid Castillo</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2014</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/15">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nikhil.novak@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1015</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-62180</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Nikhil Novak</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2015</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/16">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">grace.bianchi@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1016</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">tl</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-36002</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Grace Bianchi</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2016</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/17">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ivan.rossi@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1017</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ar</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-45421</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Ivan Rossi</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2017</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/18">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">LPN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">carmen.xu@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1018</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-16615</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Carmen Xu</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2018</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/19">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">LPN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">dmitri.ellis@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1019</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">fr</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-26778</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Dmitri Ellis</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2019</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#MOA"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <certificationNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MOA-9934</certificationNumber>
+  <desk xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Main Front Desk</desk>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">sofia.alvarez@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1001</identifierValue>
+  <issues xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/message/1"/>
+  <issues xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/message/2"/>
+  <issues xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/message/6"/>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">es</language>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Sofia Alvarez</name>
+  <phoneExtension xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ext. 2100</phoneExtension>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2001</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/20">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">samir.wagner@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1020</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-85187</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Samir Wagner</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2020</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/21">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#MOA"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <desk xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency Registration Desk</desk>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ximena.yilmaz@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1021</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">pa</language>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Ximena Yilmaz</name>
+  <phoneExtension xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ext. 2120</phoneExtension>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2021</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/22">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#MOA"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <certificationNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MOA-4793</certificationNumber>
+  <desk xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Family Medicine Desk</desk>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">eva.garcia@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1022</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">tl</language>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Eva Garcia</name>
+  <phoneExtension xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ext. 2121</phoneExtension>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2022</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/23">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#MOA"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <desk xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology Desk</desk>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">liam.chen@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1023</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">pa</language>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Liam Chen</name>
+  <phoneExtension xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ext. 2122</phoneExtension>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2023</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/24">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#MOA"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <desk xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Main Front Desk</desk>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">samir.dlamini@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1024</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Samir Dlamini</name>
+  <phoneExtension xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ext. 2123</phoneExtension>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2024</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/25">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#MOA"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <certificationNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MOA-5025</certificationNumber>
+  <desk xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Main Front Desk</desk>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">quinn.dubois@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1025</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ar</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Quinn Dubois</name>
+  <phoneExtension xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ext. 2124</phoneExtension>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2025</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">priya.nair@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1002</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">hi</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-63979</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Priya Nair</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2002</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">tom.becker@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1003</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">de</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-77753</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Tom Becker</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2003</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">LPN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">jun.park@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1004</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ko</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-26179</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Jun Park</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2004</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/5">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Doctor"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">amara.okafor@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1005</identifierValue>
+  <issues xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/message/5"/>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">fr</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MD-28590</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Amara Okafor</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2005</phoneNumber>
+  <qualification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MD</qualification>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/6">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Doctor"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">lucas.brennan@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1006</identifierValue>
+  <issues xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/message/3"/>
+  <issues xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/message/4"/>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MD-13282</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Lucas Brennan</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2006</phoneNumber>
+  <qualification xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">MD</qualification>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/7">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">wei.dlamini@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1007</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-97689</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Wei Dlamini</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2007</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/8">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">farid.bauer@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1008</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">vi</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-26860</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Farid Bauer</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2008</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">male</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/9">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Nurse"/>
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Staff"/>
+  <active xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">1</active>
+  <designation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN</designation>
+  <email xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">theo.haddad@triad-general.example</email>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/employee</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">E1009</identifierValue>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">en</language>
+  <language xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">vi</language>
+  <licenseNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">RN-32786</licenseNumber>
+  <name xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Theo Haddad</name>
+  <phoneNumber xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">+1-508-555-2009</phoneNumber>
+  <staffSex xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">female</staffSex>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/visit-location/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#VisitLocation"/>
+  <atLocation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/location/14"/>
+  <endDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-06-12T10:20:00-04:00</endDate>
+  <ofVisit xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/1"/>
+  <startDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-06-12T10:10:00-04:00</startDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/visit-location/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#VisitLocation"/>
+  <atLocation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/location/8"/>
+  <endDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:00:00-04:00</endDate>
+  <ofVisit xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2"/>
+  <startDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T09:30:00-04:00</startDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/visit-location/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#VisitLocation"/>
+  <atLocation xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/location/10"/>
+  <endDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T11:30:00-04:00</endDate>
+  <ofVisit xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/3"/>
+  <startDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T10:00:00-04:00</startDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Visit"/>
+  <endDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-06-12T10:20:00-04:00</endDate>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/encounter</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ENC-ELENA-2019-06-12</identifierValue>
+  <reason xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Phone call</reason>
+  <startDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2019-06-12T10:10:00-04:00</startDate>
+  <visitClass xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">VR</visitClass>
+  <visitType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Phone call</visitType>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Visit"/>
+  <endDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T10:00:00-04:00</endDate>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/encounter</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ENC-ELENA-2025-08-20</identifierValue>
+  <reason xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Blood pressure check</reason>
+  <startDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2025-08-20T09:30:00-04:00</startDate>
+  <visitClass xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">AMB</visitClass>
+  <visitType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Blood pressure check</visitType>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/visit/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#Visit"/>
+  <endDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T11:30:00-04:00</endDate>
+  <identifierSystem xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">https://triad.example/fhir/sid/encounter</identifierSystem>
+  <identifierValue xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">ENC-ELENA-2026-10-02</identifierValue>
+  <reason xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Penicillin allergy test</reason>
+  <startDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2026-10-02T10:00:00-04:00</startDate>
+  <visitClass xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">AMB</visitClass>
+  <visitType xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Penicillin allergy test</visitType>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/10">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/2"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/10"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-09-12</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/11">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/2"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/11"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2015-02-08</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/12">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/2"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/12"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2011-02-04</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/13">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/3"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/13"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-11-21</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/14">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/3"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/14"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2023-09-08</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/15">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/4"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/15"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2022-12-10</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/16">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/4"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/16"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2014-12-17</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/17">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/5"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/17"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-01-21</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/18">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/6"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/18"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-11-08</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/19">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/7"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/19"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-11-22</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/1">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/8"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/1"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">moa</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2015-09-11</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/20">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/7"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/20"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-05-10</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/21">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/1"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/21"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">moa</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2024-04-10</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/22">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/3"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/22"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">moa</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-08-20</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/23">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/7"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/23"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">moa</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2022-08-18</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/24">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/8"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/24"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">moa</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2019-06-20</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/25">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/8"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/25"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">moa</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2013-12-14</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/2">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/1"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/2"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2009-12-26</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/3">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/7"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/3"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2016-11-09</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/4">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/5"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/4"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-05-14</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/5">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/1"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/5"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">doctor</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2012-03-03</roleStartDate>
+  <specialty xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Emergency medicine</specialty>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/6">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/7"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/6"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">doctor</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-03-22</roleStartDate>
+  <specialty xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">Cardiology</specialty>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/7">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/1"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/7"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2017-03-15</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/8">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/1"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/8"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2018-03-09</roleStartDate>
+</rdf:Description>
+<rdf:Description rdf:about="https://github.com/MohamedKhalidmk/TRIAD/kg/works-in/9">
+  <type xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#WorksIn"/>
+  <atDepartment xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/department/1"/>
+  <ofStaff xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:resource="https://github.com/MohamedKhalidmk/TRIAD/kg/staff/9"/>
+  <roleCode xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#">nurse</roleCode>
+  <roleStartDate xmlns="https://github.com/MohamedKhalidmk/TRIAD/ontology/triad#" rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2010-01-13</roleStartDate>
+</rdf:Description>
+</rdf:RDF>

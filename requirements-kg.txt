@@ -1,0 +1,12 @@
+# TRIAD knowledge-graph dependencies (Milestone 5, Python 3.12). requirements.txt includes this file.
+# Keep these versions together. Morph-KGC 2.10.0 needs pyoxigraph < 0.4 and rdflib < 7.3.
+# morph-kgc: runs the W3C R2RML mapping on the SQLite database.
+# pyoxigraph: the embedded triple store (tests, and the store without Docker); it also writes RDF/XML.
+# rdflib: reads the Turtle source of the ontology. pyshacl and owlrl: the SHACL validation.
+# SPARQLWrapper: the driver for the SPARQL 1.1 Protocol (Virtuoso).
+morph-kgc[sqlite]==2.10.0
+pyoxigraph==0.3.22
+rdflib==7.2.1
+pyshacl==0.31.0
+owlrl==7.1.4
+SPARQLWrapper==2.0.0

@@ -45,3 +45,6 @@ class AppContext:
     identity: Identity
     close: Callable[[], None] = lambda: None
     clock_mode: str = "fixed"          # 'system' (the computer clock) or 'fixed' (a fixed TRIAD_NOW)
+    store: str = "sqlite"              # TRIAD_STORE: 'sqlite', 'virtuoso' or 'oxigraph' (doc/api.md section 1.6)
+    ontology_version: Optional[str] = None   # the ontology of the knowledge graph; None for SQLite
+    sparql_url: Optional[str] = None         # TRIAD_SPARQL_QUERY_URL for the Virtuoso store, else None

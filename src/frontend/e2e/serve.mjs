@@ -7,16 +7,19 @@
 // 3. Copy the template to a new database for this run (<temp>/triad-e2e/run.db).
 //    So each run starts from the same data, and a run does not depend on an earlier run.
 // 4. Start "main.py serve" on port 8123 with the fake LLM and the fixed demo time.
+//    With TRIAD_E2E_STORE=oxigraph the script also builds a template of the knowledge graph (ensure-kg, embedded
+//    Oxigraph) from the template database, copies it for the run, and starts the server with --store oxigraph.
 // On SIGTERM or SIGINT, the script stops the server and deletes the database of the run.
 //
 // Environment variables:
 //   TRIAD_PYTHON        the Python of the backend (default: <repo>/.venv/bin/python)
-//   TRIAD_E2E_PORT      the port (default: 8123)
+//   TRIAD_E2E_PORT      the port (default: 8123; "npm run e2e:kg" uses 8124)
+//   TRIAD_E2E_STORE     the data store of the backend: sqlite (default) or oxigraph (virtuoso is not supported here)
 //   TRIAD_E2E_NO_BUILD  "1": do not build the frontend (use the dist folder that is there)
 
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { cpSync, copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,6 +33,11 @@ const work = join(tmpdir(), 'triad-e2e');
 const template = join(work, 'template.db');
 const stampFile = join(work, 'template.stamp');
 const runDb = join(work, 'run.db');
+const store = (process.env.TRIAD_E2E_STORE || 'sqlite').toLowerCase();
+// The knowledge graph of the template and of the run: Oxigraph files and the export files of ensure-kg.
+const kgTemplate = join(work, 'kg-template');
+const kgStampFile = join(work, 'kg-template.stamp');
+const kgRun = join(work, 'kg-run');
 
 // The fixed demo time of USER_FLOWS.md section 0.3. The times in the screenshots are the times of the journey.
 const DEMO_NOW = '2026-10-30T09:00:00-04:00';
@@ -58,7 +66,9 @@ function buildInputs(folder, out = []) {
   for (const entry of readdirSync(folder, { withFileTypes: true })) {
     const path = join(folder, entry.name);
     if (entry.isDirectory()) {
-      if (!['tests', '__pycache__', '.pytest_cache'].includes(entry.name)) buildInputs(path, out);
+      // data/kg holds the export files of the knowledge graph. They do not change the SQLite template.
+      const exported = relative(backend, path).split('\\').join('/') === 'data/kg';
+      if (!exported && !['tests', '__pycache__', '.pytest_cache'].includes(entry.name)) buildInputs(path, out);
     } else if (/\.(py|sql|json|gz)$/.test(entry.name) && entry.name !== 'onboard_report.json') {
       out.push(path);
     }
@@ -78,8 +88,10 @@ function inputStamp() {
 
 function removeRunDb() {
   for (const suffix of ['', '-wal', '-shm']) rmSync(`${runDb}${suffix}`, { force: true });
+  rmSync(kgRun, { recursive: true, force: true });
 }
 
+if (!['sqlite', 'oxigraph'].includes(store)) fail(`TRIAD_E2E_STORE must be sqlite or oxigraph, not "${store}".`);
 if (!existsSync(python)) {
   fail(`Python ${python} does not exist. Create the venv (see the root README.md), or set TRIAD_PYTHON.`);
 }
@@ -104,16 +116,39 @@ if (current) {
 removeRunDb();
 copyFileSync(template, runDb);
 
+// The settings of the knowledge graph: the template and the run have their own folders (TRIAD_KG_DIR and
+// TRIAD_KG_OXIGRAPH_PATH), so the e2e run does not touch src/backend/data/kg.
+const kgEnv = (dir) => ({ TRIAD_STORE: 'oxigraph', TRIAD_KG_DIR: dir, TRIAD_KG_OXIGRAPH_PATH: join(dir, 'oxigraph') });
+if (store === 'oxigraph') {
+  const kgCurrent = current && existsSync(kgTemplate) && existsSync(kgStampFile) && readFileSync(kgStampFile, 'utf8') === stamp;
+  if (kgCurrent) {
+    say(`The knowledge graph template ${kgTemplate} is current.`);
+  } else {
+    say(`Building the knowledge graph template ${kgTemplate} (ensure-kg --store oxigraph) ...`);
+    rmSync(kgStampFile, { force: true });
+    rmSync(kgTemplate, { recursive: true, force: true });
+    run(python, [join(backend, 'main.py'), 'ensure-kg', '--store', 'oxigraph', '--db', template], {
+      cwd: repo,
+      env: { ...process.env, ...kgEnv(kgTemplate) },
+    });
+    writeFileSync(kgStampFile, stamp);
+  }
+  cpSync(kgTemplate, kgRun, { recursive: true });
+}
+
 const env = {
   ...process.env,
   TRIAD_DB_PATH: runDb,
   TRIAD_LLM: 'fake',
   TRIAD_NOW: DEMO_NOW,
   TRIAD_SQL_LOG: 'off',
+  TRIAD_SPARQL_LOG: 'off',
+  TRIAD_STORE: store,
+  ...(store === 'oxigraph' ? kgEnv(kgRun) : {}),
   PORT: port,
 };
-say(`Starting the server on http://127.0.0.1:${port} with the database ${runDb} ...`);
-const server = spawn(python, [join(backend, 'main.py'), 'serve', '--db', runDb], { cwd: repo, env, stdio: ['ignore', 'inherit', 'inherit'] });
+say(`Starting the server on http://127.0.0.1:${port} with the database ${runDb} (store: ${store}) ...`);
+const server = spawn(python, [join(backend, 'main.py'), 'serve', '--db', runDb, '--store', store], { cwd: repo, env, stdio: ['ignore', 'inherit', 'inherit'] });
 
 let stopping = false;
 function stop(signal) {

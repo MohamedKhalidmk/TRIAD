@@ -36,6 +36,7 @@ class Permissions:
     chat: bool = False
     tell: bool = False
     edit_demographics: bool = False
+    delete_patient: bool = False
     check_in: bool = False
     end_visit: bool = False
     move_location: bool = False

@@ -19,9 +19,11 @@ router = APIRouter(prefix="/api", tags=["records"])
 @router.get("/patients/{patient_id}/chart", response_model=s.Chart)
 def chart(patient_id: int, visit_id: Optional[int] = Query(default=None, alias="visitId"),
           category: Optional[str] = None, history: bool = False, q: Optional[str] = None,
+          date_from: Optional[str] = Query(default=None, alias="from", description="First day, YYYY-MM-DD."),
+          date_to: Optional[str] = Query(default=None, alias="to", description="Last day, YYYY-MM-DD."),
           page: PageRequest = Depends(page_request), ctx: AppContext = Depends(get_ctx),
           actor: Actor = Depends(get_actor)):
-    return records.chart(ctx, actor, patient_id, visit_id, category, history, q, page)
+    return records.chart(ctx, actor, patient_id, visit_id, category, history, q, page, date_from, date_to)
 
 
 @router.get("/assertions/{assertion_id}/chain", response_model=s.Chain)

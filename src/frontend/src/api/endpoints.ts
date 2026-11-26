@@ -34,7 +34,19 @@ import type {
 
 // ----- Request bodies (doc/api.md, section 3) -----
 
-export interface Health { status: 'ok'; schemaVersion: number; mode: ChatMode; now: string; clock?: 'system' | 'fixed'; }
+/** The data store of the backend (doc/api.md, section 1.6): the relational database, or a knowledge graph. */
+export type StoreName = 'sqlite' | 'virtuoso' | 'oxigraph';
+
+export interface Health {
+  status: 'ok';
+  schemaVersion: number;
+  mode: ChatMode;
+  now: string;
+  clock?: 'system' | 'fixed';
+  store?: StoreName; // an old backend gives no store: it is SQLite
+  ontologyVersion?: string | null;
+  sparqlUrl?: string | null; // the SPARQL page of Virtuoso (store 'virtuoso' only)
+}
 
 export type PatientScope = 'all' | 'care-team' | 'open-visits';
 
@@ -52,6 +64,8 @@ export type ChartParams = PageParams & {
   category?: Category;
   history?: boolean;
   q?: string; // finds the text in the display, the statement and the author name
+  from?: string; // the first day (YYYY-MM-DD, included), on the local date of assertedAt
+  to?: string; // the last day (YYYY-MM-DD, included)
 };
 
 export interface NewPatientBody {

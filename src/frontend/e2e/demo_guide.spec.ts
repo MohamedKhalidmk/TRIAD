@@ -64,3 +64,19 @@ test('Act as: Use case 8 opens the Staff tab of the directory as Sofia Alvarez',
   await expect(page.getByRole('tab', { name: 'Staff', exact: true })).toHaveAttribute('aria-selected', 'true');
   await expect(page.getByRole('button', { name: 'New staff member' })).toBeVisible();
 });
+
+test('The top bar names the data store, and "Show the SPARQL" shows the query of Use case 0', async ({ page }) => {
+  const label = { sqlite: 'SQLite', oxigraph: 'Knowledge graph (Oxigraph)', virtuoso: 'Knowledge graph (Virtuoso)' }[
+    process.env.TRIAD_E2E_STORE ?? 'sqlite'
+  ];
+  await page.goto('/');
+  await expect(page.locator('.store-badge')).toHaveText(label ?? 'SQLite');
+  const dialog = await openGuide(page);
+  const queries = useCase(dialog, 0).locator('.demo-queries');
+  await expect(queries.locator('.demo-query')).toHaveCount(2);
+  // "Run in Virtuoso" shows only for the store Virtuoso.
+  await expect(queries.getByRole('link', { name: 'Run in Virtuoso' })).toHaveCount(process.env.TRIAD_E2E_STORE === 'virtuoso' ? 2 : 0);
+  await queries.getByRole('button', { name: 'Show the SPARQL' }).first().click();
+  await expect(queries.locator('pre')).toContainText('PREFIX triad:');
+  await expect(queries.locator('pre')).toContainText('# Q2.');
+});

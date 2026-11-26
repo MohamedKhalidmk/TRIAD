@@ -166,9 +166,16 @@ class SqlLogMiddleware:
     With show_query (the mode "params"), the label also shows the query string.
     """
 
-    def __init__(self, app: Any, show_query: bool = False):
+    def __init__(self, app: Any, show_query: bool = False, tag: str = "sql", unit: str = "statement",
+                 store: str = "SQL", logger: Optional[logging.Logger] = None):
         self.app = app
         self.show_query = show_query
+        # The SPARQL log (infrastructure/sparql/sparql_log.py) uses the same middleware with its own words:
+        # tag "sparql", unit "request", store "SPARQL" and the logger "triad.sparql".
+        self.tag = tag
+        self.unit = unit
+        self.store = store
+        self.log = logger or log
 
     async def __call__(self, scope: dict, receive: Any, send: Any) -> None:
         if scope["type"] != "http" or not is_api_path(scope["path"]):
@@ -194,8 +201,8 @@ class SqlLogMiddleware:
         finally:
             _request.reset(token)
             total = time.perf_counter() - start
-            log.info(f"[sql] {stats.label} {status}: {plural(stats.statements, 'statement')}, "
-                     f"{stats.seconds * 1000:.1f} ms in SQL, {total * 1000:.1f} ms in all.")
+            self.log.info(f"[{self.tag}] {stats.label} {status}: {plural(stats.statements, self.unit)}, "
+                          f"{stats.seconds * 1000:.1f} ms in {self.store}, {total * 1000:.1f} ms in all.")
 
 
 class StderrHandler(logging.Handler):
@@ -210,16 +217,17 @@ class StderrHandler(logging.Handler):
             self.handleError(record)
 
 
-def configure_logger() -> logging.Logger:
-    """Send the lines of "triad.sql" (level INFO) to stderr. The root logger does not change.
+def configure_logger(logger: Optional[logging.Logger] = None, handler_name: str = HANDLER_NAME) -> logging.Logger:
+    """Send the lines of "triad.sql" (or of `logger`; level INFO) to stderr. The root logger does not change.
 
     create_app can run more than one time in a process (the tests), so the handler is added only once.
     The logger does not send its lines to the root logger, so no line is written two times.
     """
-    if not any(handler.get_name() == HANDLER_NAME for handler in log.handlers):
+    target = logger or log
+    if not any(handler.get_name() == handler_name for handler in target.handlers):
         handler = StderrHandler()
-        handler.set_name(HANDLER_NAME)
-        log.addHandler(handler)
-    log.setLevel(logging.INFO)
-    log.propagate = False
-    return log
+        handler.set_name(handler_name)
+        target.addHandler(handler)
+    target.setLevel(logging.INFO)
+    target.propagate = False
+    return target

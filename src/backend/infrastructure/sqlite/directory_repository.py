@@ -172,9 +172,11 @@ class SqliteDirectoryRepository:
                 f"JOIN Department d ON d.Id = w.DepartmentId WHERE w.StaffId IN ({marks}) ORDER BY w.Id", staff_ids):
             depts.setdefault(r["StaffId"], []).append(
                 StaffDepartment(r["DepartmentId"], r["Name"], r["RoleCode"], r["Specialty"]))
+        # The languages by name (the text, BINARY order), not in the order of entry: the knowledge graph keeps
+        # a set of literals and has no order of entry (plan 5.5), so both stores use this order.
         langs: dict[int, list[str]] = {}
         for r in self.conn.execute(f"SELECT StaffId, Language FROM StaffLanguage WHERE StaffId IN ({marks}) "
-                                   "ORDER BY Id", staff_ids):
+                                   "ORDER BY Language", staff_ids):
             langs.setdefault(r["StaffId"], []).append(r["Language"])
         return [StaffView(
             id=r["Id"], key=f"{r['Role']}:{r['IdentifierValue']}",

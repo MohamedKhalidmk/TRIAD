@@ -2037,6 +2037,53 @@ s {
   font-size: 14px;
 }
 
+/* The data store badge of the top bar, and the SPARQL queries of the Demo guide. */
+.store-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
+.store-badge-kg {
+  color: var(--green);
+  background: var(--green-soft);
+  border-color: #b9dcc8;
+}
+
+.demo-queries ul {
+  margin: 4px 0 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 14px;
+}
+
+.demo-query {
+  margin-top: 6px;
+}
+
+.demo-query-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+}
+
+.demo-query pre {
+  max-height: 320px;
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  overflow: auto;
+  font-size: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
 /* ----- Narrow screens ----- */
 
 /* 1300 px or less: the long clock uses two lines (the time, then the chat mode). */
@@ -2345,4 +2392,15 @@ s {
   gap: 4px 10px;
   padding: 6px 12px;
   border-bottom: 1px solid var(--border);
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.filter-row .field-inline input[type='date'] {
+  min-width: 0;
 }
